@@ -1,116 +1,54 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
+    <q-header>
+      <div style="justify-items: center;">
+        <Sidebar />
+      </div>
+
+      <Drawer/>
+
+      <q-toolbar style="min-height: 80px; padding: 0 6.5%; background-color: #000000;">
+        <q-img
+          src="/logo-bcontrol.svg"
+          :style="!$q.screen.lt.sm ? 'max-width: 160px;' : 'max-width: 200px;'"
         />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+        <q-space />
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div class="row items-center q-gutter-md">
+          <span class="text-20">Olá Matheus!</span>
+
+          <q-avatar size="50px" style="background-color: #FFFFFF; border-radius: 50%;">
+            <q-icon
+              name="person"
+              color="black"
+              size="44px"
+            />
+          </q-avatar>
+        </div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
+    <q-footer>
+      <q-toolbar style="min-height: 35px; background-color: #000000;">
+        <q-toolbar-title class="text-center text-14 weight-300">Desenvolvido por FatorX Tech - Todos os Direitos de Uso Reservados</q-toolbar-title>
+      </q-toolbar>
+    </q-footer>
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
-      <router-view />
+    <q-page-container class="flex flex-center">
+      <q-page style="padding: 100px 0px 0px 140px;">
+        <router-view />
+      </q-page>
     </q-page-container>
   </q-layout>
 </template>
-
 <script>
-import { defineComponent, ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
-
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
-
-export default defineComponent({
-  name: 'MainLayout',
-
+import Drawer from 'src/components/DrawerComponent.vue'
+import Sidebar from 'src/components/SidebarComponent.vue'
+export default {
   components: {
-    EssentialLink
-  },
-
-  setup () {
-    const leftDrawerOpen = ref(false)
-
-    return {
-      linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      }
-    }
+    Sidebar,
+    Drawer
   }
-})
+}
 </script>

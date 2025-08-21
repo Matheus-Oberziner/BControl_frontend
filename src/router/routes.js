@@ -1,9 +1,9 @@
 const routes = [
   {
-    path: '/',
+    path: '/dashboard',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { path: 'resultado-financeiro', component: () => import('pages/IndexPage.vue') }
     ]
   },
 
@@ -11,7 +11,15 @@ const routes = [
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue')
+    component: () => import('pages/ErrorNotFound.vue'),
+    beforeEnter: (to, from, next) => {
+      // Se for diretório raiz direciona para página de login
+      if (to.path === '/') {
+        next('/dashboard/resultado-financeiro')
+      } else {
+        next()
+      }
+    }
   }
 ]
 

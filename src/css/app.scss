@@ -1,1 +1,30 @@
-// app global css in SCSS form
+// -------------------------------------------
+
+// Classes utilitárias
+
+// Gera classes para font-size
+@for $i from 10 through 50 {
+  .text-#{$i} {
+    font-size: #{$i}px;
+  }
+}
+
+// Gera classes para font-weight
+$weights: (300, 400, 500, 600, 700);
+@each $i in $weights {
+  .weight-#{$i} {
+    font-weight: #{$i}
+  }
+}
+
+// Gera classes para opacity (intervalos de 0.05 entre 0 e 1)
+@for $i from 0 through 20 {
+  $value: $i * 0.05;
+  $class-name: $value * 100;
+
+  .opacity-#{$class-name} {
+    opacity: #{$value} !important;
+  }
+}
+
+// -------------------------------------------
