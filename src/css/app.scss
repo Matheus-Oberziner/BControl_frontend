@@ -1,5 +1,17 @@
 // -------------------------------------------
 
+// Fontes
+.font-1 {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+}
+
+// Define radius dos inputs
+.q-field__control {
+  border-radius: 12px !important;
+}
+
+// -------------------------------------------
 // Classes utilitárias
 
 // Gera classes para font-size

@@ -7,7 +7,7 @@
   <div class="sidebar-styles flex justify-between items-center shadow-1">
     <div class="row items-center">
       <div class="column">
-        <span class="text-24 weight-500 text-grey-7">Success Factor</span>
+        <span class="font-1 text-24 weight-500 text-grey-7">Success Factor</span>
         <span class="text-caption text-grey-7">33.486.687/0001-31</span>
       </div>
     </div>
@@ -73,7 +73,7 @@ export default {
   width: 1540px;
   padding: 10px 80px 10px 280px;
   border-radius: 0px 0px 30px 30px;
-  background-color: #E8E8EA;
+  background-color: #ECECEC;
 }
 
 .logo-styles {

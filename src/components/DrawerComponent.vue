@@ -65,10 +65,10 @@ export default {
   position: fixed;
   top: 100px;
   left: 20px;
-  background-color: #E8E8EA;
+  background-color: #ECECEC;
   border-radius: 70px;
 }
 .active-menu-item {
-  background-color: #E8E8EA;
+  background-color: #ECECEC;
 }
 </style>

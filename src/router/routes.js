@@ -3,7 +3,7 @@ const routes = [
     path: '/dashboard',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: 'resultado-financeiro', component: () => import('pages/IndexPage.vue') }
+      { path: 'resultado-financeiro', component: () => import('src/pages/ResultadoFinanceiroPage.vue') }
     ]
   },
 

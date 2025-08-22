@@ -35,8 +35,8 @@
       </q-toolbar>
     </q-footer>
 
-    <q-page-container class="flex flex-center">
-      <q-page style="padding: 100px 0px 0px 140px;">
+    <q-page-container>
+      <q-page style="padding: 100px 60px 0px 130px;">
         <router-view />
       </q-page>
     </q-page-container>
