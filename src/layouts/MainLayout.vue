@@ -36,7 +36,7 @@
     </q-footer>
 
     <q-page-container>
-      <q-page style="padding: 100px 60px 0px 130px;">
+      <q-page style="padding: 100px 30px 0px 120px;">
         <router-view />
       </q-page>
     </q-page-container>

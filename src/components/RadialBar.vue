@@ -10,14 +10,15 @@
 
 <script>
 import VueApexCharts from "vue3-apexcharts"
-
 export default {
-  name: "GaugeChart",
   components: {
     apexchart: VueApexCharts
   },
   props: {
-    value: { type: Number, default: 50 }
+    value: {
+      type: Number,
+      required: true
+    }
   },
   data() {
     return {
