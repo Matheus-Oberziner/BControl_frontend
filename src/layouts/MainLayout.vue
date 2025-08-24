@@ -5,8 +5,6 @@
         <Sidebar />
       </div>
 
-      <Drawer/>
-
       <q-toolbar style="min-height: 80px; padding: 0 6.5%; background-color: #000000;">
         <q-img
           src="/logo-bcontrol.svg"
@@ -28,6 +26,8 @@
         </div>
       </q-toolbar>
     </q-header>
+
+    <Drawer/>
 
     <q-footer>
       <q-toolbar style="min-height: 35px; background-color: #000000;">

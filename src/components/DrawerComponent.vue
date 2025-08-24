@@ -62,7 +62,7 @@ export default {
 </script>
 <style>
 .drawer-styles {
-  position: fixed;
+  position: absolute;
   top: 100px;
   left: 20px;
   background-color: #ECECEC;

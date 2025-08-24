@@ -68,7 +68,7 @@ export default {
 </script>
 <style scoped>
 .sidebar-styles {
-  position: fixed;
+  position: absolute;
   top: 80px;
   width: 1540px;
   padding: 10px 80px 10px 280px;
@@ -77,7 +77,7 @@ export default {
 }
 
 .logo-styles {
-  position: fixed;
+  position: absolute;
   top: 35px;
   left: 330px;
   z-index: 9999;
