@@ -63,6 +63,7 @@ export default {
 <style>
 .drawer-styles {
   position: absolute;
+  z-index: 999;
   top: 100px;
   left: 20px;
   background-color: #ECECEC;

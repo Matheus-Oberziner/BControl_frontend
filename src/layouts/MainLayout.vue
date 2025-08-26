@@ -1,10 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header>
-      <div style="justify-items: center;">
-        <Sidebar />
-      </div>
-
       <q-toolbar style="min-height: 80px; padding: 0 6.5%; background-color: #000000;">
         <q-img
           src="/logo-bcontrol.svg"
@@ -25,6 +21,12 @@
           </q-avatar>
         </div>
       </q-toolbar>
+
+      <div class="row justify-center" style="width: 100%;">
+        <div style="width: 80%; position: absolute;">
+          <Sidebar />
+        </div>
+      </div>
     </q-header>
 
     <Drawer/>
@@ -36,7 +38,9 @@
     </q-footer>
 
     <q-page-container>
-      <q-page style="padding: 100px 30px 0px 120px;">
+      <q-page
+        :style="$q.screen.width > 1550 ? 'padding: 100px 30px 0px 120px;' : 'padding: 100px 10px 0px 100px;'"
+      >
         <router-view />
       </q-page>
     </q-page-container>
