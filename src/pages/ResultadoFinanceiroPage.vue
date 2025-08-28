@@ -144,8 +144,30 @@
             </svg>
           </div>
 
-          <div class="col-12 row q-pb-sm">
-            <CustomBarChart />
+          <div class="col-12 row q-pb-sm" style="padding: 0px 20px;">
+            <CustomBarChart
+              :chartData="[
+                {
+                  value: 500000.00,
+                  label: 'Projetado',
+                  color: 'gray',
+                  bgColor: '#f0f0f0'
+                },
+                {
+                  value: 250000.00,
+                  label: 'Faturamento',
+                  color: 'blue',
+                  bgColor: '#0047A1'
+                },
+                {
+                  value: 70000.00,
+                  label: 'Ponto de Equilíbrio',
+                  color: 'pink',
+                  bgColor: '#FF3CC7'
+                }
+              ]"
+              side-title="Resultado Atual"
+            />
           </div>
         </div>
       </div>
@@ -371,22 +393,36 @@
           </div>
         </div>
       </div>
+
+      <div class="col-12 row justify-center" style="padding: 50px 40px; overflow-x: auto; flex-wrap: nowrap;">
+        <PeriodicColumnsChart
+          :meses="[
+            { label: 'JUN / 2025', projetado: 420000, faturamento: 420000, equilibrio: 300000 },
+            { label: 'JUL / 2025', projetado: 420000, faturamento: 430000, equilibrio: 305000 },
+            { label: 'AGO / 2025', projetado: 420000, faturamento: 415000, equilibrio: 310000 },
+            { label: 'SET / 2025', projetado: 420000, faturamento: 400000, equilibrio: 310000 },
+            { label: 'OUT / 2025', projetado: 420000, faturamento: 415000, equilibrio: 315000 }
+          ]"
+        />
+      </div>
     </div>
   </div>
 </template>
 <script>
 import RadialBar from 'src/components/RadialBar.vue'
 import CustomBarChart from 'src/components/CustomBarChart.vue'
-import CardComponent from 'src/components/CardComponent.vue';
-import DonutRadial from 'src/components/DonutRadial.vue';
+import CardComponent from 'src/components/CardComponent.vue'
+import DonutRadial from 'src/components/DonutRadial.vue'
 import CustomLinearProgress from 'src/components/CustomLinearProgress.vue'
+import PeriodicColumnsChart from 'src/components/PeriodicColumnsChart.vue'
 export default {
   components: {
     RadialBar,
     CustomBarChart,
     CardComponent,
     DonutRadial,
-    CustomLinearProgress
+    CustomLinearProgress,
+    PeriodicColumnsChart
   },
   data () {
     return {
@@ -430,19 +466,19 @@ export default {
       arrayFaturamento: [
         {
           title: 'Total Período',
-          value: '4.000.000,00'
+          value: '2.080.000,00'
         },
         {
           title: 'Média Mensal',
-          value: '335.000,00'
+          value: '416.000,00'
         },
         {
           title: 'Maior Mensal',
-          value: '335.000,00'
+          value: '430.000,00'
         },
         {
           title: 'Menor Mensal',
-          value: '335.000,00'
+          value: '400.000,00'
         }
       ]
     }

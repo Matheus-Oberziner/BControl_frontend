@@ -1,9 +1,9 @@
 <template>
   <div class="chart-container">
-    <div class="chart-content">
+    <div class="chart-content" :style="sideTitle && !onlyBar ? 'margin-left: 60px;' : ''">
       
       <!-- Label lateral -->
-      <div class="chart-title text-23 text-grey-1">Resultado Atual</div>
+      <div v-if="sideTitle && !onlyBar" class="chart-title text-23 text-grey-1">{{ sideTitle }}</div>
 
       <!-- Barra -->
       <div
@@ -12,14 +12,13 @@
         <!-- Fundo projetado -->
         <div class="bar-bg"></div>
         
-        <!-- Barras proporcionais -->
         <div
           v-for="(item, index) in chartData.filter(i => i.label !== 'Projetado')"
           :key="index"
           class="chart-fill"
           :class="{ 'hovered': hoveredIndex === (index + 1) }"
           :style="{
-            height: calcHeight(item.value) + '%',
+            height: calcHeight(item) + '%',
             backgroundColor: item.bgColor
           }"
           @mouseenter="hoveredIndex = (index + 1)"
@@ -28,7 +27,7 @@
       </div>
 
       <!-- Legenda -->
-      <div class="chart-legend">
+      <div v-if="!onlyBar" class="chart-legend">
         <div 
           v-for="(item, index) in chartData" 
           :key="index"
@@ -55,29 +54,25 @@
 </template>
 <script>
 export default {
+  props: {
+    chartData: {
+      type: Object,
+      required: true
+    },
+    sideTitle: {
+      type: Object,
+      required: false,
+      default: null
+    },
+    onlyBar: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
+  },
   data () {
     return {
-      hoveredIndex: null,
-      chartData: [
-        {
-          value: 500000.00,
-          label: 'Projetado',
-          color: 'gray',
-          bgColor: '#f0f0f0'
-        },
-        {
-          value: 150000.00,
-          label: 'Faturamento',
-          color: 'blue',
-          bgColor: '#0047A1'
-        },
-        {
-          value: 70000.00,
-          label: 'Ponto de Equilíbrio',
-          color: 'pink',
-          bgColor: '#FF3CC7'
-        }
-      ]
+      hoveredIndex: null
     }
   },
   methods: {
@@ -87,16 +82,25 @@ export default {
         maximumFractionDigits: 2
       }).format(value);
     },
-    calcHeight(value) {
+    calcHeight(item) {
       const projetado = this.chartData.find(i => i.label === 'Projetado').value;
-      return (value / projetado) * 100; // % proporcional
+
+      if (item.label === 'Ponto de Equilíbrio') {
+        return 30; // sempre 25% fixo
+      }
+
+      if (item.label === 'Faturamento') {
+        return (item.value / projetado) * 70; 
+        // proporcional ao projetado, mas limitado aos 75% da barra
+      }
+
+      return 0;
     }
   }
 }
 </script>
 <style scoped>
 .chart-container {
-  padding: 0px 20px;
   background-color: transparent;
   width: 100%;
 }
@@ -106,7 +110,6 @@ export default {
   align-items: center;
   position: relative; /* para o absolute funcionar */
   gap: 40px; /* só um respiro */
-  margin-left: 60px;
 }
 
 .chart-title {
