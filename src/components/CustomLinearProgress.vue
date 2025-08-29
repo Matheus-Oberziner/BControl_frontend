@@ -27,7 +27,7 @@
 import { ref } from 'vue'
 export default {
   setup () {
-    const progress = ref(0.5)
+    const progress = ref(0.42)
 
     return {
       progress
@@ -50,7 +50,7 @@ export default {
 
 .progress-wrapper {
   position: relative;
-  width: 370px;
+  width: 350px;
   height: 25px;
 }
 
@@ -58,7 +58,7 @@ export default {
   background: repeating-linear-gradient(
     45deg,
     #f5f5f5,
-    #f5f5f5 2px,
+    #f5f5f5 1px,
     #ffffff 2px,
     #ffffff 4px
   );

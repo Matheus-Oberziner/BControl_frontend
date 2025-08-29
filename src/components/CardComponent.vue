@@ -1,7 +1,13 @@
 <template>
   <div class="card-container">
     <div class="title-card font-1 text-18 weight-500 text-blue">
-      {{ title }}
+      <span class="q-pr-sm">{{ title }}</span>
+
+      <q-icon
+        v-if="withIcon"
+        :name="mdiChevronDownCircle"
+        size="md"
+      />
     </div>
 
     <div class="row" style="padding: 40px 30px;">
@@ -10,11 +16,22 @@
   </div>
 </template>
 <script>
+import { mdiChevronDownCircle } from '@quasar/extras/mdi-v4'
 export default {
   props: {
     title: {
       type: String,
       required: true
+    },
+    withIcon: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
+  },
+  setup () {
+    return {
+      mdiChevronDownCircle
     }
   }
 }

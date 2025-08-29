@@ -281,7 +281,7 @@
 
     <div
       class="row justify-center items-center q-pa-md"
-      style="background-color: #4D4D4D; margin: 0px 0px 60px 0; width: 100vw; margin-left: calc(-6.5vw); margin-right: calc(-6.5vw);"
+      style="background-color: #4D4D4D; margin: 0px 0px 60px 0; width: 100vw; margin-left: calc(-7.1vw); margin-right: calc(-6.5vw);"
     >
       <q-btn
         no-caps
@@ -388,22 +388,65 @@
             </div>
           </div>
   
-          <div class="q-pl-md">
+          <div class="q-pl-md" :class="$q.screen.width < 1324 ? 'col-12 row justify-end' : ''" :style="$q.screen.width < 1324 ? 'padding: 40px 0px;' : ''">
             <CustomLinearProgress />
           </div>
         </div>
       </div>
 
-      <div class="col-12 row justify-center" style="padding: 50px 40px; overflow-x: auto; flex-wrap: nowrap;">
-        <PeriodicColumnsChart
-          :meses="[
-            { label: 'JUN / 2025', projetado: 420000, faturamento: 420000, equilibrio: 300000 },
-            { label: 'JUL / 2025', projetado: 420000, faturamento: 430000, equilibrio: 305000 },
-            { label: 'AGO / 2025', projetado: 420000, faturamento: 415000, equilibrio: 310000 },
-            { label: 'SET / 2025', projetado: 420000, faturamento: 400000, equilibrio: 310000 },
-            { label: 'OUT / 2025', projetado: 420000, faturamento: 415000, equilibrio: 315000 }
-          ]"
-        />
+      <div class="col-12 row justify-center" style="padding: 60px 50px; overflow-x: auto; flex-wrap: nowrap;">
+        <div style="width: 80%;">
+          <PeriodicColumnsChart
+            :meses="[
+              { label: 'JUN / 2025', projetado: 420000, faturamento: 420000, equilibrio: 300000 },
+              { label: 'JUL / 2025', projetado: 420000, faturamento: 430000, equilibrio: 305000 },
+              { label: 'AGO / 2025', projetado: 420000, faturamento: 415000, equilibrio: 310000 },
+              { label: 'SET / 2025', projetado: 420000, faturamento: 400000, equilibrio: 310000 },
+              { label: 'OUT / 2025', projetado: 420000, faturamento: 415000, equilibrio: 315000 }
+            ]"
+          />
+        </div>
+      </div>
+
+      <div class="col-12 row" style="padding: 0px 70px;">
+        <CardComponent
+          title="Desempenho Diário do Mês Atual"
+          :with-icon="true"
+        >
+          <template #content>
+            <div class="col-12 row items-center">
+              <div style="width: 80%; padding: 50px 20px 0px 0px;">
+                <ProgressBarsComponent />
+              </div>
+  
+              <div style="width: 20%;">
+                <CustomBarChart
+                  :chartData="[
+                    {
+                      value: 420000.00,
+                      label: 'Projetado',
+                      color: 'gray',
+                      bgColor: '#f0f0f0'
+                    },
+                    {
+                      value: 200000.00,
+                      label: 'Faturamento',
+                      color: 'blue',
+                      bgColor: '#0047A1'
+                    },
+                    {
+                      value: 300000.00,
+                      label: 'Ponto de Equilíbrio',
+                      color: 'pink',
+                      bgColor: '#FF3CC7'
+                    }
+                  ]"
+                  side-title=""
+                />
+              </div>
+            </div>
+          </template>
+        </CardComponent>
       </div>
     </div>
   </div>
@@ -415,6 +458,7 @@ import CardComponent from 'src/components/CardComponent.vue'
 import DonutRadial from 'src/components/DonutRadial.vue'
 import CustomLinearProgress from 'src/components/CustomLinearProgress.vue'
 import PeriodicColumnsChart from 'src/components/PeriodicColumnsChart.vue'
+import ProgressBarsComponent from 'src/components/ProgressBarsComponent.vue'
 export default {
   components: {
     RadialBar,
@@ -422,7 +466,8 @@ export default {
     CardComponent,
     DonutRadial,
     CustomLinearProgress,
-    PeriodicColumnsChart
+    PeriodicColumnsChart,
+    ProgressBarsComponent
   },
   data () {
     return {

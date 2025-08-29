@@ -128,7 +128,6 @@ export default {
   border-radius: 28px;
   overflow: hidden;
   background: #f8f8f8;
-  border: 1px solid #ececea;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -139,13 +138,14 @@ export default {
   position: absolute;
   inset: 0;
   background: repeating-linear-gradient(
-    45deg,
+    145deg,
     #dadada,
-    #dadada 2px,
+    #dadada 1px,
     transparent 2px,
-    transparent 6px
+    transparent 5px
   );
-  opacity: 0.3;
+  opacity: 0.4;
+  border: 1px solid #e8e8e8;
 }
 
 /* --- barras proporcionais --- */
