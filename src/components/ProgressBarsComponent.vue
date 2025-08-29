@@ -126,7 +126,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 10px;
+  margin: 0 15px;
   height: 100%;
   position: relative;
 }
@@ -147,6 +147,7 @@ export default defineComponent({
 .bar-container {
   width: 100%;
   height: 400px;
+  width: 15px;
   display: flex;
   align-items: flex-end;
   position: relative;
@@ -170,7 +171,8 @@ export default defineComponent({
 
 .bar {
   width: 100%;
-  background: linear-gradient(180deg, #2196f3 0%, #1565c0 100%);
+  background: linear-gradient(180deg, #1976d2 0%, #0047A1 100%);
+  /* background: #0047A1; */
   border-radius: 20px;
   position: relative;
   z-index: 1;

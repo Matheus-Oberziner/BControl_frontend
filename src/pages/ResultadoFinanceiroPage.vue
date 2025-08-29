@@ -408,41 +408,47 @@
         </div>
       </div>
 
-      <div class="col-12 row" style="padding: 0px 70px;">
+      <div class="col-12 row" style="padding: 40px 70px;">
         <CardComponent
           title="Desempenho Diário do Mês Atual"
           :with-icon="true"
         >
           <template #content>
-            <div class="col-12 row items-center">
-              <div style="width: 80%; padding: 50px 20px 0px 0px;">
+            <div class="col-12 row items-center justify-between">
+              <div style="width: 70%; padding: 50px 20px 0px 0px; overflow-x: auto; flex-wrap: nowrap;">
                 <ProgressBarsComponent />
               </div>
   
-              <div style="width: 20%;">
-                <CustomBarChart
-                  :chartData="[
-                    {
-                      value: 420000.00,
-                      label: 'Projetado',
-                      color: 'gray',
-                      bgColor: '#f0f0f0'
-                    },
-                    {
-                      value: 200000.00,
-                      label: 'Faturamento',
-                      color: 'blue',
-                      bgColor: '#0047A1'
-                    },
-                    {
-                      value: 300000.00,
-                      label: 'Ponto de Equilíbrio',
-                      color: 'pink',
-                      bgColor: '#FF3CC7'
-                    }
-                  ]"
-                  side-title=""
-                />
+              <div class="row" style="width: 25%;">
+                <div class="col-12" style="padding-bottom: 50px;">
+                  <CustomBarChart
+                    :chartData="[
+                      {
+                        value: 420000.00,
+                        label: 'Projetado',
+                        color: 'gray',
+                        bgColor: '#f0f0f0'
+                      },
+                      {
+                        value: 200000.00,
+                        label: 'Faturamento',
+                        color: 'blue',
+                        bgColor: '#0047A1'
+                      },
+                      {
+                        value: 300000.00,
+                        label: 'Ponto de Equilíbrio',
+                        color: 'pink',
+                        bgColor: '#FF3CC7'
+                      }
+                    ]"
+                    side-title=""
+                  />
+                </div>
+
+                <div class="col-12">
+                  <DonutRadial :value="69" />
+                </div>
               </div>
             </div>
           </template>
