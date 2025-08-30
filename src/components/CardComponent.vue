@@ -1,16 +1,21 @@
 <template>
-  <div class="card-container">
-    <div class="title-card font-1 text-18 weight-500 text-blue">
+  <div class="card-container" :style="{ borderColor: themeColor }">
+    <div
+      class="title-card font-1 text-18 weight-500"
+      :class="titlePosition === 'start' ? 'start' : 'center'"
+      :style="{ color: themeColor }"
+    >
       <span class="q-pr-sm">{{ title }}</span>
 
       <q-icon
         v-if="withIcon"
         :name="mdiChevronDownCircle"
         size="md"
+        :style="{ color: themeColor }"
       />
     </div>
 
-    <div class="row" style="padding: 40px 30px;">
+    <div class="row">
       <slot name="content" />
     </div>
   </div>
@@ -23,10 +28,18 @@ export default {
       type: String,
       required: true
     },
+    titlePosition: {
+      type: String,
+      default: 'start'
+    },
     withIcon: {
       type: Boolean,
       required: false,
       default: false
+    },
+    themeColor: {
+      type: String,
+      default: '#2583FF'
     }
   },
   setup () {
@@ -39,7 +52,7 @@ export default {
 <style scoped>
 .card-container {
   position: relative;
-  border: 2px solid #2583FF;
+  border: 2px solid;
   border-radius: 20px;
   width: 100%;
 }
@@ -47,8 +60,14 @@ export default {
 .title-card {
   position: absolute;
   top: -14px;
-  left: 5%;
   padding: 0px 20px;
   background-color: white;
+}
+.start {
+  left: 5%;
+}
+.center {
+  left: 50%;
+  transform: translateX(-50%);
 }
 </style>

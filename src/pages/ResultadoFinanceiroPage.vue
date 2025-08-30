@@ -133,7 +133,7 @@
           </div>
 
           <div style="height: 130px;">
-            <RadialBar :value="16" />
+            <StrokedGauge :value="16" />
           </div>
         </div>
 
@@ -179,7 +179,7 @@
           <template #content>
             <div
               class="row q-pa-sm"
-              style="overflow-x: auto; flex-wrap: nowrap;"
+              style="overflow-x: auto; flex-wrap: nowrap; padding: 40px 30px;"
             >
               <div
                 v-for="(item, index) in arrayComparativos"
@@ -236,20 +236,25 @@
                 <div
                   class="q-pa-md q-mt-md"
                 >
-                  <DonutRadial
-                    :value="item.percent"
-                  />
+                  <DonutRadial :value="item.percent">
+                    <template #left-label>
+                      {{ (100 - item.percent).toFixed(1).replace('.', ',') }}%
+                    </template>
+                  
+                    <template #info-right>
+                      <svg width="15" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="7" cy="7.5" r="6.75" fill="white" stroke="#797979" stroke-width="0.5"/>
+                        <path d="M7.925 3.5L7.76251 9.03134H6.23755L6.07089 3.5H7.925ZM7.00003 11.5C6.72504 11.5 6.48893 11.41 6.29172 11.23C6.0945 11.0474 5.99728 10.8288 6.00006 10.5743C5.99728 10.3222 6.0945 10.1062 6.29172 9.92623C6.48893 9.74622 6.72504 9.65622 7.00003 9.65622C7.26391 9.65622 7.49585 9.74622 7.69584 9.92623C7.89584 10.1062 7.99722 10.3222 8 10.5743C7.99722 10.744 7.94861 10.8996 7.85417 11.041C7.76251 11.1798 7.64168 11.2917 7.49168 11.3766C7.34169 11.4589 7.1778 11.5 7.00003 11.5Z" fill="#ED0000"/>
+                      </svg>
+                    </template>
+                  
+                    <template #right-label>
+                      <q-icon name="chevron_left" size="md" />
+                      <span class="percent-box">{{ item.percent }}%</span>
+                    </template>
+                  </DonutRadial>
                 </div>
               </div>
-            </div>
-
-            <div class="col-12">
-              <q-linear-progress
-                :value="0.1"
-                color="blue"
-                size="8px"
-                style="border-radius: 5px;"
-              />
             </div>
           </template>
         </CardComponent>
@@ -414,7 +419,7 @@
           :with-icon="true"
         >
           <template #content>
-            <div class="col-12 row items-center justify-between">
+            <div class="col-12 row items-center justify-between" style="padding: 40px 30px;">
               <div style="width: 70%; padding: 50px 20px 0px 0px; overflow-x: auto; flex-wrap: nowrap;">
                 <ProgressBarsComponent />
               </div>
@@ -446,9 +451,140 @@
                   />
                 </div>
 
-                <div class="col-12">
-                  <DonutRadial :value="69" />
+                <div class="col-12 row justify-center" style="margin: 40px 0;">
+                  <DonutRadial
+                    :value="69"
+                    :size="110"
+                    :start-angle="175"
+                    progress-color="#0047A1"
+                    rest-color=""
+                    :rest-pattern-angle="110"
+                    rest-pattern-color="#dadada"
+                    :rest-pattern-stripe="1"
+                    :rest-pattern-gap="3"
+                  >
+                    <!-- Top label -->
+                    <template #top-label>
+                      <div class="label-top">
+                        <div class="weight-600 text-blue"><span class="text-12 q-pr-xs">R$</span><span class="text-16">288.000,00</span></div>
+                        <div class="text-grey-1 text-center">Total Vendido</div>
+                      </div>
+                    </template>
+
+                    <!-- Center label -->
+                    <template #center-label>
+                      <div class="label-center">
+                        <span class="text-18 weight-600 text-blue">69%</span>
+                      </div>
+                    </template>
+
+                    <!-- Bottom label -->
+                    <template #bottom-label>
+                      <div class="label-bottom">
+                        <div class="weight-600 text-grey-1"><span class="text-12 q-pr-xs">R$</span><span class="text-16">288.000,00</span></div>
+                        <div class="text-grey-1 text-center">Falta</div>
+                      </div>
+                    </template>
+                  </DonutRadial>
                 </div>
+              </div>
+            </div>
+          </template>
+        </CardComponent>
+      </div>
+
+      <div class="col-12 row" style="padding: 40px 70px;">
+        <CardComponent
+          title="Faturamento por Modalidade de Venda"
+          :with-icon="true"
+        >
+          <template #content>
+            <div class="col-12 row items-start justify-center" style="padding: 60px 20px; overflow-x: auto; flex-wrap: nowrap;">
+              <div class="col-2 row justify-center" style="height: 100%;">
+                <PieChartComponent
+                  :data="[
+                    { label: 'Pontual', percentage: 38, color: '#7ED321' },
+                    { label: 'Recorrente', percentage: 24, color: '#417505' },
+                    { label: 'Serviço', percentage: 19, color: '#FF8A00' },
+                    { label: 'Revende', percentage: 19, color: '#9013FE' }
+                  ]"
+                />
+              </div>
+
+              <div
+                v-for="(item, index) in arrayFaturamentoVenda"
+                :key="index"
+                class="col"
+                :class="$q.screen.lt.lg ? 'q-mx-sm' : 'q-mx-md'"
+              >
+                <CardComponent
+                  :title="item.title"
+                  title-position="center"
+                  :theme-color="item.color"
+                >
+                  <template #content>
+                    <div class="col-12 row justify-center" style="padding: 20px 10px;">
+                      <div class="col-12 row justify-between">
+                        <div class="legend-dot" :style="{ backgroundColor: item.color}" style="width: 15px; height: 15px; border-radius: 50%; flex-shrink: 0;"></div>
+  
+                        <svg width="15" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="7" cy="7.5" r="6.75" fill="white" stroke="#797979" stroke-width="0.5"/>
+                          <path d="M7.925 3.5L7.76251 9.03134H6.23755L6.07089 3.5H7.925ZM7.00003 11.5C6.72504 11.5 6.48893 11.41 6.29172 11.23C6.0945 11.0474 5.99728 10.8288 6.00006 10.5743C5.99728 10.3222 6.0945 10.1062 6.29172 9.92623C6.48893 9.74622 6.72504 9.65622 7.00003 9.65622C7.26391 9.65622 7.49585 9.74622 7.69584 9.92623C7.89584 10.1062 7.99722 10.3222 8 10.5743C7.99722 10.744 7.94861 10.8996 7.85417 11.041C7.76251 11.1798 7.64168 11.2917 7.49168 11.3766C7.34169 11.4589 7.1778 11.5 7.00003 11.5Z" fill="#ED0000"/>
+                        </svg>
+                      </div>
+
+                      <div class="col-12 row justify-center q-px-md q-pt-md">
+                        <DonutRadial
+                          :value="item.percent"
+                          :size="130"
+                          :stroke-width="16"
+                          semicircle
+                          :progress-color="item.color"
+                          rest-color=""
+                          :rest-pattern-angle="110"
+                          rest-pattern-color="#dadada"
+                          :rest-pattern-stripe="1"
+                          :rest-pattern-gap="3"
+                        >
+                          <!-- Center label -->
+                          <template #center-label>
+                            <div class="label-center q-pt-lg">
+                              <span class="text-18 weight-600" :style="{ color: item.color }">{{ item.percent }}%</span>
+                            </div>
+                          </template>
+                        </DonutRadial>
+                      </div>
+
+                      <div
+                        v-for="(card, index) in item.cards"
+                        :key="index"
+                        class="col-12 row justify-center items-center"
+                        style="border-radius: 10px; position: relative;"
+                        :style="{
+                          border: card.border && `2px solid ${item.color}`,
+                          backgroundColor: card.background && item.color,
+                        }"
+                        :class="[
+                          !card.background ? 'text-grey-2' : 'text-white',
+                          !card.border && !card.background ? 'q-mb-md' : 'q-py-md q-my-sm'
+                        ]"
+                      >
+                        <span class="text-12 q-pr-xs weight-600 text-center">R$</span><span class="text-16 weight-600">{{ card.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                        <span v-if="!card.background" class="col-12 text-center">Quantidade: {{ card.qtde }}</span>
+                        <span v-else class="col-12 text-center">Ticket Médio</span>
+
+                        <div
+                          v-if="card.title"
+                          style="position: absolute; top: -15%; border-radius: 5px;"
+                          :style="{ border: `1px solid ${item.color}` }"
+                          class="q-px-md bg-white"
+                        >
+                          <span :style="{ color: item.color }">{{ card.title }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </CardComponent>
               </div>
             </div>
           </template>
@@ -458,22 +594,24 @@
   </div>
 </template>
 <script>
-import RadialBar from 'src/components/RadialBar.vue'
+import StrokedGauge from 'src/components/StrokedGauge.vue'
 import CustomBarChart from 'src/components/CustomBarChart.vue'
 import CardComponent from 'src/components/CardComponent.vue'
 import DonutRadial from 'src/components/DonutRadial.vue'
 import CustomLinearProgress from 'src/components/CustomLinearProgress.vue'
 import PeriodicColumnsChart from 'src/components/PeriodicColumnsChart.vue'
 import ProgressBarsComponent from 'src/components/ProgressBarsComponent.vue'
+import PieChartComponent from 'src/components/PieChartComponent.vue'
 export default {
   components: {
-    RadialBar,
+    StrokedGauge,
     CustomBarChart,
     CardComponent,
     DonutRadial,
     CustomLinearProgress,
     PeriodicColumnsChart,
-    ProgressBarsComponent
+    ProgressBarsComponent,
+    PieChartComponent
   },
   data () {
     return {
@@ -530,6 +668,92 @@ export default {
         {
           title: 'Menor Mensal',
           value: '400.000,00'
+        }
+      ],
+      arrayFaturamentoVenda: [
+        {
+          title: 'Pontual',
+          percent: 38,
+          color: '#91DA71',
+          cards: [
+            {
+              qtde: 320,
+              value: 160000,
+              border: false,
+              background: false
+            },
+            {
+              qtde: 40,
+              value: 20000,
+              border: true,
+              background: false,
+              title: 'Serviço'
+            },
+            {
+              qtde: 280,
+              value: 140000,
+              border: true,
+              background: false,
+              title: 'Produto'
+            }
+          ]
+        },
+        {
+          title: 'Recorrente',
+          percent: 24,
+          color: '#4F7D6B',
+          cards: [
+            {
+              qtde: 100,
+              value: 100000,
+              border: true,
+              background: false
+            },
+            {
+              qtde: null,
+              value: 1000,
+              border: true,
+              background: true
+            }
+          ]
+        },
+        {
+          title: 'Serviço',
+          percent: 19,
+          color: '#F2814B',
+          cards: [
+            {
+              qtde: 40,
+              value: 80000,
+              border: true,
+              background: false
+            },
+            {
+              qtde: null,
+              value: 2000,
+              border: true,
+              background: true
+            }
+          ]
+        },
+        {
+          title: 'Revenda',
+          percent: 19,
+          color: '#9643B7',
+          cards: [
+            {
+              qtde: 20,
+              value: 80000,
+              border: true,
+              background: false
+            },
+            {
+              qtde: null,
+              value: 4000,
+              border: true,
+              background: true
+            }
+          ]
         }
       ]
     }
