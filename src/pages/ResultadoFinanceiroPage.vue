@@ -521,6 +521,7 @@
                   :title="item.title"
                   title-position="center"
                   :theme-color="item.color"
+                  :stroke="1"
                 >
                   <template #content>
                     <div class="col-12 row justify-center" style="padding: 20px 10px;">
@@ -561,7 +562,7 @@
                         class="col-12 row justify-center items-center"
                         style="border-radius: 10px; position: relative;"
                         :style="{
-                          border: card.border && `2px solid ${item.color}`,
+                          border: card.border && `1px solid ${item.color}`,
                           backgroundColor: card.background && item.color,
                         }"
                         :class="[
@@ -591,6 +592,21 @@
         </CardComponent>
       </div>
     </div>
+
+    <!-- Card 3 - Inadimplência -->
+    <Card3 />
+
+    <!-- Card 4 - Perda de Receita Recorrente -->
+     <Card4 />
+
+    <!-- Card 5 -->
+     <Card5 />
+
+    <!-- Card 6 -->
+     <Card6 />
+
+    <!-- Card 7 -->
+     <Card7 />
   </div>
 </template>
 <script>
@@ -602,6 +618,11 @@ import CustomLinearProgress from 'src/components/CustomLinearProgress.vue'
 import PeriodicColumnsChart from 'src/components/PeriodicColumnsChart.vue'
 import ProgressBarsComponent from 'src/components/ProgressBarsComponent.vue'
 import PieChartComponent from 'src/components/PieChartComponent.vue'
+import Card3 from 'src/components/CardsResultadoFinanceiro.vue/Card3.vue'
+import Card4 from 'src/components/CardsResultadoFinanceiro.vue/Card4.vue'
+import Card5 from 'src/components/CardsResultadoFinanceiro.vue/Card5.vue'
+import Card6 from 'src/components/CardsResultadoFinanceiro.vue/Card6.vue'
+import Card7 from 'src/components/CardsResultadoFinanceiro.vue/Card7.vue'
 export default {
   components: {
     StrokedGauge,
@@ -611,7 +632,12 @@ export default {
     CustomLinearProgress,
     PeriodicColumnsChart,
     ProgressBarsComponent,
-    PieChartComponent
+    PieChartComponent,
+    Card3,
+    Card4,
+    Card5,
+    Card6,
+    Card7
   },
   data () {
     return {
@@ -755,12 +781,102 @@ export default {
             }
           ]
         }
+      ],
+      arrayInadimplenciaVenda: [
+        {
+          title: 'Pontual',
+          percent: 24,
+          color: '#91DA71',
+          cards: [
+            {
+              qtde: 8,
+              value: 200000,
+              color: '#B0F2C2'
+            },
+            {
+              qtde: 8,
+              value: 200000,
+              color: '#F2F298'
+            },
+            {
+              qtde: 4,
+              value: 100000,
+              color: '#FFB6AF'
+            }
+          ]
+        },
+        {
+          title: 'Recorrente',
+          percent: 38.5,
+          color: '#4F7D6B',
+          cards: [
+            {
+              qtde: 15,
+              value: 480000,
+              color: '#B0F2C2'
+            },
+            {
+              qtde: 7,
+              value: 224000,
+              color: '#F2F298'
+            },
+            {
+              qtde: 3,
+              value: 96000,
+              color: '#FFB6AF'
+            }
+          ]
+        },
+        {
+          title: 'Serviço',
+          percent: 21.6,
+          color: '#F2814B',
+          cards: [
+            {
+              qtde: 4,
+              value: 120000,
+              color: '#B0F2C2'
+            },
+            {
+              qtde: 6,
+              value: 180000,
+              color: '#F2F298'
+            },
+            {
+              qtde: 5,
+              value: 150000,
+              color: '#FFB6AF'
+            }
+          ]
+        },
+        {
+          title: 'Revenda',
+          percent: 15.9,
+          color: '#9643B7',
+          cards: [
+            {
+              qtde: 2,
+              value: 66000,
+              color: '#B0F2C2'
+            },
+            {
+              qtde: 3,
+              value: 99000,
+              color: '#F2F298'
+            },
+            {
+              qtde: 5,
+              value: 165000,
+              color: '#FFB6AF'
+            }
+          ]
+        }
       ]
     }
   }
 }
 </script>
-<style scoped>
+<style>
 .topic-style {
   background: #FDFAFA;
   border-radius: 30px;

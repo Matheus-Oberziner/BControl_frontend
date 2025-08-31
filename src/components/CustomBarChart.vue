@@ -8,6 +8,7 @@
       <!-- Barra -->
       <div
         class="chart-bar"
+        :style="{ width: width, height: height }"
       >
         <!-- Fundo projetado -->
         <div class="bar-bg"></div>
@@ -55,6 +56,14 @@
 <script>
 export default {
   props: {
+    height: {
+      type: String,
+      default: '300px'
+    },
+    width: {
+      type: String,
+      default: '55px'
+    },
     chartData: {
       type: Object,
       required: true
@@ -84,14 +93,20 @@ export default {
     },
     calcHeight(item) {
       const projetado = this.chartData.find(i => i.label === 'Projetado').value;
+      let comPontoEqulibrio = false
 
       if (item.label === 'Ponto de Equilíbrio') {
+        comPontoEqulibrio = true
         return 30; // sempre 25% fixo
       }
 
       if (item.label === 'Faturamento') {
-        return (item.value / projetado) * 70; 
-        // proporcional ao projetado, mas limitado aos 75% da barra
+        if (comPontoEqulibrio) {
+          return (item.value / projetado) * 70
+          // proporcional ao projetado, mas limitado aos 70% da barra
+        }
+
+        return (item.value / projetado) * 100
       }
 
       return 0;
@@ -108,6 +123,7 @@ export default {
 .chart-content {
   display: flex;
   align-items: center;
+  justify-content: center;
   position: relative; /* para o absolute funcionar */
   gap: 40px; /* só um respiro */
 }
@@ -123,8 +139,6 @@ export default {
 /* --- barra --- */
 .chart-bar {
   position: relative;
-  width: 55px;
-  height: 300px;
   border-radius: 28px;
   overflow: hidden;
   background: #f8f8f8;

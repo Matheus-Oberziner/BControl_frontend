@@ -1,11 +1,11 @@
 <template>
-  <div class="card-container" :style="{ borderColor: themeColor }">
+  <div class="card-container" :style="{ border: `${stroke}px solid ${themeColor}` }">
     <div
-      class="title-card font-1 text-18 weight-500"
+      class="title-card font-1 text-18 weight-500 row"
       :class="titlePosition === 'start' ? 'start' : 'center'"
       :style="{ color: themeColor }"
     >
-      <span class="q-pr-sm">{{ title }}</span>
+      <span class="q-pr-sm text-center">{{ title }}</span>
 
       <q-icon
         v-if="withIcon"
@@ -15,7 +15,7 @@
       />
     </div>
 
-    <div class="row">
+    <div class="row" style="height: 100%;">
       <slot name="content" />
     </div>
   </div>
@@ -40,6 +40,10 @@ export default {
     themeColor: {
       type: String,
       default: '#2583FF'
+    },
+    stroke: {
+      type: Number,
+      default: 2
     }
   },
   setup () {
@@ -55,6 +59,7 @@ export default {
   border: 2px solid;
   border-radius: 20px;
   width: 100%;
+  height: 100%;
 }
 
 .title-card {
