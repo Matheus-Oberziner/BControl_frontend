@@ -58,6 +58,7 @@
           <div
             class="col-12 row justify-between items-center q-py-md q-px-lg"
             :style="{ borderBottom: `2px solid ${a.color}` }"
+            style="position: relative;"
           >
             <div class="row items-center text-grey-2">
               <span class="col-12 text-18 text-blue weight-600 q-pb-sm">{{ a.label }}</span>
@@ -82,6 +83,17 @@
                 </div>
               </template>
             </DonutRadial>
+
+            <q-icon
+              :name="mdiChevronDownCircle"
+              size="md"
+              :style="{ color: a.color }"
+              style="
+                position:absolute; right:10%; bottom:-16.5%;
+                background:#fff;
+                border-radius:50%;
+              "
+            />
           </div>
           
           <div class="row q-px-md q-pb-md q-pt-lg">
@@ -117,6 +129,7 @@
   </div>
 </template>
 <script>
+import { mdiChevronDownCircle } from '@quasar/extras/mdi-v7'
 import CustomBarChart from '../CustomBarChart.vue'
 import DonutRadial from '../DonutRadial.vue'
 import SegmentedPizza from '../SegmentedPizza.vue'
@@ -125,6 +138,12 @@ export default {
     DonutRadial,
     SegmentedPizza,
     CustomBarChart
+  },
+
+  setup () {
+    return {
+      mdiChevronDownCircle
+    }
   },
 
   data () {

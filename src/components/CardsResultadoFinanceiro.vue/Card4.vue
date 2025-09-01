@@ -149,9 +149,11 @@
         :with-icon="true"
       >
         <template #content>
-          <div class="col-12 row" style="padding: 40px 10px;">
-            <div class="col-12">
-              <!-- Aqui vêm progressbar -->
+          <div class="col-12 row justify-center" style="padding: 40px 10px;">
+            <div class="q-pb-lg" style="width: 85%;">
+              <GradientScaleComponent
+
+              />
             </div>
 
             <div class="col-12 row justify-center q-gutter-md">
@@ -365,13 +367,15 @@
 import CardComponent from '../CardComponent.vue'
 import CustomBarChart from '../CustomBarChart.vue';
 import DonutRadial from '../DonutRadial.vue';
+import GradientScaleComponent from '../GradientScaleComponent.vue';
 import TreeComponent from '../TreeComponent.vue';
 export default {
   components: {
     CardComponent,
     DonutRadial,
     CustomBarChart,
-    TreeComponent
+    TreeComponent,
+    GradientScaleComponent
   },
   data () {
     return {
