@@ -41,7 +41,7 @@
         style="padding: 10px 0px 30px; gap: 20px;"
       >
         <div
-          class="border-gradient shadow-1 q-pa-sm"
+          class="border-gradient q-pa-sm"
           style="width: 230px;"
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
@@ -70,7 +70,7 @@
         </div>
 
         <div
-          class="border-gradient shadow-1 q-pa-sm"
+          class="border-gradient q-pa-sm"
           style="width: 230px;"
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
@@ -100,7 +100,7 @@
 
         <div v-if="$q.screen.width < 1500" class="col-12" />
 
-        <div class="row items-center border-gradient shadow-1 q-pa-sm">
+        <div class="row items-center border-gradient q-pa-sm">
           <div class="col-12 row justify-end items-center">
             <svg width="15" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="7" cy="7.5" r="6.75" fill="white" stroke="#797979" stroke-width="0.5"/><path d="M7.925 3.5L7.76251 9.03134H6.23755L6.07089 3.5H7.925ZM7.00003 11.5C6.72504 11.5 6.48893 11.41 6.29172 11.23C6.0945 11.0474 5.99728 10.8288 6.00006 10.5743C5.99728 10.3222 6.0945 10.1062 6.29172 9.92623C6.48893 9.74622 6.72504 9.65622 7.00003 9.65622C7.26391 9.65622 7.49585 9.74622 7.69584 9.92623C7.89584 10.1062 7.99722 10.3222 8 10.5743C7.99722 10.744 7.94861 10.8996 7.85417 11.041C7.76251 11.1798 7.64168 11.2917 7.49168 11.3766C7.34169 11.4589 7.1778 11.5 7.00003 11.5Z" fill="#ED0000"/>
@@ -137,7 +137,7 @@
           </div>
         </div>
 
-        <div class="row items-center border-gradient shadow-1 q-pa-sm">
+        <div class="row items-center border-gradient q-pa-sm">
           <div class="col-12 row justify-end items-center">
             <svg width="15" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="7" cy="7.5" r="6.75" fill="white" stroke="#797979" stroke-width="0.5"/><path d="M7.925 3.5L7.76251 9.03134H6.23755L6.07089 3.5H7.925ZM7.00003 11.5C6.72504 11.5 6.48893 11.41 6.29172 11.23C6.0945 11.0474 5.99728 10.8288 6.00006 10.5743C5.99728 10.3222 6.0945 10.1062 6.29172 9.92623C6.48893 9.74622 6.72504 9.65622 7.00003 9.65622C7.26391 9.65622 7.49585 9.74622 7.69584 9.92623C7.89584 10.1062 7.99722 10.3222 8 10.5743C7.99722 10.744 7.94861 10.8996 7.85417 11.041C7.76251 11.1798 7.64168 11.2917 7.49168 11.3766C7.34169 11.4589 7.1778 11.5 7.00003 11.5Z" fill="#ED0000"/>
@@ -148,19 +148,19 @@
             <CustomBarChart
               :chartData="[
                 {
-                  value: 500000.00,
+                  value: 500000,
                   label: 'Projetado',
                   color: 'gray',
                   bgColor: '#f0f0f0'
                 },
                 {
-                  value: 250000.00,
+                  value: 250000,
                   label: 'Faturamento',
                   color: 'blue',
                   bgColor: '#0047A1'
                 },
                 {
-                  value: 70000.00,
+                  value: 70000,
                   label: 'Ponto de Equilíbrio',
                   color: 'pink',
                   bgColor: '#FF3CC7'
@@ -178,17 +178,17 @@
         >
           <template #content>
             <div
-              class="row q-pa-sm"
-              style="overflow-x: auto; flex-wrap: nowrap; padding: 40px 30px;"
+              class="row fancy-scroll"
+              style="padding: 40px 0px 15px; margin: 0px 30px 20px;"
             >
               <div
                 v-for="(item, index) in arrayComparativos"
                 :key="index"
-                class="q-pa-sm col"
-                style="margin: 5px; display: flex; flex-direction: column; justify-content: space-between; min-width: 200px;"
+                class="q-pa-sm"
+                style="display: flex; flex-direction: column; justify-content: space-between; min-width: 240px;"
               >
                 <div
-                  class="border-gradient shadow-1 q-pa-sm"
+                  class="border-gradient q-pa-sm"
                   style="margin: 5px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;"
                 >
                   <div class="col-12 row items-start">
@@ -384,7 +384,7 @@
             <div
               v-for="(item, index) in arrayFaturamento"
               :key="index"
-              class="row items-center justify-center border-gradient shadow-1"
+              class="row items-center justify-center border-gradient"
               style="width: 180px; padding: 20px 5px;"
             >
               <span class="col-12 text-16 weight-300 text-grey-1 text-center q-pb-sm">{{ item.title }}</span>
@@ -399,7 +399,7 @@
         </div>
       </div>
 
-      <div class="col-12 row justify-center" style="padding: 60px 50px; overflow-x: auto; flex-wrap: nowrap;">
+      <div class="col-12 row justify-center fancy-scroll" style="padding: 60px 50px;">
         <div style="width: 80%;">
           <PeriodicColumnsChart
             :meses="[
@@ -420,7 +420,7 @@
         >
           <template #content>
             <div class="col-12 row items-center justify-between" style="padding: 40px 30px;">
-              <div style="width: 70%; padding: 50px 20px 0px 0px; overflow-x: auto; flex-wrap: nowrap;">
+              <div class="fancy-scroll" style="width: 70%; padding: 50px 20px 0px 0px;">
                 <ProgressBarsComponent />
               </div>
   
@@ -499,7 +499,7 @@
           :with-icon="true"
         >
           <template #content>
-            <div class="col-12 row items-start justify-center" style="padding: 60px 20px; overflow-x: auto; flex-wrap: nowrap;">
+            <div class="col-12 row items-start justify-center" style="padding: 60px 20px;">
               <div class="col-2 row justify-center" style="height: 100%;">
                 <PieChartComponent
                   :data="[
@@ -508,7 +508,14 @@
                     { label: 'Serviço', percentage: 19, color: '#FF8A00' },
                     { label: 'Revende', percentage: 19, color: '#9013FE' }
                   ]"
-                />
+                >
+                  <template #bottom-label>
+                    <div class="bottom-label row items-center justify-center">
+                      <span class="text-12 q-pr-xs weight-600 text-center">R$</span><span class="text-16 weight-600">{{ (420000).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                      <span class="text-center text-grey-1">Total em Vendas</span>
+                    </div>
+                  </template>
+                </PieChartComponent>
               </div>
 
               <div
@@ -521,6 +528,7 @@
                   :title="item.title"
                   title-position="center"
                   :theme-color="item.color"
+                  :title-color="item.color"
                   :stroke="1"
                 >
                   <template #content>
@@ -599,13 +607,13 @@
     <!-- Card 4 - Perda de Receita Recorrente -->
      <Card4 />
 
-    <!-- Card 5 -->
+    <!-- Card 5 - Despesas por Centro de Custo -->
      <Card5 />
 
-    <!-- Card 6 -->
+    <!-- Card 6 - Margem de Contribuição -->
      <Card6 />
 
-    <!-- Card 7 -->
+    <!-- Card 7 - DRE -->
      <Card7 />
   </div>
 </template>
@@ -904,5 +912,4 @@ export default {
   position: relative;
   z-index: 1; /* conteúdo sempre acima da pseudo */
 }
-
 </style>

@@ -1,55 +1,74 @@
 <!-- SegmentedPizza.vue -->
 <template>
-  <div class="segmented-pizza" :style="{ margin: space + 'px', padding: pad + 'px' }" @mouseleave="hideTooltip">
-    <svg :width="size" :height="size" :viewBox="`0 0 ${size} ${size}`" role="img">
-      <defs>
-        <!-- MÁSCARA: recorta os gaps com ponta arredondada -->
-        <mask :id="maskId" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">
-          <!-- branco mantém; preto recorta -->
-          <rect :width="size" :height="size" fill="white" />
-          <g stroke="black" :stroke-width="gapWidth" stroke-linecap="round" vector-effect="non-scaling-stroke">
-            <line
-              v-for="(ang, i) in boundaryAngles"
-              :key="'m-'+i"
-              :x1="polar(innerRadius - gapWidth, ang).x"
-              :y1="polar(innerRadius - gapWidth, ang).y"
-              :x2="polar(outerRadius + gapWidth, ang).x"
-              :y2="polar(outerRadius + gapWidth, ang).y"
-            />
-          </g>
-        </mask>
-      </defs>
+  <div
+    class="segmented-pizza"
+    :style="{ margin: space + 'px', padding: pad + 'px' }"
+    @mouseleave="hideTooltip"
+  >
+    <q-intersection
+      once
+      :threshold="[0.18]"
+      root-margin="0px 0px -10%"
+      @visibility="onVis"
+      transition="fade"
+      :transition-duration="180"
+    >
+      <svg :width="size" :height="size" :viewBox="`0 0 ${size} ${size}`" role="img">
+        <defs>
+          <!-- MÁSCARA: recorta os gaps com ponta arredondada -->
+          <mask :id="maskId" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">
+            <rect :width="size" :height="size" fill="white" />
+            <g
+              stroke="black"
+              :stroke-width="gapWidth"
+              stroke-linecap="round"
+              vector-effect="non-scaling-stroke"
+            >
+              <line
+                v-for="(ang, i) in boundaryAngles"
+                :key="'m-'+i"
+                :x1="polar(innerRadius - gapWidth, ang).x"
+                :y1="polar(innerRadius - gapWidth, ang).y"
+                :x2="polar(outerRadius + gapWidth, ang).x"
+                :y2="polar(outerRadius + gapWidth, ang).y"
+              />
+            </g>
+          </mask>
+        </defs>
 
-      <!-- Grupo com a máscara aplicada (atributo + CSS para máxima compatibilidade) -->
-      <g :mask="`url(#${maskId})`" :style="{ mask: `url(#${maskId})`, WebkitMask: `url(#${maskId})` }">
-        <path
+        <!-- Grupo com a máscara aplicada -->
+        <g :mask="`url(#${maskId})`" :style="{ mask: `url(#${maskId})`, WebkitMask: `url(#${maskId})` }">
+          <path
+            v-for="(seg, i) in segmentsWithGeom"
+            :key="'slice-'+i+'-'+animKey"
+            class="svg-slice"
+            :d="seg.path"
+            :fill="seg.color"
+            :style="sliceStyle(i)"
+            @mouseenter="showTooltipFromMouse($event, seg)"
+          />
+        </g>
+
+        <!-- Labels (entram suave quando play=true) -->
+        <text
           v-for="(seg, i) in segmentsWithGeom"
-          :key="'slice-'+i+'-'+animKey"
-          class="svg-slice"
-          :d="seg.path"
-          :fill="seg.color"
-          :style="sliceStyle(i)"
-          @mouseenter="showTooltipFromMouse($event, seg)"
-        />
-      </g>
+          :key="'lbl-'+i"
+          class="slice-label"
+          :class="{ show: play }"
+          :x="seg.labelX"
+          :y="seg.labelY"
+          text-anchor="middle"
+          dominant-baseline="middle"
+        >
+          {{ seg.percent.toFixed(0) }}%
+        </text>
 
-      <!-- Labels por cima -->
-      <text
-        v-for="(seg, i) in segmentsWithGeom"
-        :key="'lbl-'+i"
-        class="slice-label"
-        :x="seg.labelX"
-        :y="seg.labelY"
-        text-anchor="middle"
-        dominant-baseline="middle"
-      >
-        {{ seg.percent.toFixed(0) }}%
-      </text>
+        <!-- Furo central -->
+        <circle :cx="center" :cy="center" :r="innerRadius" :fill="separatorColor" />
+      </svg>
+    </q-intersection>
 
-      <!-- Furo central (mesma cor do separador) -->
-      <circle :cx="center" :cy="center" :r="innerRadius" :fill="separatorColor" />
-    </svg>
-
+    <!-- Tooltip flutuante -->
     <div class="tooltip" :class="{ show: tooltip.show }" :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
       <div v-html="tooltip.html"></div>
     </div>
@@ -61,8 +80,8 @@ export default {
   name: 'SegmentedPizza',
   props: {
     size: { type: Number, default: 300 },
-    hole: { type: Number, default: 0.30 },         // 30% do diâmetro
-    gapWidth: { type: Number, default: 10 },       // grossura do gap (define o “arredondado”)
+    hole: { type: Number, default: 0.30 },
+    gapWidth: { type: Number, default: 10 },
     separatorColor: { type: String, default: '#FFFFFF' },
     space: { type: Number, default: 16 },
     pad: { type: Number, default: 0 },
@@ -85,6 +104,7 @@ export default {
     return {
       tooltip: { show: false, x: 0, y: 0, html: '' },
       animKey: 0,
+      play: false, // disparo via q-intersection
       maskId: 'mask-' + Math.random().toString(36).slice(2, 8)
     }
   },
@@ -94,7 +114,6 @@ export default {
     innerRadius () { return this.size * (this.hole / 2) },
     total () { return this.segments.reduce((s, v) => s + Number(v.percent || 0), 0) },
 
-    // fatias clássicas (sem cortar ângulo); o espaço arredondado vem da MÁSCARA
     segmentsWithGeom () {
       let cursor = -90
       return this.segments.map(s => {
@@ -117,7 +136,6 @@ export default {
       })
     },
 
-    // ângulos de fronteira (onde ficam os gaps arredondados)
     boundaryAngles () {
       const out = []
       let cursor = -90
@@ -130,9 +148,15 @@ export default {
     }
   },
   watch: {
-    segments: { deep: true, handler () { this.animKey++ } }
+    segments: { deep: true, handler () { this.animKey++ } },
+    play (v) { if (v) this.animKey++ } // rearmar animação ao ficar visível
   },
   methods: {
+    onVis (v) {
+      if (!v || this.play) return
+      // duplo rAF garante estilo inicial antes do destino
+      requestAnimationFrame(() => requestAnimationFrame(() => { this.play = true }))
+    },
     degToRad (d) { return (Math.PI / 180) * d },
     polar (radius, angleDeg) {
       const a = this.degToRad(angleDeg)
@@ -162,8 +186,14 @@ export default {
     },
     hideTooltip () { this.tooltip.show = false },
     sliceStyle (i) {
-      const base = { transformBox: 'fill-box', transformOrigin: '50% 50%', transition: 'transform .25s, filter .25s', cursor: 'pointer' }
-      if (this.animate) base.animation = `spinIn 1s ease-out ${i * 0.1}s both`
+      const base = {
+        transformBox: 'fill-box',
+        transformOrigin: '50% 50%',
+        transition: 'transform .25s, filter .25s',
+        cursor: 'pointer'
+      }
+      // anima só quando: animate=true E play=true (entrou no viewport)
+      if (this.animate && this.play) base.animation = `spinIn 900ms ease-out ${i * 100}ms both`
       return base
     }
   }
@@ -173,8 +203,32 @@ export default {
 <style scoped>
 .segmented-pizza { display: inline-block; box-sizing: border-box; }
 .svg-slice:hover { transform: scale(1.04); filter: brightness(1.1); }
-.slice-label { fill:#fff; font-weight:700; font-size:14px; text-shadow:0 1px 2px rgba(0,0,0,.2); pointer-events:none; }
-.tooltip { position:fixed; background:rgba(0,0,0,.85); color:#fff; padding:8px 12px; border-radius:6px; font-size:12px; pointer-events:none; opacity:0; transition:opacity .2s; z-index:1000; }
+
+/* labels entram suavemente quando play=true */
+.slice-label {
+  fill:#fff; font-weight:700; font-size:14px; pointer-events:none;
+  opacity: 0; transform: scale(.95);
+  transition: opacity .35s ease .1s, transform .35s ease .1s;
+  text-shadow:0 1px 2px rgba(0,0,0,.2);
+}
+.slice-label.show { opacity: 1; transform: scale(1); }
+
+.tooltip {
+  position:fixed; background:rgba(0,0,0,.85); color:#fff;
+  padding:8px 12px; border-radius:6px; font-size:12px;
+  pointer-events:none; opacity:0; transition:opacity .2s; z-index:1000;
+}
 .tooltip.show { opacity:1; }
-@keyframes spinIn { from{ transform:rotate(0) scale(.8); opacity:0 } to{ transform:rotate(360deg) scale(1); opacity:1 } }
+
+/* keyframe para a fatia */
+@keyframes spinIn {
+  from { transform: rotate(0) scale(.85); opacity: 0; }
+  to   { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+
+/* acessibilidade: reduz movimento */
+@media (prefers-reduced-motion: reduce) {
+  .svg-slice { animation: none !important; transition: none !important; }
+  .slice-label { transition: none !important; opacity: 1 !important; transform: none !important; }
+}
 </style>

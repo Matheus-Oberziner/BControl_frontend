@@ -134,6 +134,7 @@
                 :title="item.title"
                 title-position="center"
                 :theme-color="item.color"
+                :title-color="item.color"
                 :stroke="1"
               >
                 <template #content>

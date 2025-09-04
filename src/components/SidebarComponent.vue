@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-container">
     <div class="logo-badge">
-      <q-img src="/logo-studio.svg" height="60px" width="70px" />
+      <q-img src="/logo-fator-1.svg" height="80px" width="80px" />
     </div>
   
     <div
@@ -10,8 +10,8 @@
     >
       <div class="row items-center">
         <div class="column">
-          <span class="font-1 text-24 weight-500 text-grey-7">Success Factor</span>
-          <span class="text-caption text-grey-7">33.486.687/0001-31</span>
+          <span class="font-1 text-24 weight-600 text-grey-7" style="line-height: 1.3;">Success Factor</span>
+          <span class="text-16 weight-300 text-grey-7" style="letter-spacing: -0.5px;">33.486.687/0001-31</span>
         </div>
       </div>
   
@@ -80,18 +80,48 @@ export default {
 }
 
 .sidebar-bar {
-  border-radius: 0px 0px 30px 30px;
-  background-color: #ECECEC;
+  height: 100px;
+
+  /* cantos inferiores arredondados */
+  border-radius: 0 0 30px 30px;
+
+  /* borda transparente: topo 0, lados/baixo 2px */
+  border-style: solid;
+  border-color: transparent;
+  border-width: 0 2px 2px 2px;
+
+  /* 1) fill base (padding-box)
+     2) "stroke" gradiente (border-box) — só aparece onde há borda */
+  background:
+    linear-gradient(#F7F5F6, #F7F5F6) padding-box,
+    linear-gradient(10deg, #F3F3F3 0%, #FFFFFF 54%, #D4D4D4 100%) border-box;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+
+  /* suas sombras continuam valendo */
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.10),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.55),
+    0 2px 0px rgba(0, 0, 0, 0.16);
 }
 
 .logo-badge {
   position: absolute;
   top: -45px;
   left: 130px;
+  height: 125px;
+  width: 125px;
   z-index: 1;
-  padding: 20px 16px;
   border: 5px solid black;
   border-radius: 15px;
   background-color: #FFFFFF;
+
+  /* centraliza o q-img */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* garante que padding conte no tamanho total */
+  box-sizing: border-box;
 }
 </style>

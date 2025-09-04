@@ -1,11 +1,19 @@
 <template>
-  <apexchart 
-    type="radialBar" 
-    width="230"
-    height="230"
-    :options="chartOptions" 
-    :series="[value]"
-  />
+  <q-intersection
+    once
+    transition="fade"
+    :transition-duration="400"
+    :threshold="[0.15]"
+    root-margin="0px 0px -10%"
+  >
+    <apexchart 
+      type="radialBar" 
+      width="230"
+      height="230"
+      :options="chartOptions" 
+      :series="[value]"
+    />
+  </q-intersection>
 </template>
 
 <script>

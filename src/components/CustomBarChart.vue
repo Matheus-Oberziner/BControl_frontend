@@ -1,83 +1,77 @@
 <template>
   <div class="chart-container">
-    <div class="chart-content" :style="sideTitle && !onlyBar ? 'margin-left: 60px;' : ''">
-      
-      <!-- Label lateral -->
-      <div v-if="sideTitle && !onlyBar" class="chart-title text-23 text-grey-1">{{ sideTitle }}</div>
+    <!-- O QIntersection controla quando o conteúdo monta/aparece -->
+    <q-intersection
+      class="chart-io"
+      once
+      transition="fade"
+      :transition-duration="400"
+      :threshold="[0.15]"
+      root-margin="0px 0px -10%"
+    >
+      <div class="chart-content" :style="sideTitle && !onlyBar ? 'margin-left: 60px;' : ''">
+        <!-- Label lateral -->
+        <div v-if="sideTitle && !onlyBar" class="chart-title text-23 text-grey-1">{{ sideTitle }}</div>
 
-      <!-- Barra -->
-      <div
-        class="chart-bar"
-        :style="{ width: width, height: height }"
-      >
-        <!-- Fundo projetado -->
-        <div class="bar-bg"></div>
-        
+        <!-- Barra -->
         <div
-          v-for="(item, index) in chartData.filter(i => i.label !== 'Projetado')"
-          :key="index"
-          class="chart-fill"
-          :class="{ 'hovered': hoveredIndex === (index + 1) }"
-          :style="{
-            height: calcHeight(item) + '%',
-            backgroundColor: item.bgColor
-          }"
-          @mouseenter="hoveredIndex = (index + 1)"
-          @mouseleave="hoveredIndex = null"
-        ></div>
-      </div>
-
-      <!-- Legenda -->
-      <div v-if="!onlyBar" class="chart-legend">
-        <div 
-          v-for="(item, index) in chartData" 
-          :key="index"
-          class="legend-item"
-          @mouseenter="hoveredIndex = index"
-          @mouseleave="hoveredIndex = null"
+          class="chart-bar"
+          :style="{ width: width, height: height }"
         >
+          <!-- Fundo projetado -->
+          <div class="bar-bg"></div>
+
+          <!-- BARRAS: agora usamos CSS var --bar-h e animamos no mount do Intersection -->
+          <div
+            v-for="(item, index) in chartData.filter(i => i.label !== 'Projetado')"
+            :key="index"
+            class="chart-fill"
+            :class="{ 'hovered': hoveredIndex === (index + 1) }"
+            :style="{
+              '--bar-h': calcHeight(item) + '%',
+              backgroundColor: item.bgColor
+            }"
+            @mouseenter="hoveredIndex = (index + 1)"
+            @mouseleave="hoveredIndex = null"
+          />
+        </div>
+
+        <!-- Legenda -->
+        <div v-if="!onlyBar" class="chart-legend">
           <div 
-            class="legend-dot"
-            :class="[item.color, { 'hovered': hoveredIndex === index }]"
-          ></div>
-          <div class="legend-content">
-            <div class="weight-600">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(item.value) }}</span>
-            </div>
-            <div class="legend-label text-grey-1">
-              {{ item.label }}
+            v-for="(item, index) in chartData" 
+            :key="index"
+            class="legend-item"
+            @mouseenter="hoveredIndex = index"
+            @mouseleave="hoveredIndex = null"
+          >
+            <div 
+              class="legend-dot"
+              :class="[item.color, { 'hovered': hoveredIndex === index }]"
+            />
+            <div class="legend-content">
+              <div class="weight-600">
+                <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(item.value) }}</span>
+              </div>
+              <div class="legend-label text-grey-1">
+                {{ item.label }}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </q-intersection>
   </div>
 </template>
+
 <script>
 export default {
   props: {
-    height: {
-      type: String,
-      default: '300px'
-    },
-    width: {
-      type: String,
-      default: '55px'
-    },
-    chartData: {
-      type: Object,
-      required: true
-    },
-    sideTitle: {
-      type: Object,
-      required: false,
-      default: null
-    },
-    onlyBar: {
-      type: Boolean,
-      required: false,
-      default: false
-    }
+    height: { type: String, default: '300px' },
+    width: { type: String, default: '55px' },
+    chartData: { type: Array, required: true },
+    sideTitle: { type: Object, default: null },
+    onlyBar: { type: Boolean, default: false }
   },
   data () {
     return {
@@ -85,35 +79,29 @@ export default {
     }
   },
   methods: {
-    formatCurrency(value) {
+    formatCurrency (value) {
       return new Intl.NumberFormat('pt-BR', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      }).format(value);
+      }).format(value)
     },
-    calcHeight(item) {
-      const projetado = this.chartData.find(i => i.label === 'Projetado').value;
-      let comPontoEqulibrio = false
+    calcHeight (item) {
+      const projetado = Number(this.chartData.find(i => i.label === 'Projetado')?.value) || 0
+      if (!projetado) return 0
 
-      if (item.label === 'Ponto de Equilíbrio') {
-        comPontoEqulibrio = true
-        return 30; // sempre 25% fixo
-      }
+      const hasPE = this.chartData.some(i => i.label === 'Ponto de Equilíbrio')
+      const reserve = hasPE ? 30 : 0
+      const span = 100 - reserve
 
-      if (item.label === 'Faturamento') {
-        if (comPontoEqulibrio) {
-          return (item.value / projetado) * 70
-          // proporcional ao projetado, mas limitado aos 70% da barra
-        }
+      if (item.label === 'Ponto de Equilíbrio') return reserve
 
-        return (item.value / projetado) * 100
-      }
-
-      return 0;
+      const percent = (Number(item.value) / projetado) * span
+      return Math.max(0, Math.min(percent, span))
     }
   }
 }
 </script>
+
 <style scoped>
 .chart-container {
   background-color: transparent;
@@ -163,18 +151,32 @@ export default {
 }
 
 /* --- barras proporcionais --- */
+/* Agora a altura final vem da CSS var --bar-h, e a animação dispara quando o slot do QIntersection monta */
 .chart-fill {
   width: 100%;
   border-radius: 30px;
-  /* transition: height 0.6s ease-in-out; */
-  transition: height 0.6s ease-in-out, transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
   z-index: 2;
+  /* sem height inline; ela será animada de 0 -> var(--bar-h) */
 }
+
+/* Quando dentro de .chart-io (conteúdo do QIntersection), anima ao entrar em view */
+.chart-io .chart-fill {
+  height: 0;
+  animation: growBar 800ms ease-out forwards;
+}
+
+@keyframes growBar {
+  from { height: 0; }
+  to   { height: var(--bar-h, 0%); }
+}
+
+/* foco/hover */
 .chart-fill.hovered {
-  transform: scaleY(1.05); /* cresce levemente */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scaleY(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   cursor: pointer;
-  filter: brightness(1.2); /* aumenta brilho da cor */
+  filter: brightness(1.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
 }
 
 /* --- legenda --- */
@@ -211,27 +213,22 @@ export default {
   filter: brightness(1.2);
 }
 
-.legend-dot.gray {
-  background-color: #f0f0f0;
-  border: 2px solid #e0e0e0;
-}
+.legend-dot.gray { background-color: #f0f0f0; border: 2px solid #e0e0e0; }
+.legend-dot.blue { background-color: #0047A1; }
+.legend-dot.pink { background-color: #FF3CC7; }
 
-.legend-dot.blue {
-  background-color: #0047A1;
-}
-
-.legend-dot.pink {
-  background-color: #FF3CC7;
-}
-
-.legend-content {
-  flex: 1;
-}
+.legend-content { flex: 1; }
 
 @keyframes slideIn {
   to {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* Respeita acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  .chart-io .chart-fill { animation: none; height: var(--bar-h, 0%); }
+  .legend-item { animation: none; opacity: 1; transform: none; }
 }
 </style>

@@ -3,7 +3,7 @@
     <div
       class="title-card font-1 text-18 weight-500 row"
       :class="titlePosition === 'start' ? 'start' : 'center'"
-      :style="{ color: themeColor }"
+      :style="{ color: titleColor }"
     >
       <span class="q-pr-sm text-center">{{ title }}</span>
 
@@ -11,7 +11,7 @@
         v-if="withIcon"
         :name="mdiChevronDownCircle"
         size="md"
-        :style="{ color: themeColor }"
+        :style="{ color: titleColor }"
       />
     </div>
 
@@ -40,6 +40,10 @@ export default {
     themeColor: {
       type: String,
       default: '#2583FF'
+    },
+    titleColor: {
+      type: String,
+      default: '#0047A1'
     },
     stroke: {
       type: Number,

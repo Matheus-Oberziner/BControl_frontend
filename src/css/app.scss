@@ -11,6 +11,43 @@
   border-radius: 12px !important;
 }
 
+/* trava o body/viewport */
+html, body, #q-app {
+  overflow-x: hidden !important;
+  max-width: 100%;
+}
+
+/* se estiver usando QLayout, assegure que as áreas internas também não gerem X-scroll */
+.q-layout,
+.q-page-container,
+.q-page {
+  overflow-x: hidden !important;
+  max-width: 100%;
+}
+
+/* opcional: evita “overscroll” horizontal em trackpad/touch */
+html, body {
+  overscroll-behavior-x: none;
+}
+
+/* ===========================
+   Scroll horizontal – minimal
+   =========================== */
+.fancy-scroll {
+  min-width: 0;        /* permite encolher dentro do flex parent */
+  width: 100%;
+  max-width: 100%;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  flex-wrap: nowrap;
+
+  /* sua customização da barra */
+  scrollbar-width: auto;
+  scrollbar-color: var(--sb-thumb, #0047A1) transparent;
+}
+
 // -------------------------------------------
 // Classes utilitárias
 

@@ -7,7 +7,7 @@
         clickable
         v-ripple
         style="padding: 20px; margin: 0px -5px; border-radius: 50%;"
-        :class="{'active-menu-item shadow-5': $route.path === item.src}"
+        :class="{'active-menu-item': $route.path === item.src}"
         class="row justify-center"
       >
         <svg v-if="item.id === '1'" width="35" height="35" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -66,10 +66,103 @@ export default {
   z-index: 999;
   top: 100px;
   left: 20px;
-  background-color: #ECECEC;
-  border-radius: 70px;
+  border-radius: 80px;
+
+  background-color: #F7F5F6;
+
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.10),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.55),
+    0 2px 2px rgba(0, 0, 0, 0.16);
+
+  isolation: isolate;
 }
+
+/* “Stroke” gradiente externo (2px), posicionado FORA do componente */
+.drawer-styles::after {
+  content: "";
+  position: absolute;
+  inset: -2px; /* expande 2px para fora (peso do stroke) */
+  padding: 2px;
+  border-radius: 80px;
+
+  /* Gradiente do stroke: 0% #F3F3F3, 54% #FFFFFF, 100% #D4D4D4 em 100° */
+  background: linear-gradient(100deg, #F3F3F3 0%, #FFFFFF 54%, #D4D4D4 100%);
+
+  /* Máscara para mostrar só o anel (stroke) */
+  -webkit-mask: 
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: 
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+          mask-composite: exclude;
+
+  /* Não bloquear interação dos elementos internos */
+  pointer-events: none;
+}
+
 .active-menu-item {
-  background-color: #ECECEC;
+  position: relative;
+  border-radius: inherit;
+  background: transparent;
+  overflow: hidden; /* garante que pseudo-elementos não vazem */
 }
+
+/* FILL + reflexo metálico */
+.active-menu-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background:
+    /* reflexo suave superior */
+    radial-gradient(140% 100% at 25% 8%,
+      rgba(255,255,255,0.55) 0%,
+      rgba(255,255,255,0.35) 32%,
+      rgba(255,255,255,0.00) 60%) ,
+    /* preenchimento translúcido */
+    linear-gradient(180deg,
+      rgba(236,237,240,0.40) 0%,
+      rgba(227,229,232,0.40) 45%,
+      rgba(202,205,208,0.40) 100%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.90),   /* aro claro */
+    inset 0 -6px 12px rgba(0,0,0,0.05),     /* leve profundidade */
+    0 12px 24px rgba(0,0,0,0.15),           /* sombra externa */
+    0 2px 4px rgba(0,0,0,0.08);
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* STROKE gradiente (borda) */
+.active-menu-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(180deg, #E8E8EA 0%, #ACAEAF 100%) border-box;
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.5) inset;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* garante que o ícone fique acima de tudo */
+.active-menu-item svg {
+  position: relative;
+  z-index: 2;
+}
+
 </style>

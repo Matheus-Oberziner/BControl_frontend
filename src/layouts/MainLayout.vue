@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" class="bg-app">
     <q-header>
       <q-toolbar style="min-height: 80px; padding: 0 6.5%; background-color: #000000;">
         <q-img
@@ -56,3 +56,14 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.bg-app{
+  /* funciona com Quasar/Vite */
+  // background-image: url('/bg-app.png');
+  background-size: cover;       /* cobre a tela */
+  background-repeat: no-repeat;
+  background-position: center;
+  /* opcional: deixa “parado” no scroll (evite em mobile) */
+  /* background-attachment: fixed; */
+}
+</style>

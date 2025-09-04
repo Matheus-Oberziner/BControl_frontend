@@ -19,6 +19,7 @@
         <CardComponent
           :title="a.title"
           title-position="center"
+          title-color="#797979"
         >
           <template #content>
             <div class="col-12 row items-center justify-center q-pa-md">
@@ -93,6 +94,7 @@
         <CardComponent
           title="Perda Sob Venda"
           title-position="center"
+          title-color="#797979"
           :stroke="1"
         >
           <template #content>
@@ -152,13 +154,13 @@
           <div class="col-12 row justify-center" style="padding: 40px 10px;">
             <div class="q-pb-lg" style="width: 85%;">
               <GradientScaleComponent
-
+                :value="3.2"
               />
             </div>
 
             <div class="col-12 row justify-center q-gutter-md">
               <div
-                class="border-gradient shadow-1 q-pa-sm"
+                class="border-gradient q-pa-sm"
                 style="width: 230px;"
                 :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
               >
@@ -184,7 +186,7 @@
                 </div>
               </div>
               <div
-                class="border-gradient shadow-1 q-pa-sm"
+                class="border-gradient q-pa-sm"
                 style="width: 230px;"
                 :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
               >
@@ -210,7 +212,7 @@
                 </div>
               </div>
               <div
-                class="border-gradient shadow-1 q-pa-sm"
+                class="border-gradient q-pa-sm"
                 style="width: 230px;"
                 :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
               >
@@ -274,7 +276,7 @@
                   <!-- Rótulos dos eixos -->
                   <div class="axis-labels row">
                     <div class="col-12 row justify-center">
-                      <span class="text-grey-2">Perda - </span><span>Ticket {{ r.type }}</span>
+                      <span class="text-grey-2">Perda -</span><span>&nbsp;Ticket {{ r.type }}</span>
                     </div>
 
                     <span class="tick text-grey-2 q-pr-md">{{ r.qtde }}</span>

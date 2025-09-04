@@ -1,35 +1,37 @@
 <template>
-  <div class="chart-container">
-    <div 
-      v-for="(item, index) in chartData" 
-      :key="index"
-      class="bar-wrapper"
-    >
-      <!-- Label do valor rotacionado -->
-      <div v-if="item.label" class="value-label">
-        {{ item.label }}
-      </div>
-      
-      <!-- Container da barra -->
-      <div class="bar-container">
-        <!-- Fundo da barra (capacidade máxima) -->
-        <div class="bar-background"></div>
+  <q-intersection>
+    <div class="chart-container">
+      <div 
+        v-for="(item, index) in chartData" 
+        :key="index"
+        class="bar-wrapper"
+      >
+        <!-- Label do valor rotacionado -->
+        <div v-if="item.label" class="value-label">
+          {{ item.label }}
+        </div>
         
-        <!-- Barra com valor real -->
-        <q-tooltip v-if="item.value > 0" class="bg-blue-8">
-          Dia {{ item.day }}: {{ item.label }}
-        </q-tooltip>
-        <div 
-          v-if="item.value > 0"
-          class="bar"
-          :style="{ height: calculateHeight(item.value) + '%' }"
-        ></div>
+        <!-- Container da barra -->
+        <div class="bar-container">
+          <!-- Fundo da barra (capacidade máxima) -->
+          <div class="bar-background"></div>
+          
+          <!-- Barra com valor real -->
+          <q-tooltip v-if="item.value > 0" class="bg-blue-8">
+            Dia {{ item.day }}: {{ item.label }}
+          </q-tooltip>
+          <div 
+            v-if="item.value > 0"
+            class="bar"
+            :style="{ height: calculateHeight(item.value) + '%' }"
+          ></div>
+        </div>
+        
+        <!-- Label do dia -->
+        <div class="day-label">{{ item.day }}</div>
       </div>
-      
-      <!-- Label do dia -->
-      <div class="day-label">{{ item.day }}</div>
     </div>
-  </div>
+  </q-intersection>
 </template>
 
 <script>

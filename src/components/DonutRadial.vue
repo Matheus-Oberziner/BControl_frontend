@@ -1,87 +1,97 @@
 <template>
-  <div class="donut-row">
-    <div class="chart-wrapper" :style="{ width: size + 'px', height: svgHeight + 'px' }">
-      <svg
-        :width="size"
-        :height="svgHeight"
-        :viewBox="viewBoxStr"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <!-- Definição do pattern somente se estiver usando pattern -->
-        <defs v-if="usePattern">
-          <pattern
-            :id="patternId"
-            :width="patternSize"
-            :height="patternSize"
-            patternUnits="userSpaceOnUse"
-            :patternTransform="patternTransform"
-          >
-            <!-- faixa clara (stripe) -->
-            <rect :width="stripeWidth" :height="patternSize" :fill="restPatternColor" />
-            <!-- o resto é transparente por padrão -->
-          </pattern>
-        </defs>
+  <!-- dispara montagem e animação só quando entrar na tela -->
+  <q-intersection
+    class="donut-io"
+    once
+    transition="fade"
+    :transition-duration="850"
+    :threshold="[0.15]"
+    root-margin="0px 0px -10%"
+  >
+    <div class="donut-row">
+      <div class="chart-wrapper" :style="{ width: size + 'px', height: svgHeight + 'px' }">
+        <svg
+          :width="size"
+          :height="svgHeight"
+          :viewBox="viewBoxStr"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <!-- Pattern do restante (se habilitado) -->
+          <defs v-if="usePattern">
+            <pattern
+              :id="patternId"
+              :width="patternSize"
+              :height="patternSize"
+              patternUnits="userSpaceOnUse"
+              :patternTransform="patternTransform"
+            >
+              <rect :width="stripeWidth" :height="patternSize" :fill="restPatternColor" />
+            </pattern>
+          </defs>
 
-        <!-- Dark arc (restante) - usa cor sólida ou pattern -->
-        <path
-          v-if="darkPath"
-          :d="darkPath"
-          :stroke="restStroke"
-          :stroke-width="strokeWidth"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          fill="none"
-        />
+          <!-- Arco restante -->
+          <path
+            v-if="darkPath"
+            :d="darkPath"
+            :stroke="restStroke"
+            :stroke-width="strokeWidth"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+            class="rest-arc"
+            pathLength="100"
+          />
 
-        <!-- Light arc (progresso) -->
-        <path
-          v-if="lightPath"
-          :d="lightPath"
-          :stroke="progressColor"
-          :stroke-width="strokeWidth"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          fill="none"
-          class="progress-arc"
-        />
+          <!-- Arco de progresso (animado) -->
+          <path
+            v-if="lightPath"
+            :d="lightPath"
+            :stroke="progressColor"
+            :stroke-width="strokeWidth"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+            class="progress-arc"
+            pathLength="100"
+          />
 
-        <!-- Caso de progresso muito pequeno: desenha um dot -->
-        <circle
-          v-if="drawLightDot"
-          :cx="dotPos.x"
-          :cy="dotPos.y"
-          :r="strokeWidth / 2"
-          :fill="progressColor"
-        />
+          <!-- Dots para ângulos muito pequenos -->
+          <circle
+            v-if="drawLightDot"
+            :cx="dotPos.x"
+            :cy="dotPos.y"
+            :r="strokeWidth / 2"
+            :fill="progressColor"
+            class="progress-dot"
+          />
+          <circle
+            v-if="drawDarkDot"
+            :cx="dotPosDark.x"
+            :cy="dotPosDark.y"
+            :r="strokeWidth / 2"
+            :fill="usePattern ? restPatternColor : restColor"
+            class="rest-dot"
+          />
+        </svg>
 
-        <!-- Caso de restante muito pequeno: desenha um dot escuro -->
-        <circle
-          v-if="drawDarkDot"
-          :cx="dotPosDark.x"
-          :cy="dotPosDark.y"
-          :r="strokeWidth / 2"
-          :fill="usePattern ? restPatternColor : restColor"
-        />
-      </svg>
-
-      <!-- slots posicionados (mesma estrutura que você tinha) -->
-      <div class="label-left">
-        <slot name="left-label" />
+        <!-- slots posicionados -->
+        <div class="label-left">
+          <slot name="left-label" />
+        </div>
+        <div class="info-right">
+          <slot name="info-right" />
+        </div>
       </div>
-      <div class="info-right">
-        <slot name="info-right" />
+
+      <div class="right-label">
+        <slot name="right-label" />
       </div>
-    </div>
 
-    <div class="right-label">
-      <slot name="right-label" />
+      <slot name="top-label" />
+      <slot name="center-label" />
+      <slot name="bottom-label" />
     </div>
-
-    <!-- labels de layout (top / center / bottom) -->
-    <slot name="top-label" />
-    <slot name="center-label" />
-    <slot name="bottom-label" />
-  </div>
+  </q-intersection>
 </template>
 
 <script>
@@ -92,172 +102,101 @@ export default {
     size: { type: Number, default: 100 },
     strokeWidth: { type: Number, default: 14 },
     progressColor: { type: String, default: "#4090F2" },
-
-    // comportamento antigo: se você passar uma string vazia para restColor (rest-color=""),
-    // o componente irá usar o pattern. Caso contrário, usará a cor sólida.
     restColor: { type: String, default: "#0047A1" },
-
-    // ângulo padrão para o donut completo
     startAngle: { type: Number, default: 87 },
 
-    /* PROPS DO PATTERN (opcionais) */
+    /* pattern opcional */
     restUsePattern: { type: Boolean, default: false },
     restPatternColor: { type: String, default: "#dadada" },
     restPatternAngle: { type: Number, default: 145 },
     restPatternStripe: { type: Number, default: 1 },
     restPatternGap: { type: Number, default: 5 },
 
-    /* NOVO: modo semicircular */
-    semicircle: { type: Boolean, default: false }, // ativa 180°
-    arcSpan: { type: Number, default: null },      // opcional: span custom em graus
-    startAngleSemi: { type: Number, default: 270 } // início padrão do semi (metade superior)
+    /* semicircular / arco custom */
+    semicircle: { type: Boolean, default: false },
+    arcSpan: { type: Number, default: null },
+    startAngleSemi: { type: Number, default: 270 }
   },
 
   computed: {
-    // --- geometria / lógica existente (mantida/adaptada) ---
-    radius() {
-      return (this.size / 2) - (this.strokeWidth / 2);
+    radius () { return (this.size / 2) - (this.strokeWidth / 2) },
+    circumference () { return 2 * Math.PI * this.radius },
+    gapPx () {
+      const min = 1
+      const max = Math.max(1, this.circumference * 0.05)
+      return Math.min(max, Math.max(min, this.strokeWidth))
     },
-    circumference() {
-      return 2 * Math.PI * this.radius;
-    },
-    gapPx() {
-      const min = 1;
-      const max = Math.max(1, this.circumference * 0.05);
-      return Math.min(max, Math.max(min, this.strokeWidth));
-    },
-    gapAngle() {
-      return (this.gapPx / this.circumference) * 360;
-    },
+    gapAngle () { return (this.gapPx / this.circumference) * 360 },
 
-    /* NOVOS: ângulo efetivo, start efetivo, e altura do SVG */
-    arcSpanDeg() {
-      if (this.arcSpan != null) return this.arcSpan;
-      return this.semicircle ? 180 : 360;
-    },
-    startAngleEff() {
-      return this.semicircle ? this.startAngleSemi : this.startAngle;
-    },
-    svgHeight() {
-      // No semi, mostramos metade do círculo + a espessura pra não cortar os caps
-      return this.semicircle ? Math.ceil(this.size / 2 + this.strokeWidth) : this.size;
-    },
-    viewBoxStr() {
-      return `0 0 ${this.size} ${this.svgHeight}`;
-    },
+    arcSpanDeg () { return this.arcSpan != null ? this.arcSpan : (this.semicircle ? 180 : 360) },
+    startAngleEff () { return this.semicircle ? this.startAngleSemi : this.startAngle },
+    svgHeight () { return this.semicircle ? Math.ceil(this.size / 2 + this.strokeWidth) : this.size },
+    viewBoxStr () { return `0 0 ${this.size} ${this.svgHeight}` },
 
-    valueAngle() {
-      return (this.value / 100) * this.arcSpanDeg;
-    },
+    valueAngle () { return (this.value / 100) * this.arcSpanDeg },
 
-    drawLightDot() {
-      return this.value > 0 && this.valueAngle <= this.gapAngle + 0.0001;
-    },
-    drawDarkDot() {
-      return this.value < 100 && (this.arcSpanDeg - this.valueAngle) <= this.gapAngle + 0.0001;
-    },
+    drawLightDot () { return this.value > 0 && this.valueAngle <= this.gapAngle + 0.0001 },
+    drawDarkDot () { return this.value < 100 && (this.arcSpanDeg - this.valueAngle) <= this.gapAngle + 0.0001 },
 
-    lightPath() {
-      if (this.value <= 0) return null;
+    lightPath () {
+      if (this.value <= 0) return null
       if (this.value >= 100) {
-        return this.describeArc(
-          this.center,
-          this.center,
-          this.radius,
-          this.startAngleEff + 0.001,
-          this.startAngleEff + this.arcSpanDeg - 0.001
-        );
+        return this.describeArc(this.center, this.center, this.radius, this.startAngleEff + 0.001, this.startAngleEff + this.arcSpanDeg - 0.001)
       }
-      if (this.drawLightDot) return null;
-
-      const start = this.startAngleEff + (this.gapAngle / 2);
-      const end   = this.startAngleEff + this.valueAngle - (this.gapAngle / 2);
-
-      return this.describeArc(this.center, this.center, this.radius, start, end);
+      if (this.drawLightDot) return null
+      const start = this.startAngleEff + (this.gapAngle / 2)
+      const end   = this.startAngleEff + this.valueAngle - (this.gapAngle / 2)
+      return this.describeArc(this.center, this.center, this.radius, start, end)
     },
 
-    darkPath() {
-      if (this.value >= 100) return null;
+    darkPath () {
+      if (this.value >= 100) return null
       if (this.value <= 0) {
-        return this.describeArc(
-          this.center,
-          this.center,
-          this.radius,
-          this.startAngleEff + 0.001,
-          this.startAngleEff + this.arcSpanDeg - 0.001
-        );
+        return this.describeArc(this.center, this.center, this.radius, this.startAngleEff + 0.001, this.startAngleEff + this.arcSpanDeg - 0.001)
       }
-      if (this.drawDarkDot) return null;
-
-      const start = this.startAngleEff + this.valueAngle + (this.gapAngle / 2);
-      const end   = this.startAngleEff + this.arcSpanDeg - (this.gapAngle / 2);
-
-      return this.describeArc(this.center, this.center, this.radius, start, end);
+      if (this.drawDarkDot) return null
+      const start = this.startAngleEff + this.valueAngle + (this.gapAngle / 2)
+      const end   = this.startAngleEff + this.arcSpanDeg - (this.gapAngle / 2)
+      return this.describeArc(this.center, this.center, this.radius, start, end)
     },
 
-    dotPos() {
-      const angle = this.startAngleEff + (this.valueAngle / 2);
-      return this.polarToCartesian(this.center, this.center, this.radius, angle);
+    dotPos () {
+      const angle = this.startAngleEff + (this.valueAngle / 2)
+      return this.polarToCartesian(this.center, this.center, this.radius, angle)
     },
-    dotPosDark() {
-      const remainingAngle = this.arcSpanDeg - this.valueAngle;
-      const angle = this.startAngleEff + this.valueAngle + (remainingAngle / 2);
-      return this.polarToCartesian(this.center, this.center, this.radius, angle);
-    },
-
-    center() {
-      return this.size / 2;
+    dotPosDark () {
+      const remainingAngle = this.arcSpanDeg - this.valueAngle
+      const angle = this.startAngleEff + this.valueAngle + (remainingAngle / 2)
+      return this.polarToCartesian(this.center, this.center, this.radius, angle)
     },
 
-    // --- lógica do pattern (mantida) ---
-    usePattern() {
-      // usa pattern se for forçado ou se restColor for string vazia (rest-color="")
-      return this.restUsePattern || this.restColor === "";
-    },
-    patternId() {
-      // usa _uid para gerar id único por instância (evita colisões)
-      return `donut-rest-pattern-${this._uid}`;
-    },
-    patternSize() {
-      // tile (px) = gap total (ex: 5)
-      return Number(this.restPatternGap) || 5;
-    },
-    stripeWidth() {
-      return Number(this.restPatternStripe) || 1;
-    },
-    patternTransform() {
-      // rotate(angle)
-      return `rotate(${this.restPatternAngle})`;
-    },
-    restStroke() {
-      return this.usePattern ? `url(#${this.patternId})` : this.restColor;
-    },
+    center () { return this.size / 2 },
+
+    /* pattern */
+    usePattern () { return this.restUsePattern || this.restColor === "" },
+    patternId () { return `donut-rest-pattern-${this._uid}` },
+    patternSize () { return Number(this.restPatternGap) || 5 },
+    stripeWidth () { return Number(this.restPatternStripe) || 1 },
+    patternTransform () { return `rotate(${this.restPatternAngle})` },
+    restStroke () { return this.usePattern ? `url(#${this.patternId})` : this.restColor }
   },
 
   methods: {
-    polarToCartesian(cx, cy, radius, angleDeg) {
-      const angleRad = (angleDeg - 90) * Math.PI / 180.0;
+    polarToCartesian (cx, cy, radius, angleDeg) {
+      const angleRad = (angleDeg - 90) * Math.PI / 180
       return {
         x: +(cx + (radius * Math.cos(angleRad))).toFixed(3),
-        y: +(cy + (radius * Math.sin(angleRad))).toFixed(3),
-      };
+        y: +(cy + (radius * Math.sin(angleRad))).toFixed(3)
+      }
     },
-    describeArc(cx, cy, radius, startAngle, endAngle) {
-      // normaliza para que endAngle > startAngle (varrendo sentido horário)
-      let s = startAngle % 360;
-      if (s < 0) s += 360;
-      let e = endAngle % 360;
-      if (e < 0) e += 360;
-      if (e <= s) e += 360;
-
-      const start = this.polarToCartesian(cx, cy, radius, s);
-      const end = this.polarToCartesian(cx, cy, radius, e);
-
-      const largeArcFlag = (e - s) <= 180 ? "0" : "1";
-      return [
-        "M", start.x, start.y,
-        "A", radius, radius, 0, largeArcFlag, 1, end.x, end.y
-      ].join(" ");
+    describeArc (cx, cy, radius, startAngle, endAngle) {
+      let s = startAngle % 360; if (s < 0) s += 360
+      let e = endAngle % 360;   if (e < 0) e += 360
+      if (e <= s) e += 360
+      const start = this.polarToCartesian(cx, cy, radius, s)
+      const end   = this.polarToCartesian(cx, cy, radius, e)
+      const largeArcFlag = (e - s) <= 180 ? '0' : '1'
+      return ['M', start.x, start.y, 'A', radius, radius, 0, largeArcFlag, 1, end.x, end.y].join(' ')
     }
   }
 }
@@ -271,39 +210,66 @@ export default {
   gap: 4px;
 }
 
-.chart-wrapper {
-  position: relative;
-  display: inline-block;
-}
+.chart-wrapper { position: relative; display: inline-block; }
+.label-left { position: absolute; top: -10px; left: -20px; font-weight: 300; color: #666; font-size: 16px; user-select: none; }
+.info-right { position: absolute; top: -5px; right: -70px; }
+.right-label { display: flex; align-items: center; gap: 4px; }
 
-.label-left {
-  position: absolute;
-  top: -10px;
-  left: -20px;
-  font-weight: 300;
-  color: #666;
-  font-size: 16px;
-  user-select: none;
-}
+/* --- ANIMAÇÕES (acionadas quando o conteúdo monta via QIntersection) --- */
 
-.info-right {
-  position: absolute;
-  top: -5px;
-  right: -70px;
-}
-
-.right-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* animação suave do arco claro */
+/* 1) “desenhando” o arco de progresso */
 .progress-arc {
-  transition: stroke-dashoffset 0.4s ease, d 0.4s ease;
+  /* normaliza o comprimento do path (ver pathLength="100" no template) */
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100; /* totalmente escondido inicialmente */
+  animation: drawArc 900ms cubic-bezier(.2,.9,.2,1) 120ms forwards;
 }
 
-/* aplica a classe percent-box mesmo quando vinda via slot (scoped styles) */
+/* 2) resto aparece levemente depois */
+.rest-arc {
+  opacity: 0;
+  animation: fadeIn 350ms ease 80ms forwards;
+}
+
+/* 3) dots em caso de ângulos curtos */
+.progress-dot, .rest-dot {
+  opacity: 0;
+  transform: scale(.7);
+  transform-origin: center;
+  animation: dotIn 300ms ease 250ms forwards;
+}
+
+/* pequeno pop da peça inteira */
+.donut-io .chart-wrapper {
+  animation: popIn 300ms ease-out both;
+}
+
+@keyframes drawArc {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+@keyframes dotIn {
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes popIn {
+  from { transform: translateY(6px); opacity: 0; }
+  to   { transform: translateY(0);  opacity: 1; }
+}
+
+/* acessibilidade: reduz movimento */
+@media (prefers-reduced-motion: reduce) {
+  .donut-io .chart-wrapper,
+  .progress-arc,
+  .rest-arc,
+  .progress-dot,
+  .rest-dot { animation: none !important; }
+  .progress-arc { stroke-dashoffset: 0; }
+}
+
+/* slots utilitários (mantidos) */
 .right-label :deep(.percent-box) {
   display: inline-block;
   padding: 4px 6px;
@@ -313,22 +279,7 @@ export default {
   font-weight: 500;
   user-select: none;
 }
-
-/* posições auxiliares caso use os três slots de layout */
-:deep(.label-top) {
-  position: absolute;
-  top: -50%;
-}
-
-:deep(.label-center) {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateY(-50%) translateX(-50%);
-}
-
-:deep(.label-bottom) {
-  position: absolute;
-  bottom: -50%;
-}
+:deep(.label-top) { position: absolute; top: -50%; }
+:deep(.label-center) { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+:deep(.label-bottom) { position: absolute; bottom: -50%; }
 </style>
