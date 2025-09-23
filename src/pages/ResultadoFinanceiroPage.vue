@@ -15,22 +15,22 @@
           <span class="text-16 text-grey-7">Selecione o período:</span>
 
           <q-input
-            model-value="2025-10-01"
+            v-model="filters.startDate"
             outlined
             dense
             type="date"
-            max="2099-12-31"
+            :max="filters.endDate"  
             style="text-transform: uppercase;"
           />
 
           <span class="text-16 text-grey-7">a</span>
 
           <q-input
-            model-value="2025-10-07"
+            v-model="filters.endDate"
             outlined
             dense
             type="date"
-            max="2099-12-31"
+            :min="filters.startDate" 
             style="text-transform: uppercase;"
           />
         </div>
@@ -61,7 +61,7 @@
           </div>
 
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(financialData.faturamento) }}</span>
           </div>
 
           <div class="row justify-center">
@@ -90,7 +90,7 @@
           </div>
 
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">98.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(financialData.receita) }}</span>
           </div>
 
           <div class="row justify-center">
@@ -124,7 +124,7 @@
             </div>
 
             <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">17.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(financialData.lucroLiquido) }}</span>
             </div>
 
             <div class="row justify-center">
@@ -238,7 +238,7 @@
                 >
                   <DonutRadial :value="item.percent">
                     <template #left-label>
-                      {{ (100 - item.percent).toFixed(1).replace('.', ',') }}%
+                      {{ formatPercent(100 - item.percent) }}
                     </template>
                   
                     <template #info-right>
@@ -250,7 +250,7 @@
                   
                     <template #right-label>
                       <q-icon name="chevron_left" size="md" />
-                      <span class="percent-box">{{ item.percent }}%</span>
+                      <span class="percent-box">{{ formatPercent(item.percent) }}</span>
                     </template>
                   </DonutRadial>
                 </div>
@@ -402,13 +402,7 @@
       <div class="col-12 row justify-center fancy-scroll" style="padding: 60px 50px;">
         <div style="width: 80%;">
           <PeriodicColumnsChart
-            :meses="[
-              { label: 'JUN / 2025', projetado: 420000, faturamento: 420000, equilibrio: 300000 },
-              { label: 'JUL / 2025', projetado: 420000, faturamento: 430000, equilibrio: 305000 },
-              { label: 'AGO / 2025', projetado: 420000, faturamento: 415000, equilibrio: 310000 },
-              { label: 'SET / 2025', projetado: 420000, faturamento: 400000, equilibrio: 310000 },
-              { label: 'OUT / 2025', projetado: 420000, faturamento: 415000, equilibrio: 315000 }
-            ]"
+            :meses="mesesFaturamento"
           />
         </div>
       </div>
@@ -645,244 +639,360 @@ export default {
     Card4,
     Card5,
     Card6,
-    Card7
+    Card7,
   },
-  data () {
+  data() {
     return {
-      arrayComparativos: [
-        {
-          title: 'Inadinplência',
-          value: 3000,
-          percent: 3
-        },
-        {
-          title: 'Perda Receita Recorrente',
-          value: 1500,
-          percent: 1.5
-        },
-        {
-          title: 'Lucro Bruto',
-          value: 34000,
-          percent: 32
-        },
-        {
-          title: 'Despesas',
-          value: 66000,
-          percent: 63
-        },
-        {
-          title: 'CSV',
-          value: 7500,
-          percent: 7
-        },
-        {
-          title: 'CMV',
-          value: 15000,
-          percent: 14
-        },
-        {
-          title: 'Margem de Contribuição',
-          value: 23000,
-          percent: 22
-        }
-      ],
-      arrayFaturamento: [
-        {
-          title: 'Total Período',
-          value: '2.080.000,00'
-        },
-        {
-          title: 'Média Mensal',
-          value: '416.000,00'
-        },
-        {
-          title: 'Maior Mensal',
-          value: '430.000,00'
-        },
-        {
-          title: 'Menor Mensal',
-          value: '400.000,00'
-        }
+      filters: {
+        startDate: "2025-10-01",
+        endDate: "2025-10-07",
+      },
+      financialData: {
+        faturamento: 0,
+        receita: 0,
+        lucroLiquido: 0,
+        inadimplencia: 0,
+        perdaReceitaRecorrente: 0,
+        lucroBruto: 0,
+        despesas: 0,
+        csv: 0,
+        cmv: 0,
+        margemContribuicao: 0,
+      },
+      faturamento: {
+        maiorMensal: 0,
+        menorMensal: 0,
+      },
+      mesesFaturamento: [
       ],
       arrayFaturamentoVenda: [
         {
-          title: 'Pontual',
+          title: "Pontual",
           percent: 38,
-          color: '#91DA71',
+          color: "#91DA71",
           cards: [
             {
               qtde: 320,
               value: 160000,
               border: false,
-              background: false
+              background: false,
             },
             {
               qtde: 40,
               value: 20000,
               border: true,
               background: false,
-              title: 'Serviço'
+              title: "Serviço",
             },
             {
               qtde: 280,
               value: 140000,
               border: true,
               background: false,
-              title: 'Produto'
-            }
-          ]
+              title: "Produto",
+            },
+          ],
         },
         {
-          title: 'Recorrente',
+          title: "Recorrente",
           percent: 24,
-          color: '#4F7D6B',
+          color: "#4F7D6B",
           cards: [
             {
               qtde: 100,
               value: 100000,
               border: true,
-              background: false
+              background: false,
             },
             {
               qtde: null,
               value: 1000,
               border: true,
-              background: true
-            }
-          ]
+              background: true,
+            },
+          ],
         },
         {
-          title: 'Serviço',
+          title: "Serviço",
           percent: 19,
-          color: '#F2814B',
+          color: "#F2814B",
           cards: [
             {
               qtde: 40,
               value: 80000,
               border: true,
-              background: false
+              background: false,
             },
             {
               qtde: null,
               value: 2000,
               border: true,
-              background: true
-            }
-          ]
+              background: true,
+            },
+          ],
         },
         {
-          title: 'Revenda',
+          title: "Revenda",
           percent: 19,
-          color: '#9643B7',
+          color: "#9643B7",
           cards: [
             {
               qtde: 20,
               value: 80000,
               border: true,
-              background: false
+              background: false,
             },
             {
               qtde: null,
               value: 4000,
               border: true,
-              background: true
-            }
-          ]
-        }
+              background: true,
+            },
+          ],
+        },
       ],
       arrayInadimplenciaVenda: [
         {
-          title: 'Pontual',
+          title: "Pontual",
           percent: 24,
-          color: '#91DA71',
+          color: "#91DA71",
           cards: [
             {
               qtde: 8,
               value: 200000,
-              color: '#B0F2C2'
+              color: "#B0F2C2",
             },
             {
               qtde: 8,
               value: 200000,
-              color: '#F2F298'
+              color: "#F2F298",
             },
             {
               qtde: 4,
               value: 100000,
-              color: '#FFB6AF'
-            }
-          ]
+              color: "#FFB6AF",
+            },
+          ],
         },
         {
-          title: 'Recorrente',
+          title: "Recorrente",
           percent: 38.5,
-          color: '#4F7D6B',
+          color: "#4F7D6B",
           cards: [
             {
               qtde: 15,
               value: 480000,
-              color: '#B0F2C2'
+              color: "#B0F2C2",
             },
             {
               qtde: 7,
               value: 224000,
-              color: '#F2F298'
+              color: "#F2F298",
             },
             {
               qtde: 3,
               value: 96000,
-              color: '#FFB6AF'
-            }
-          ]
+              color: "#FFB6AF",
+            },
+          ],
         },
         {
-          title: 'Serviço',
+          title: "Serviço",
           percent: 21.6,
-          color: '#F2814B',
+          color: "#F2814B",
           cards: [
             {
               qtde: 4,
               value: 120000,
-              color: '#B0F2C2'
+              color: "#B0F2C2",
             },
             {
               qtde: 6,
               value: 180000,
-              color: '#F2F298'
+              color: "#F2F298",
             },
             {
               qtde: 5,
               value: 150000,
-              color: '#FFB6AF'
-            }
-          ]
+              color: "#FFB6AF",
+            },
+          ],
         },
         {
-          title: 'Revenda',
+          title: "Revenda",
           percent: 15.9,
-          color: '#9643B7',
+          color: "#9643B7",
           cards: [
             {
               qtde: 2,
               value: 66000,
-              color: '#B0F2C2'
+              color: "#B0F2C2",
             },
             {
               qtde: 3,
               value: 99000,
-              color: '#F2F298'
+              color: "#F2F298",
             },
             {
               qtde: 5,
               value: 165000,
-              color: '#FFB6AF'
-            }
-          ]
-        }
-      ]
+              color: "#FFB6AF",
+            },
+          ],
+        },
+      ],
+    };
+  },
+  created() {
+    // 🔹 Simulação de login (substitua pelo retorno real do seu backend)
+    this.user = { role: "BCONTROL" };
+
+    // 🔹 Condição baseada no usuário
+    if (this.user.role === "BCONTROL") {
+      this.filters = {
+        startDate: "2024-11-01",
+        endDate: "2025-09-17",
+      };
+      this.financialData = {
+        faturamento: 33483.85,
+        receita: 32540.89,
+        lucroLiquido: -135125.92,
+        inadimplencia: 2501.97,
+        perdaReceitaRecorrente: 1180.0,
+        lucroBruto: 7369.93,
+        despesas: 168609.77,
+        csv: 25173.96,
+        cmv: 0.0,
+        margemContribuicao: -136068.88,
+      };
+      this.faturamento = {
+        maiorMensal: 8707.97,
+        menorMensal: 1180.0,
+      };
+      this.mesesFaturamento = [
+          { label: 'JUN / 2025', projetado: 11024.96, faturamento: 4656, equilibrio: 10250.10 },
+          { label: 'JUL / 2025', projetado: 11024.96, faturamento: 4656, equilibrio: 10250.10 },
+          { label: 'AGO / 2025', projetado: 11024.96, faturamento: 5828.99, equilibrio: 10250.10 },
+          { label: 'SET / 2025', projetado: 11024.96, faturamento: 8244.00, equilibrio: 10250.10 },
+          { label: 'OUT / 2025', projetado: 11024.96, faturamento: 8244.00, equilibrio: 10250.10 }
+      ];
+    } else if (this.user.role === "DEMO") {
+      this.filters = {
+        startDate: "2025-10-01",
+        endDate: "2025-10-07",
+      };
+      this.financialData = {
+        faturamento: 105000.0,
+        receita: 98000.0,
+        lucroLiquido: 170000.0,
+        inadimplencia: 3000.0,
+        perdaReceitaRecorrente: 1500.0,
+        lucroBruto: 34000.0,
+        despesas: 66000.0,
+        csv: 7500.0,
+        cmv: 15000.0,
+        margemContribuicao: 23000.0,
+      };
+      this.faturamento = {
+        maiorMensal: 430000.0,
+        menorMensal: 400000.0,
+      };
+      this.mesesFaturamento =             [
+          { label: 'JUN / 2025', projetado: 420000, faturamento: 420000, equilibrio: 300000 },
+          { label: 'JUL / 2025', projetado: 420000, faturamento: 430000, equilibrio: 305000 },
+          { label: 'AGO / 2025', projetado: 420000, faturamento: 415000, equilibrio: 310000 },
+          { label: 'SET / 2025', projetado: 420000, faturamento: 400000, equilibrio: 310000 },
+          { label: 'OUT / 2025', projetado: 420000, faturamento: 415000, equilibrio: 315000 }
+      ];
     }
-  }
-}
+  },
+  computed: {
+    arrayComparativos() {
+      const f = this.financialData.faturamento || 1;
+      return [
+        {
+          title: "Inadimplência",
+          value: this.financialData.inadimplencia,
+          percent: (this.financialData.inadimplencia / f) * 100,
+        },
+        {
+          title: "Perda Receita Recorrente",
+          value: this.financialData.perdaReceitaRecorrente,
+          percent: (this.financialData.perdaReceitaRecorrente / f) * 100,
+        },
+        {
+          title: "Lucro Bruto",
+          value: this.financialData.lucroBruto,
+          percent: (this.financialData.lucroBruto / f) * 100,
+        },
+        {
+          title: "Despesas",
+          value: this.financialData.despesas,
+          percent: (this.financialData.despesas / f) * 100,
+        },
+        {
+          title: "CSV",
+          value: this.financialData.csv,
+          percent: (this.financialData.csv / f) * 100,
+        },
+        {
+          title: "CMV",
+          value: this.financialData.cmv,
+          percent: (this.financialData.cmv / f) * 100,
+        },
+        {
+          title: "Margem de Contribuição",
+          value: this.financialData.margemContribuicao,
+          percent: (this.financialData.margemContribuicao / f) * 100,
+        },
+      ];
+    },
+    arrayFaturamento() {
+      const months = this.monthsDistinct(this.filters.startDate, this.filters.endDate);
+      console.log('Meses distintos:', months);
+      return [
+        {
+          title: "Total Período",
+          value: this.formatCurrency(this.financialData.faturamento),
+        },
+        {
+          title: "Média Mensal",
+          value: this.formatCurrency(this.financialData.faturamento / months),
+        },
+        {
+          title: "Maior Mensal",
+          value: this.formatCurrency(this.faturamento.maiorMensal),
+        },
+        {
+          title: "Menor Mensal",
+          value: this.formatCurrency(this.faturamento.menorMensal),
+        },
+      ];
+    },
+  },
+  methods: {
+    formatCurrency(value) {
+      if (value === null || value === undefined) return "0,00";
+      return new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+    },
+    formatPercent(value) {
+      return `${value.toFixed(2).replace(".", ",")}%`;
+    },
+    parseYYYYMMDD(s) {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, m - 1, d); // evita bug de fuso
+    },
+    monthsDistinct(startStr, endStr) {
+      const s = this.parseYYYYMMDD(startStr);
+      const e = this.parseYYYYMMDD(endStr);
+      if (e < s) return 0;
+      return (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth()) + 1;
+    },
+  },
+};
 </script>
 <style>
 .topic-style {
