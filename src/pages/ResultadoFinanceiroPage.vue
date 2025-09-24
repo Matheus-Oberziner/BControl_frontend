@@ -415,39 +415,23 @@
           <template #content>
             <div class="col-12 row items-center justify-between" style="padding: 40px 30px;">
               <div class="fancy-scroll" style="width: 70%; padding: 50px 20px 0px 0px;">
-                <ProgressBarsComponent />
+                <ProgressBarsComponent 
+                  :chartData="diasFaturamento"
+                  :maxValue="20000"
+                />
               </div>
   
               <div class="row" style="width: 25%;">
                 <div class="col-12" style="padding-bottom: 50px;">
                   <CustomBarChart
-                    :chartData="[
-                      {
-                        value: 420000.00,
-                        label: 'Projetado',
-                        color: 'gray',
-                        bgColor: '#f0f0f0'
-                      },
-                      {
-                        value: 200000.00,
-                        label: 'Faturamento',
-                        color: 'blue',
-                        bgColor: '#0047A1'
-                      },
-                      {
-                        value: 300000.00,
-                        label: 'Ponto de Equilíbrio',
-                        color: 'pink',
-                        bgColor: '#FF3CC7'
-                      }
-                    ]"
+                    :chartData="chartFaturamentoMes"
                     side-title=""
                   />
                 </div>
 
                 <div class="col-12 row justify-center" style="margin: 40px 0;">
                   <DonutRadial
-                    :value="69"
+                    :value="percentualAlcancado"
                     :size="110"
                     :start-angle="175"
                     progress-color="#0047A1"
@@ -460,7 +444,7 @@
                     <!-- Top label -->
                     <template #top-label>
                       <div class="label-top">
-                        <div class="weight-600 text-blue"><span class="text-12 q-pr-xs">R$</span><span class="text-16">288.000,00</span></div>
+                        <div class="weight-600 text-blue"><span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(desempenhoMensal.faturamentoMensal) }}</span></div>
                         <div class="text-grey-1 text-center">Total Vendido</div>
                       </div>
                     </template>
@@ -468,14 +452,14 @@
                     <!-- Center label -->
                     <template #center-label>
                       <div class="label-center">
-                        <span class="text-18 weight-600 text-blue">69%</span>
+                        <span class="text-18 weight-600 text-blue">{{ percentualAlcancado }}%</span>
                       </div>
                     </template>
 
                     <!-- Bottom label -->
                     <template #bottom-label>
                       <div class="label-bottom">
-                        <div class="weight-600 text-grey-1"><span class="text-12 q-pr-xs">R$</span><span class="text-16">288.000,00</span></div>
+                        <div class="weight-600 text-grey-1"><span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(faltaMensal) }}</span></div>
                         <div class="text-grey-1 text-center">Falta</div>
                       </div>
                     </template>
@@ -497,15 +481,15 @@
               <div class="col-2 row justify-center" style="height: 100%;">
                 <PieChartComponent
                   :data="[
-                    { label: 'Pontual', percentage: 38, color: '#7ED321' },
-                    { label: 'Recorrente', percentage: 24, color: '#417505' },
-                    { label: 'Serviço', percentage: 19, color: '#FF8A00' },
-                    { label: 'Revende', percentage: 19, color: '#9013FE' }
+                    { label: arrayFaturamentoVenda[0].title, percentage: arrayFaturamentoVenda[0].percent, color: '#7ED321' },
+                    { label: arrayFaturamentoVenda[1].title, percentage: arrayFaturamentoVenda[1].percent, color: '#417505' },
+                    { label: arrayFaturamentoVenda[2].title, percentage: arrayFaturamentoVenda[2].percent, color: '#FF8A00' },
+                    { label: arrayFaturamentoVenda[3].title, percentage: arrayFaturamentoVenda[3].percent, color: '#9013FE' }
                   ]"
                 >
                   <template #bottom-label>
                     <div class="bottom-label row items-center justify-center">
-                      <span class="text-12 q-pr-xs weight-600 text-center">R$</span><span class="text-16 weight-600">{{ (420000).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                      <span class="text-12 q-pr-xs weight-600 text-center">R$</span><span class="text-16 weight-600">{{ formatCurrency(totalVendas) }}</span>
                       <span class="text-center text-grey-1">Total em Vendas</span>
                     </div>
                   </template>
@@ -659,98 +643,15 @@ export default {
         cmv: 0,
         margemContribuicao: 0,
       },
-      faturamento: {
+      faturamentoMeses: {
         maiorMensal: 0,
         menorMensal: 0,
       },
       mesesFaturamento: [
       ],
-      arrayFaturamentoVenda: [
-        {
-          title: "Pontual",
-          percent: 38,
-          color: "#91DA71",
-          cards: [
-            {
-              qtde: 320,
-              value: 160000,
-              border: false,
-              background: false,
-            },
-            {
-              qtde: 40,
-              value: 20000,
-              border: true,
-              background: false,
-              title: "Serviço",
-            },
-            {
-              qtde: 280,
-              value: 140000,
-              border: true,
-              background: false,
-              title: "Produto",
-            },
-          ],
-        },
-        {
-          title: "Recorrente",
-          percent: 24,
-          color: "#4F7D6B",
-          cards: [
-            {
-              qtde: 100,
-              value: 100000,
-              border: true,
-              background: false,
-            },
-            {
-              qtde: null,
-              value: 1000,
-              border: true,
-              background: true,
-            },
-          ],
-        },
-        {
-          title: "Serviço",
-          percent: 19,
-          color: "#F2814B",
-          cards: [
-            {
-              qtde: 40,
-              value: 80000,
-              border: true,
-              background: false,
-            },
-            {
-              qtde: null,
-              value: 2000,
-              border: true,
-              background: true,
-            },
-          ],
-        },
-        {
-          title: "Revenda",
-          percent: 19,
-          color: "#9643B7",
-          cards: [
-            {
-              qtde: 20,
-              value: 80000,
-              border: true,
-              background: false,
-            },
-            {
-              qtde: null,
-              value: 4000,
-              border: true,
-              background: true,
-            },
-          ],
-        },
-      ],
+      diasFaturamento:[],
+      arrayFaturamentoVenda: [],
+      totalVendas: 0,
       arrayInadimplenciaVenda: [
         {
           title: "Pontual",
@@ -854,29 +755,155 @@ export default {
         endDate: "2025-09-17",
       };
       this.financialData = {
-        faturamento: 33483.85,
-        receita: 32540.89,
-        lucroLiquido: -135125.92,
-        inadimplencia: 2501.97,
-        perdaReceitaRecorrente: 1180.0,
-        lucroBruto: 7369.93,
-        despesas: 168609.77,
+        faturamento: 175287.69,
+        receita: 175287.69,
+        lucroLiquido: 752.55,
+        inadimplencia: 4748.97,
+        perdaReceitaRecorrente: 1180.00,
+        lucroBruto: 150077.73,
+        despesas: 174499.14,
         csv: 25173.96,
         cmv: 0.0,
-        margemContribuicao: -136068.88,
-      };
-      this.faturamento = {
-        maiorMensal: 8707.97,
-        menorMensal: 1180.0,
+        margemContribuicao: 150077.73,
       };
       this.mesesFaturamento = [
-          { label: 'JUN / 2025', projetado: 11024.96, faturamento: 4656, equilibrio: 10250.10 },
-          { label: 'JUL / 2025', projetado: 11024.96, faturamento: 4656, equilibrio: 10250.10 },
-          { label: 'AGO / 2025', projetado: 11024.96, faturamento: 5828.99, equilibrio: 10250.10 },
-          { label: 'SET / 2025', projetado: 11024.96, faturamento: 8244.00, equilibrio: 10250.10 },
-          { label: 'OUT / 2025', projetado: 11024.96, faturamento: 8244.00, equilibrio: 10250.10 }
+          { label: 'ABR / 2025', projetado: 31264.50, faturamento: 1680.00, equilibrio: 21264.50 },
+          { label: 'MAI / 2025', projetado: 21245.89, faturamento: 750.00, equilibrio: 11245.89 },
+          { label: 'JUN / 2025', projetado: 9062.79, faturamento: 500.00, equilibrio: 4062.79 },
+          { label: 'JUL / 2025', projetado: 21762.64, faturamento: 8485.76, equilibrio: 11762.64 },
+          { label: 'AGO / 2025', projetado: 23769.17, faturamento: 5203.80, equilibrio: 11762.64 }
       ];
-    } else if (this.user.role === "DEMO") {
+      this.faturamentoMeses = {
+        totalPeriodo: 25463.30,
+        mediaMensal: 2314.85,
+        maiorMensal: 8485.76,
+        menorMensal: 0.00,
+      };
+      this.desempenhoMensal = {
+        projetadoMensal: 11888.38 ,
+        faturamentoMensal: 1328.99,
+        equilibrioMensal: 10508.49,
+      };
+      this.diasFaturamento = [
+        { day: '01', value: 0 },
+        { day: '02', value: 0 },
+        { day: '03', value: 0 },
+        { day: '04', value: 0 },
+        { day: '05', value: 0 },
+        { day: '06', value: 0 },
+        { day: '07', value: 0 },
+        { day: '08', value: 0 },
+        { day: '09', value: 1380 },
+        { day: '10', value: 0 },
+        { day: '11', value: 0 },
+        { day: '12', value: 0 },
+        { day: '13', value: 0 },
+        { day: '14', value: 0 },
+        { day: '15', value: 0 },
+        { day: '16', value: 0 },
+        { day: '17', value: 0 },
+        { day: '18', value: 0 },
+        { day: '19', value: 0 },
+        { day: '20', value: 0 },
+        { day: '21', value: 0 },
+        { day: '22', value: 0 },
+        { day: '23', value: 0 },
+        { day: '24', value: 0 },
+        { day: '25', value: 0 },
+        { day: '26', value: 0 },
+        { day: '27', value: 0 },
+        { day: '28', value: 0 },
+        { day: '29', value: 0 },
+        { day: '30', value: 0 }
+      ];
+      this.totalVendas = 9694.00;
+      this.arrayFaturamentoVenda = [
+        {
+          title: "Pontual",
+          percent: 0,
+          color: "#91DA71",
+          cards: [
+            {
+              qtde: 0,
+              value: 0,
+              border: false,
+              background: false,
+            },
+            {
+              qtde: 0,
+              value: 0,
+              border: true,
+              background: false,
+              title: "Serviço",
+            },
+            {
+              qtde: 0,
+              value: 0,
+              border: true,
+              background: false,
+              title: "Produto",
+            },
+          ],
+        },
+        {
+          title: "Recorrente",
+          percent: 0,
+          color: "#4F7D6B",
+          cards: [
+            {
+              qtde: 0,
+              value: 0,
+              border: true,
+              background: false,
+            },
+            {
+              qtde: null,
+              value: 0,
+              border: true,
+              background: true,
+            },
+          ],
+        },
+        {
+          title: "Serviço",
+          percent: 100,
+          color: "#F2814B",
+          cards: [
+            {
+              qtde: 4,
+              value: 9694.00,
+              border: true,
+              background: false,
+            },
+            {
+              qtde: null,
+              value: 2423.50,
+              border: true,
+              background: true,
+            },
+          ],
+        },
+        {
+          title: "Revenda",
+          percent: 0,
+          color: "#9643B7",
+          cards: [
+            {
+              qtde: 0,
+              value: 0,
+              border: true,
+              background: false,
+            },
+            {
+              qtde: null,
+              value: 0,
+              border: true,
+              background: true,
+            },
+          ],
+        },
+      ];
+    } else {
       this.filters = {
         startDate: "2025-10-01",
         endDate: "2025-10-07",
@@ -893,20 +920,172 @@ export default {
         cmv: 15000.0,
         margemContribuicao: 23000.0,
       };
-      this.faturamento = {
-        maiorMensal: 430000.0,
-        menorMensal: 400000.0,
-      };
-      this.mesesFaturamento =             [
+      this.mesesFaturamento = [
           { label: 'JUN / 2025', projetado: 420000, faturamento: 420000, equilibrio: 300000 },
           { label: 'JUL / 2025', projetado: 420000, faturamento: 430000, equilibrio: 305000 },
           { label: 'AGO / 2025', projetado: 420000, faturamento: 415000, equilibrio: 310000 },
           { label: 'SET / 2025', projetado: 420000, faturamento: 400000, equilibrio: 310000 },
           { label: 'OUT / 2025', projetado: 420000, faturamento: 415000, equilibrio: 315000 }
       ];
+      this.faturamentoMeses = {
+        totalPeriodo: 2080000.00,
+        mediaMensal: 416000.00,
+        maiorMensal: 430000.0,
+        menorMensal: 400000.0
+      };
+      this.desempenhoMensal = {
+        projetadoMensal: 420000.0,
+        faturamentoMensal: 200000.00,
+        equilibrioMensal: 300000.00,
+      };
+      this.diasFaturamento = [
+        { day: '01', value: 14000},
+        { day: '02', value: 15000},
+        { day: '03', value: 13500},
+        { day: '04', value: 15500},
+        { day: '05', value: 15200},
+        { day: '06', value: 15000},
+        { day: '07', value: 16000},
+        { day: '08', value: 16000},
+        { day: '09', value: 16000},
+        { day: '10', value: 15000},
+        { day: '11', value: 14000},
+        { day: '12', value: 14000},
+        { day: '13', value: 15000},
+        { day: '14', value: 15000},
+        { day: '15', value: 15000},
+        { day: '16', value: 15000},
+        { day: '17', value: 15000},
+        { day: '18', value: 17000},
+        { day: '19', value: 17000},
+        { day: '20', value: 17000},
+        { day: '21', value: 0},
+        { day: '22', value: 0},
+        { day: '23', value: 0},
+        { day: '24', value: 0},
+        { day: '25', value: 0},
+        { day: '26', value: 0},
+        { day: '27', value: 0},
+        { day: '28', value: 0},
+        { day: '29', value: 0},
+        { day: '30', value: 0},
+        { day: '31', value: 0}
+      ];
+      this.totalVendas = 420000;
+      this.arrayFaturamentoVenda = [
+        {
+          title: "Pontual",
+          percent: 38,
+          color: "#91DA71",
+          cards: [
+            {
+              qtde: 320,
+              value: 160000,
+              border: false,
+              background: false,
+            },
+            {
+              qtde: 40,
+              value: 20000,
+              border: true,
+              background: false,
+              title: "Serviço",
+            },
+            {
+              qtde: 280,
+              value: 140000,
+              border: true,
+              background: false,
+              title: "Produto",
+            },
+          ],
+        },
+        {
+          title: "Recorrente",
+          percent: 24,
+          color: "#4F7D6B",
+          cards: [
+            {
+              qtde: 100,
+              value: 100000,
+              border: true,
+              background: false,
+            },
+            {
+              qtde: null,
+              value: 1000,
+              border: true,
+              background: true,
+            },
+          ],
+        },
+        {
+          title: "Serviço",
+          percent: 19,
+          color: "#F2814B",
+          cards: [
+            {
+              qtde: 40,
+              value: 80000,
+              border: true,
+              background: false,
+            },
+            {
+              qtde: null,
+              value: 2000,
+              border: true,
+              background: true,
+            },
+          ],
+        },
+        {
+          title: "Revenda",
+          percent: 19,
+          color: "#9643B7",
+          cards: [
+            {
+              qtde: 20,
+              value: 80000,
+              border: true,
+              background: false,
+            },
+            {
+              qtde: null,
+              value: 4000,
+              border: true,
+              background: true,
+            },
+          ],
+        },
+      ];
     }
+    this.chartFaturamentoMes = [
+        {
+          value: this.desempenhoMensal.projetadoMensal,
+          label: 'Projetado',
+          color: 'gray',
+          bgColor: '#f0f0f0'
+        },
+        {
+          value: this.desempenhoMensal.faturamentoMensal,
+          color: 'blue',
+          bgColor: '#0047A1'
+        },
+        {
+          value: this.desempenhoMensal.equilibrioMensal,
+          label: 'Ponto de Equilíbrio',
+          color: 'pink',
+          bgColor: '#FF3CC7'
+        }
+      ];
   },
   computed: {
+    faltaMensal() {
+      return this.desempenhoMensal.projetadoMensal - this.desempenhoMensal.faturamentoMensal;
+    },
+    percentualAlcancado() {
+      return ((this.desempenhoMensal.faturamentoMensal / this.desempenhoMensal.projetadoMensal) * 100).toFixed(2);
+    },
     arrayComparativos() {
       const f = this.financialData.faturamento || 1;
       return [
@@ -948,24 +1127,22 @@ export default {
       ];
     },
     arrayFaturamento() {
-      const months = this.monthsDistinct(this.filters.startDate, this.filters.endDate);
-      console.log('Meses distintos:', months);
       return [
         {
           title: "Total Período",
-          value: this.formatCurrency(this.financialData.faturamento),
+          value: this.formatCurrency(this.faturamentoMeses.totalPeriodo),
         },
         {
           title: "Média Mensal",
-          value: this.formatCurrency(this.financialData.faturamento / months),
+          value: this.formatCurrency(this.faturamentoMeses.mediaMensal),
         },
         {
           title: "Maior Mensal",
-          value: this.formatCurrency(this.faturamento.maiorMensal),
+          value: this.formatCurrency(this.faturamentoMeses.maiorMensal),
         },
         {
           title: "Menor Mensal",
-          value: this.formatCurrency(this.faturamento.menorMensal),
+          value: this.formatCurrency(this.faturamentoMeses.menorMensal),
         },
       ];
     },

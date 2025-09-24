@@ -45,11 +45,11 @@
             @mouseenter="hoveredIndex = index"
             @mouseleave="hoveredIndex = null"
           >
-            <div 
+            <div v-if="item.label"
               class="legend-dot"
               :class="[item.color, { 'hovered': hoveredIndex === index }]"
             />
-            <div class="legend-content">
+            <div v-if="item.label" class="legend-content">
               <div class="weight-600">
                 <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(item.value) }}</span>
               </div>

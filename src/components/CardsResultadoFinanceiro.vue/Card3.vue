@@ -106,10 +106,9 @@
       </CardComponent>
     </div>
 
-    <!-- ===== Faturamento por Modalidade de Venda (inalterado) ===== -->
     <div class="col-12 row" style="padding: 40px 70px;">
       <CardComponent
-        title="Faturamento por Modalidade de Venda"
+        title="Inadimplência por Modalidade de Venda"
         :with-icon="true"
       >
         <template #content>

@@ -7,8 +7,8 @@
         class="bar-wrapper"
       >
         <!-- Label do valor rotacionado -->
-        <div v-if="item.label" class="value-label">
-          {{ item.label }}
+        <div class="value-label">
+          {{ formatCurrency(item.value) }}
         </div>
         
         <!-- Container da barra -->
@@ -18,7 +18,7 @@
           
           <!-- Barra com valor real -->
           <q-tooltip v-if="item.value > 0" class="bg-blue-8">
-            Dia {{ item.day }}: {{ item.label }}
+            Dia {{ item.day }}: {{ formatCurrency(item.value) }}
           </q-tooltip>
           <div 
             v-if="item.value > 0"
@@ -35,56 +35,33 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, onMounted } from 'vue'
 
 export default defineComponent({
   name: 'ProgressiveBarChart',
+
+   props: {
+    chartData: {
+      type: Array,
+      required: true,
+      default: () => []
+    },
+    maxValue: {
+      type: Number,
+      default: 20000
+    }
+  },
   
-  setup() {
-    const maxValue = ref(20000)
-    
-    const chartData = ref([
-      { day: '01', value: 14000, label: 'R$ 14.000,00' },
-      { day: '02', value: 15000, label: 'R$ 15.000,00' },
-      { day: '03', value: 13500, label: 'R$ 13.500,00' },
-      { day: '04', value: 15500, label: 'R$ 15.500,00' },
-      { day: '05', value: 15200, label: 'R$ 15.200,00' },
-      { day: '06', value: 15000, label: 'R$ 15.000,00' },
-      { day: '07', value: 16000, label: 'R$ 16.000,00' },
-      { day: '08', value: 16000, label: 'R$ 16.000,00' },
-      { day: '09', value: 16000, label: 'R$ 16.000,00' },
-      { day: '10', value: 15000, label: 'R$ 15.000,00' },
-      { day: '11', value: 14000, label: 'R$ 14.000,00' },
-      { day: '12', value: 14000, label: 'R$ 14.000,00' },
-      { day: '13', value: 15000, label: 'R$ 15.000,00' },
-      { day: '14', value: 15000, label: 'R$ 15.000,00' },
-      { day: '15', value: 15000, label: 'R$ 15.000,00' },
-      { day: '16', value: 15000, label: 'R$ 15.000,00' },
-      { day: '17', value: 15000, label: 'R$ 15.000,00' },
-      { day: '18', value: 17000, label: 'R$ 17.000,00' },
-      { day: '19', value: 17000, label: 'R$ 17.000,00' },
-      { day: '20', value: 17000, label: 'R$ 17.000,00' },
-      { day: '21', value: 0, label: '' },
-      { day: '22', value: 0, label: '' },
-      { day: '23', value: 0, label: '' },
-      { day: '24', value: 0, label: '' },
-      { day: '25', value: 0, label: '' },
-      { day: '26', value: 0, label: '' },
-      { day: '27', value: 0, label: '' },
-      { day: '28', value: 0, label: '' },
-      { day: '29', value: 0, label: '' },
-      { day: '30', value: 0, label: '' },
-      { day: '31', value: 0, label: '' }
-    ])
-    
+  setup(props, { emit }) {
+
     // Calcula a altura da barra baseado no valor máximo
     const calculateHeight = (value) => {
-      return (value / maxValue.value) * 100
+      return (value / props.maxValue) * 100
     }
     
     // Você pode adicionar métodos para atualizar os dados dinamicamente
     const updateChartData = (newData) => {
-      chartData.value = newData
+      emit('update:chartData', newData)
     }
     
     // Método para formatar valores em Real
@@ -97,12 +74,9 @@ export default defineComponent({
     
     // Lifecycle hooks
     onMounted(() => {
-      console.log('Gráfico de barras progressivas carregado')
     })
     
     return {
-      maxValue,
-      chartData,
       calculateHeight,
       updateChartData,
       formatCurrency
