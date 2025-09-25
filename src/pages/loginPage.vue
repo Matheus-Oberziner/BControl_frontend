@@ -120,7 +120,11 @@ export default {
 
         loading.value = true
         try {
-            $q.notify({ type: 'ongoing', message: `Carregando informações do Dashboard...`,  position: 'top' })
+            const notif = $q.notify({
+              type: 'ongoing',
+              message: 'Carregando informações do Dashboard...',
+              position: 'top'
+            })
             await sleep(10000) // simula rede
 
             const email = login.value.trim().toLowerCase()
@@ -133,7 +137,7 @@ export default {
             const payload = { role: found.role, email }
             setUser(payload)
             user.value = payload
-
+            notif() 
             await router.push('/dashboard/resultado-financeiro')
         } finally {
             loading.value = false
