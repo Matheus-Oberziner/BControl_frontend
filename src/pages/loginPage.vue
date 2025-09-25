@@ -6,7 +6,7 @@
         <div class="login-form">
           <!-- Logo -->
           <div>
-            <img src="src/assets/syrus-logo.png" alt="Syrus Systems" class="logo" />
+            <img src="/syrus-logo.png" alt="Syrus Systems" class="logo" />
           </div>
           
           <!-- Título -->
@@ -75,7 +75,7 @@
       
       <!-- Lado direito - Syrus -->
       <div class="col-6 flex justify-center items-center">
-        <img src="/src/assets/syrus.png" alt="Syrus" class="syrus-image" />
+        <img src="/syrus.png" alt="Syrus" class="syrus-image" />
       </div>
     </div>
   </div>
