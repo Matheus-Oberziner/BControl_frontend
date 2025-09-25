@@ -79,7 +79,7 @@
       </svg>
 
       <DonutRadial
-        :value="45"
+        :value="calculaMargemContribuicao()"
         :size="235"
         :stroke-width="30"
         semicircle
@@ -89,7 +89,7 @@
         <!-- Center label -->
         <template #center-label>
           <div class="label-center q-pt-lg">
-            <span class="text-32 weight-600 text-blue">{{ 45 }}%</span>
+            <span class="text-32 weight-600 text-blue">{{ calculaMargemContribuicao() }}%</span>
           </div>
         </template>
       </DonutRadial>
@@ -103,7 +103,41 @@ export default {
   components: {
     CustomBarChart,
     DonutRadial
-  }
+  },
+  data () {
+    return {
+      receitaBruta: 0,
+      devolucaoVendaImpostos: 0,
+      custosVariaveis: 0,
+    }
+  },
+  methods: {
+    calculaMargemContribuicao() {
+      const receita   = this.receitaBruta || 0
+      const devolucao = this.devolucaoVendaImpostos || 0
+      const custosVar = this.custosVariaveis || 0
+
+      if (receita <= 0) return '0.00'
+
+      const margem = receita - devolucao - custosVar
+      const perc = (margem / receita) * 100
+
+      console.log({ receita, devolucao, custosVar, margem, perc })
+      return perc.toFixed(0)
+    }
+  },
+  created () {
+    JSON.parse(localStorage.getItem("user")) ? this.user = JSON.parse(localStorage.getItem("user")) : this.$router.push('/login');
+    if (this.user.role === "BCONTROL")  {
+      this.receitaBruta = 175731.00;
+      this.devolucaoVendaImpostos = 444.20;
+      this.custosVariaveis = 168607.77;
+    }else{
+      this.receitaBruta = 416000.00;
+      this.devolucaoVendaImpostos = 62400.00;
+      this.custosVariaveis = 166400.00;
+    }
+  },
 }
 </script>
 <style scoped>

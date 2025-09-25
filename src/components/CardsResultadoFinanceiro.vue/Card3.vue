@@ -11,7 +11,7 @@
       <div class="row items-center q-gutter-md" :class="$q.screen.width > 1350 ? 'offset-md-1' : 'q-pl-md'">
         <span class="text-16 text-grey-7">Quantidade:</span>
         <q-input
-          :model-value="50"
+          :model-value="quantidadeInadimplencia"
           outlined
           dense
           input-class="text-center"
@@ -19,7 +19,7 @@
         />
         <span class="text-16 text-grey-7">Valor Total:</span>
         <q-input
-          model-value="R$ 102.000,00"
+          :model-value="'R$ ' + totalInadimplencia"
           outlined
           dense
           input-class="text-center"
@@ -27,7 +27,7 @@
         />
         <span class="text-16 text-grey-7">Sobre o Faturamento:</span>
         <DonutRadial
-          :value="3"
+          :value="inadimplenciaXfaturamento"
           :size="110"
           :stroke-width="16"
           semicircle
@@ -40,7 +40,7 @@
         >
           <template #center-label>
             <div class="label-center q-pt-lg">
-              <span class="text-18 weight-600" :style="{ color: '#0047A1' }">3%</span>
+              <span class="text-18 weight-600" :style="{ color: '#0047A1' }">{{inadimplenciaXfaturamento}}%</span>
             </div>
           </template>
         </DonutRadial>
@@ -116,10 +116,10 @@
             <div class="col-2 row justify-center" style="height: 100%;">
               <PieChartComponent
                 :data="[
-                  { label: 'Pontual', percentage: 24, color: '#7ED321' },
-                  { label: 'Recorrente', percentage: 38.5, color: '#417505' },
-                  { label: 'Serviço', percentage: 21.6, color: '#FF8A00' },
-                  { label: 'Revende', percentage: 15.9, color: '#9013FE' }
+                  { label: 'Pontual', percentage: percentPontual, color: '#7ED321' },
+                  { label: 'Recorrente', percentage: percentRecorrente, color: '#417505' },
+                  { label: 'Serviço', percentage: percentServico, color: '#FF8A00' },
+                  { label: 'Revenda', percentage: percentRevenda, color: '#9013FE' }
                 ]"
               />
             </div>
@@ -162,7 +162,7 @@
                           :onlyBar="true"
                           :sideTitle="null"
                           :chartData="[
-                            { value: 500000, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
+                            { value: range, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
                             { value: card.value, label: 'Faturamento', color: 'blue', bgColor: card.color }
                           ]"
                         />
@@ -205,7 +205,153 @@ export default {
   data () {
     return {
       // === Dados do bloco "Risco por Tempo de Atraso" (imagem) ===
-      riscoTempo: [
+      riscoTempo: [],
+      // === Bloco "Faturamento por Modalidade de Venda" (mantido) ===
+      range: 0,
+      arrayInadimplenciaVenda: [],
+      percentPontual: 0,
+      percentRecorrente: 0,
+      percentServico: 0,
+      percentRevenda: 0,
+      faturamento:0,
+    };
+  },
+  created() {
+    JSON.parse(localStorage.getItem("user")) ? this.user = JSON.parse(localStorage.getItem("user")) : this.$router.push('/login');
+    if (this.user.role === "BCONTROL")  {
+      this.range = 4000;
+      this.percentPontual = 0;
+      this.percentRecorrente = 0;
+      this.percentServico = 100;
+      this.percentRevenda = 0;
+      this.faturamento = 175287.69;
+      this.arrayInadimplenciaVenda = [
+        {
+          title: 'Pontual',
+          percent: this.percentPontual,
+          color: '#91DA71',
+          cards: [
+            { qtde: 0, value: 0, color: '#B0F2C2' },
+            { qtde: 0, value: 0, color: '#F2F298' },
+            { qtde: 0, value: 0, color: '#FFB6AF' }
+          ]
+        },
+        {
+          title: 'Recorrente',
+          percent: this.percentRecorrente,
+          color: '#4F7D6B',
+          cards: [
+            { qtde: 0, value: 0, color: '#B0F2C2' },
+            { qtde: 0, value: 0, color: '#F2F298' },
+            { qtde: 0, value: 0, color: '#FFB6AF' }
+          ]
+        },
+        {
+          title: 'Serviço',
+          percent: this.percentServico,
+          color: '#F2814B',
+          cards: [
+            { qtde: 1, value: 2501.97, color: '#B0F2C2' },
+            { qtde: 0, value: 0, color: '#F2F298' },
+            { qtde: 1, value: 2247.00, color: '#FFB6AF' }
+          ]
+        },
+        {
+          title: 'Revenda',
+          percent: this.percentRevenda,
+          color: '#9643B7',
+          cards: [
+            { qtde: 0, value: 0, color: '#B0F2C2' },
+            { qtde: 0, value: 0, color: '#F2F298' },
+            { qtde: 0, value: 0, color: '#FFB6AF' }
+          ]
+        }
+      ];
+      this.riscoTempo = [
+        {
+          title: 'Até 7 Dias',
+          level: 'Baixo Risco',
+          levelClass: 'level-low',
+          fill: '#7ED9AE',
+          percentLabel: '1,43%',
+          current: 2501.97,
+          max: this.range,
+          tick: 1,
+          amount: 2501.97
+        },
+        {
+          title: 'Até 30 Dias',
+          level: 'Médio Risco',
+          levelClass: 'level-mid',
+          fill: '#EFE27A',
+          percentLabel: '0%',
+          current: 0, // apenas um exemplo proporcional
+          max: this.range,
+          tick: 0,
+          amount: 0
+        },
+        {
+          title: '+ 31 Dias',
+          level: 'Alto Risco',
+          levelClass: 'level-high',
+          fill: '#FF9F9F',
+          percentLabel: '1,28%',
+          current: 2247.00, // exemplo proporcional
+          max: this.range,
+          tick: 1,
+          amount: 2247.00
+        }
+      ];
+    } else {
+      this.range = 500000;
+      this.percentPontual = 24;
+      this.percentRecorrente = 38.5;
+      this.percentServico = 21.6;
+      this.percentRevenda = 15.9;
+      this.faturamento = 105000.0;
+      this.arrayInadimplenciaVenda = [
+        {
+          title: 'Pontual',
+          percent: this.percentPontual,
+          color: '#91DA71',
+          cards: [
+            { qtde: 8, value: 200000, color: '#B0F2C2' },
+            { qtde: 8, value: 200000, color: '#F2F298' },
+            { qtde: 4, value: 100000, color: '#FFB6AF' }
+          ]
+        },
+        {
+          title: 'Recorrente',
+          percent: this.percentRecorrente,
+          color: '#4F7D6B',
+          cards: [
+            { qtde: 15, value: 480000, color: '#B0F2C2' },
+            { qtde: 7, value: 224000, color: '#F2F298' },
+            { qtde: 3, value: 96000, color: '#FFB6AF' }
+          ]
+        },
+        {
+          title: 'Serviço',
+          percent: this.percentServico,
+          color: '#F2814B',
+          cards: [
+            { qtde: 4, value: 120000, color: '#B0F2C2' },
+            { qtde: 6, value: 180000, color: '#F2F298' },
+            { qtde: 5, value: 150000, color: '#FFB6AF' }
+          ]
+        },
+        {
+          title: 'Revenda',
+          percent: this.percentRevenda,
+          color: '#9643B7',
+          cards: [
+            { qtde: 2, value: 66000, color: '#B0F2C2' },
+            { qtde: 3, value: 99000, color: '#F2F298' },
+            { qtde: 5, value: 165000, color: '#FFB6AF' }
+          ]
+        }
+      ];
+      this.riscoTempo = [
         {
           title: 'Até 7 Dias',
           level: 'Baixo Risco',
@@ -239,53 +385,39 @@ export default {
           tick: 15,
           amount: 41000
         }
-      ],
-
-      // === Bloco "Faturamento por Modalidade de Venda" (mantido) ===
-      arrayInadimplenciaVenda: [
-        {
-          title: 'Pontual',
-          percent: 24,
-          color: '#91DA71',
-          cards: [
-            { qtde: 8, value: 200000, color: '#B0F2C2' },
-            { qtde: 8, value: 200000, color: '#F2F298' },
-            { qtde: 4, value: 100000, color: '#FFB6AF' }
-          ]
-        },
-        {
-          title: 'Recorrente',
-          percent: 38.5,
-          color: '#4F7D6B',
-          cards: [
-            { qtde: 15, value: 480000, color: '#B0F2C2' },
-            { qtde: 7, value: 224000, color: '#F2F298' },
-            { qtde: 3, value: 96000, color: '#FFB6AF' }
-          ]
-        },
-        {
-          title: 'Serviço',
-          percent: 21.6,
-          color: '#F2814B',
-          cards: [
-            { qtde: 4, value: 120000, color: '#B0F2C2' },
-            { qtde: 6, value: 180000, color: '#F2F298' },
-            { qtde: 5, value: 150000, color: '#FFB6AF' }
-          ]
-        },
-        {
-          title: 'Revenda',
-          percent: 15.9,
-          color: '#9643B7',
-          cards: [
-            { qtde: 2, value: 66000, color: '#B0F2C2' },
-            { qtde: 3, value: 99000, color: '#F2F298' },
-            { qtde: 5, value: 165000, color: '#FFB6AF' }
-          ]
-        }
-      ]
+      ];
     }
-  }
+  },
+  computed: {
+    inadimplenciaXfaturamento() {
+      const totalInadimplencia = this.arrayInadimplenciaVenda.reduce((sum, item) => {
+        return sum + item.cards.reduce((cardSum, card) => cardSum + card.value, 0);
+      }, 0);
+      console.log('Total Inadimplência:', totalInadimplencia);
+      console.log('Faturamento:', this.faturamento);
+      const totalFaturamento = this.faturamento; // Valor fixo conforme solicitado
+      return ((totalInadimplencia / totalFaturamento) * 100).toFixed(2);
+    },
+    totalInadimplencia() {
+      return this.formatCurrency(this.arrayInadimplenciaVenda.reduce((sum, item) => {
+        return sum + item.cards.reduce((cardSum, card) => cardSum + card.value, 0);
+      }, 0));
+    },
+    quantidadeInadimplencia() {
+      return this.arrayInadimplenciaVenda.reduce((sum, item) => {
+        return sum + item.cards.reduce((cardSum, card) => cardSum + card.qtde, 0);
+      }, 0);
+    }
+  },
+  methods: {
+    formatCurrency(value) {
+      if (value === null || value === undefined) return "0,00";
+      return new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+    },
+  },
 }
 </script>
 <style scoped>

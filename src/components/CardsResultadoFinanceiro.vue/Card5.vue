@@ -12,7 +12,7 @@
       <div class="row items-center q-gutter-md" :class="$q.screen.width > 1350 ? 'offset-md-1' : 'q-pl-md'">
         <span class="text-16 text-grey-7">Total:</span>
         <q-input
-          model-value="R$ 520.000,00"
+          :model-value="'R$ ' + calculaTotalDespesas().toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })"
           outlined
           dense
           input-class="text-center"
@@ -20,7 +20,7 @@
         />
         <span class="text-16 text-grey-7">Sobre o Faturamento:</span>
         <DonutRadial
-          :value="25"
+          :value="calculaPercentSobFaturamento(calculaTotalDespesas())"
           :size="110"
           :stroke-width="16"
           semicircle
@@ -33,7 +33,7 @@
         >
           <template #center-label>
             <div class="label-center q-pt-lg">
-              <span class="text-18 weight-600" :style="{ color: '#0047A1' }">25%</span>
+              <span class="text-18 weight-600" :style="{ color: '#0047A1' }">{{calculaPercentSobFaturamento(calculaTotalDespesas())}}%</span>
             </div>
           </template>
         </DonutRadial>
@@ -66,7 +66,7 @@
             </div>
 
             <DonutRadial
-              :value="25"
+              :value="a.percent"
               :size="110"
               :stroke-width="16"
               semicircle
@@ -79,7 +79,7 @@
             >
               <template #center-label>
                 <div class="label-center q-pt-lg">
-                  <span class="text-18 weight-600" :style="{ color: '#0047A1' }">25%</span>
+                  <span class="text-18 weight-600" :style="{ color: '#0047A1' }">{{a.percent}}%</span>
                 </div>
               </template>
             </DonutRadial>
@@ -111,7 +111,7 @@
                   :onlyBar="true"
                   :sideTitle="null"
                   :chartData="[
-                    { value: 50, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
+                    { value: 100, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
                     { value: c.value, label: 'Faturamento', color: '#0047A1', bgColor: a.color }
                   ]"
                 />
@@ -120,7 +120,7 @@
               <div class="text-16 text-grey-2 q-pl-lg">
                 {{ c.value }}%
               </div>
-              <div class="col-12 text-grey-2 q-pl-lg">Salários</div>
+              <div class="col-12 text-grey-2 q-pl-lg">{{ c.label }}</div>
             </div>
           </div>
         </div>
@@ -149,6 +149,127 @@ export default {
   data () {
     return {
       array: [
+      ],
+      faturamento: 0,
+    }
+  },
+  methods: {
+    calculaPercentSobFaturamento(value) {
+      let faturamento = this.faturamento;
+      return ((value / faturamento) * 100).toFixed(2);
+    },
+    calculaPercentSobCategoria(value, totalCategoria) {
+      return ((value / totalCategoria) * 100).toFixed(0);
+    },
+    calculaTotalDespesas() {
+      return this.array.reduce((acc, curr) => acc + curr.value, 0);
+    }
+  },
+  created () {
+    JSON.parse(localStorage.getItem("user")) ? this.user = JSON.parse(localStorage.getItem("user")) : this.$router.push('/login');
+    if (this.user.role === "BCONTROL")  {
+      this.faturamento = 175287.69;
+      this.array = [
+        { 
+          label: 'Administrativo',
+          percent: this.calculaPercentSobFaturamento(62027.50),
+          color: '#4090F2',
+          value: 62027.50,
+          charts: [
+            { label: 'Recrutamento e Seleção', value: this.calculaPercentSobCategoria(25100.00, 62027.50) },
+            { label: 'Outras', value: this.calculaPercentSobCategoria(11321.04, 62027.50) },
+            { label: 'Rescisões', value: this.calculaPercentSobCategoria(5853.55, 62027.50) },
+            { label: 'Impostos Receita', value: this.calculaPercentSobCategoria(4108.55, 62027.50) }
+          ]
+        },
+        { 
+          label: 'Operacional',
+          percent: this.calculaPercentSobFaturamento(53843.10),
+          color: '#FFA167', 
+          value: 53843.10,
+          charts: [
+            { label: 'BPO Financeiro', value: this.calculaPercentSobCategoria(28629.04, 53843.10) },
+            { label: 'Reembolso de despesas', value: this.calculaPercentSobCategoria(8176.89, 53843.10) },
+            { label: 'Analista de DP', value: this.calculaPercentSobCategoria(6767.80, 53843.10) },
+            { label: 'Assistente operacional', value: this.calculaPercentSobCategoria(4157.60, 53843.10) }
+          ]
+        },
+        {
+          label: 'Comercial',
+          percent: this.calculaPercentSobFaturamento(6983.54),
+          color: '#58C377',
+          value: 6983.54,
+          charts: [
+            { label: 'Paula Kickoff', value: this.calculaPercentSobCategoria(4100.00, 6983.54) },
+            { label: 'Omie cliente', value: this.calculaPercentSobCategoria(2123.38, 6983.54) },
+            { label: 'G-Click', value: this.calculaPercentSobCategoria(760.16, 6983.54) },
+            { label: '', value: this.calculaPercentSobCategoria(0, 6983.54) }
+          ]
+        },
+        {
+          label: 'Marketing',
+          percent: this.calculaPercentSobFaturamento(957),
+          color: '#95F0A9',
+          value: 957,
+          charts: [
+            { label: 'Facebook', value: this.calculaPercentSobCategoria(900.00, 957) },
+            { label: 'Materiais gráficos', value: this.calculaPercentSobCategoria(57, 957) },
+            { label: '', value: this.calculaPercentSobCategoria(0, 957) },
+            { label: '', value: this.calculaPercentSobCategoria(0, 957) }
+          ]
+        },
+        { 
+          label: 'CS Suporte',
+          percent: this.calculaPercentSobFaturamento(5100),
+          color: '#CCA9DD',
+          value: 5100,
+          charts: [
+            { label: 'CS SUPORTE(21032)', value: this.calculaPercentSobCategoria(5100, 5100) },
+            { label: '', value: this.calculaPercentSobCategoria(0, 5100) },
+            { label: '', value: this.calculaPercentSobCategoria(0, 5100) },
+            { label: '', value: this.calculaPercentSobCategoria(0, 5100) }
+          ]
+        },
+        {
+          label: 'Tecnologia',
+          percent: this.calculaPercentSobFaturamento(47198.47),
+          color: '#E7DDFF',
+          value: 47198.47,
+          charts: [
+            { label: 'Mário', value: this.calculaPercentSobCategoria(39200.00, 47198.47) },
+            { label: 'Software e sistemas', value: this.calculaPercentSobCategoria(4635.49, 47198.47) },
+            { label: 'Suporte Sistema', value: this.calculaPercentSobCategoria(2041.33, 47198.47) },
+            { label: 'CRM', value: this.calculaPercentSobCategoria(562.65, 47198.47) }
+          ]
+        },
+        {
+          label: 'Logística',
+          percent: 0,
+          color: '#FFA8DC',
+          value: 0,
+          charts: [
+            { label: '', value: 0 },
+            { label: '', value: 0 },
+            { label: '', value: 0 },
+            { label: '', value: 0 }
+          ]
+        },
+        {
+          label: 'Sem Categoria', 
+          percent: 0, 
+          color: '#0047A1', 
+          value: 0,
+          charts: [
+            { label: '', value: 0 },
+            { label: '', value: 0 },
+            { label: '', value: 0 },
+            { label: '', value: 0 }
+          ]
+        }
+      ];
+    }else{
+      this.faturamento = 105000.0;
+      this.array = [
         { 
           label: 'Administrativo',
           percent: 15,
@@ -245,9 +366,9 @@ export default {
             { value: 10 }
           ]
         }
-      ]
+      ];
     }
-  }
+  },
 }
 </script>
 <style scoped>

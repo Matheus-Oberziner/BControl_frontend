@@ -108,17 +108,17 @@
   
               <div class="col-12 row justify-center q-px-md q-pt-lg">
                 <DonutRadial
-                  :value="25"
+                  :value="perdaPercent"
                   :size="120"
                   :stroke-width="14"
                   semicircle
-                  progress-color="#50D577"
-                  rest-color="#B74345"
+                  progress-color="#B74345"
+                  rest-color="#50D577"
                 >
                   <!-- Center label -->
                   <template #center-label>
                     <div class="label-center q-pt-lg">
-                      <span class="text-18 weight-600 text-blue">{{ 25 }}%</span>
+                      <span class="text-18 weight-600 text-blue">{{ perdaPercent }}%</span>
                     </div>
                   </template>
                 </DonutRadial>
@@ -182,7 +182,7 @@
                 </div>
 
                 <div class="col-12 row justify-center items-center weight-600">
-                  <span class="text-12 q-pr-xs">R$</span><span class="text-16">4.000,00</span>
+                  <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ cacMedio }}</span>
                 </div>
               </div>
               <div
@@ -208,7 +208,7 @@
                 </div>
 
                 <div class="col-12 row justify-center items-center weight-600">
-                  <span class="text-16 q-pr-md">02</span><span class="text-12 q-pr-xs">R$</span><span class="text-16">20.000,00</span>
+                  <span class="text-16 q-pr-md">{{ qtdPerdido }}</span><span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ totalPerdido }}</span>
                 </div>
               </div>
               <div
@@ -234,7 +234,7 @@
                 </div>
 
                 <div class="col-12 row justify-center items-center weight-600">
-                  <span class="text-12 q-pr-xs">R$</span><span class="text-16">10.000,00</span>
+                  <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ esforcoVenda }}</span>
                 </div>
               </div>
             </div>
@@ -381,7 +381,201 @@ export default {
   },
   data () {
     return {
-      array: [
+      qtdPerdido: 0,
+      totalPerdido: '0,00',
+      cacMedio: '0,00',
+      esforcoVenda: '0,00',
+      array: [],
+      arrayPerdaVenda: [],
+      arrayRiscoCharts: [],
+      arrayCharts: []
+    }
+  },
+  created() {
+    JSON.parse(localStorage.getItem("user")) ? this.user = JSON.parse(localStorage.getItem("user")) : this.$router.push('/login');
+    if (this.user.role === "BCONTROL")  {
+      this.cacMedio = '2.500,00';
+      this.qtdPerdido = 0;
+      this.totalPerdido = '0,00'; 
+      this.esforcoVenda = '1.180,00';
+      this.array = [
+        {
+          title: 'Entrada Clientes',
+          percent: 50,
+          color1: '#50D577',
+          color2:'#3EB461',
+          cards: [
+            {
+              label: '01 Retidos',
+              value: 670000
+            },
+            {
+              label: '05 Novos',
+              value: 200000
+            }
+          ]
+        },
+        {
+          title: 'Saída Clientes',
+          percent: 30,
+          color1: '#B74345',
+          color2: '#3EB461',
+          cards: [
+            {
+              label: '01 Perdidos',
+              value: 30000
+            }
+          ]
+        },
+        {
+          title: 'Saldo Final Clientes',
+          cards: [
+            {
+              label: '5 Saldo',
+              value: 840000
+            }
+          ],
+          charts: [
+            {
+              value: 35000,
+              color: '#50D577'
+            },
+            {
+              value: 20000,
+              color: '#B74345'
+            },
+            {
+              value: 25000,
+              color: '#0E6FEB'
+            }
+          ]
+        }
+      ];
+      this.arrayPerdaVenda = [
+        {
+          value: 8244.00,
+          label: 'Novas Vendas',
+          qtde: 5,
+          color: '#B0F2C2'
+        },
+        {
+          value: 1180.00,
+          label: 'Perda de Clientes',
+          qtde: 1,
+          color: '#FFB6AF'
+        },
+        {
+          value: 7064.00,
+          label: 'Saldo\n Entrada X Perda',
+          qtde: 4,
+          color: '#0E6FEB'
+        }
+      ];
+      this.arrayRiscoCharts = [
+        {
+          type: 'Alto',
+          qtde: 1,
+          value: 1180.00,
+          charts: [
+            {
+              val: 6000,
+              color: '#FFB6AF'
+            },
+            {
+              val: 9000,
+              color: '#F2F298'
+            },
+            {
+              val: 4000,
+              color: '#B0F2C2'
+            },
+            {
+              val: 6000,
+              color: '#83AAFD'
+            }
+          ]
+        },
+        {
+          type: 'Médio',
+          qtde: 0,
+          value: 0,
+          charts: [
+            {
+              val: 0,
+              color: '#FFB6AF'
+            },
+            {
+              val: 0,
+              color: '#F2F298'
+            },
+            {
+              val: 0,
+              color: '#B0F2C2'
+            },
+            {
+              val: 0,
+              color: '#83AAFD'
+            }
+          ]
+        },
+        {
+          type: 'Baixo',
+          qtde: 0,
+          value: 0,
+          charts: [
+            {
+              val: 0,
+              color: '#FFB6AF'
+            },
+            {
+              val: 0,
+              color: '#F2F298'
+            },
+            {
+              val: 0,
+              color: '#B0F2C2'
+            },
+            {
+              val: 0,
+              color: '#83AAFD'
+            }
+          ]
+        }
+      ];
+      this.arrayCharts = [
+        {
+          type: 'Alto',
+          percentMax: 100,
+          percentMin: 68,
+          valueMax: 1500,
+          valueMin: 500,
+          currentValue: 1180,
+          qtde: 1
+        },
+        {
+          type: 'Médio',
+          percentMax: 0,
+          percentMin: 0,
+          valueMax: 0,
+          valueMin: 0,
+          currentValue: 0,
+          qtde: 0
+        },
+        {
+          type: 'Baixo',
+          percentMax: 0,
+          percentMin: 0,
+          valueMax: 0,
+          valueMin: 0,
+          currentValue: 0,
+          qtde: 0
+        }
+      ];
+    }else{
+      this.cacMedio = '4.000,00';
+      this.qtdPerdido = 2; 
+      this.totalPerdido = '20.000,00';
+      this.array = [
         {
           title: 'Entrada Clientes',
           percent: 50,
@@ -433,8 +627,8 @@ export default {
             }
           ]
         }
-      ],
-      arrayPerdaVenda: [
+      ];
+      this.arrayPerdaVenda = [
         {
           value: 200000,
           label: 'Novas Vendas',
@@ -453,8 +647,8 @@ export default {
           qtde: 7,
           color: '#0E6FEB'
         }
-      ],
-      arrayRiscoCharts: [
+      ];
+      this.arrayRiscoCharts = [
         {
           type: 'Alto',
           qtde: 1,
@@ -524,8 +718,8 @@ export default {
             }
           ]
         }
-      ],
-      arrayCharts: [
+      ];
+      this.arrayCharts = [
         {
           type: 'Alto',
           percentMax: 100,
@@ -553,9 +747,21 @@ export default {
           currentValue: 3000,
           qtde: 20
         }
-      ]
+      ];
     }
-  }
+  },
+  computed: {
+    // calcula a porcentagem de perda sob novas vendas
+    perdaPercent() {
+      const novasVendas = this.arrayPerdaVenda.find(item => item.label === 'Novas Vendas')?.value || 0;
+      const perdaClientes = this.arrayPerdaVenda.find(item => item.label === 'Perda de Clientes')?.value || 0;
+      if (novasVendas === 0) return 0;
+      return ((perdaClientes / novasVendas) * 100).toFixed(2);
+    }
+    // calcula a porcentagem de perda sob novas vendas
+    
+  },
+
 }
 </script>
 <style scoped>

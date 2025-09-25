@@ -67,18 +67,69 @@ export default {
         { key: 'despesasFixas',  label: '(-) Despesas Fixas' },
         { key: 'ebitda',         label: 'EBITDA / Resultado Op.' },
         { key: 'jurosIR',        label: '(-) Outros (Juros/IR)' },
-        { key: 'lucroLiquido',   label: 'Lucro Líquido' }
+        { key: 'lucroLiquido2',   label: 'Lucro Líquido' }
       ],
       summaryRows: [
-        { key: 'margemContrib', label: 'Margem de Contribuição' },
-        { key: 'ebitda',        label: 'Resultado Operacional (EBITDA)' },
+        { key: 'margemContrib2', label: 'Margem de Contribuição' },
+        { key: 'ebitda',         label: 'Resultado Operacional (EBITDA)' },
         { key: 'lucroLiquido',  label: 'Lucro Líquido' }
       ],
       // dados exemplo (some quando você passar "months")
-      sampleMonths: [
-        { label: 'Janeiro / 2025',  receitaBruta: 420000, impostos: 63000,  receitaLiquida: 357000, custosVariaveis: 168000, margemContrib: 189000, despesasFixas: 104000, ebitda: 85000,  jurosIR: 2000, lucroLiquido: 83000 },
-        { label: 'Fevereiro / 2025',receitaBruta: 415000, impostos: 62250,  receitaLiquida: 352750, custosVariaveis: 166000, margemContrib: 186750, despesasFixas: 104000, ebitda: 82750,  jurosIR: 2000, lucroLiquido: 80000 },
-        { label: 'Março / 2025',    receitaBruta: 400000, impostos: 60000,  receitaLiquida: 340000, custosVariaveis: 160000, margemContrib: 180000, despesasFixas: 104000, ebitda: 76000,  jurosIR: 2000, lucroLiquido: 74000 }
+      sampleMonths: []
+    }
+  },
+  created() {
+    JSON.parse(localStorage.getItem("user")) ? this.user = JSON.parse(localStorage.getItem("user")) : this.$router.push('/login');
+    if (this.user.role === "BCONTROL")  {
+      this.sampleMonths = [
+        { 
+          label: 'Janeiro / 2025',
+          receitaBruta: 0.00,
+          impostos: 0.00,
+          receitaLiquida: 0.00,
+          custosVariaveis: 5580.94,
+          margemContrib: -5580.94,
+          despesasFixas: 18813.60,
+          ebitda: -7958.11,
+          margemContrib2: 1812.90,
+          jurosIR: 0.00,
+          lucroLiquido: 1857.90,
+          lucroLiquido2: 0
+        },
+        { 
+          label: 'Fevereiro / 2025',
+          receitaBruta: 1928.94,
+          impostos: 0.00,
+          receitaLiquida: 1928.94,
+          custosVariaveis: 5326.94,
+          margemContrib: -3398.00,
+          despesasFixas: 14690.27,
+          ebitda: -14774.14,
+          margemContrib2: -300.83,
+          jurosIR: 0.00,
+          lucroLiquido: 679.25,
+          lucroLiquido2: 0
+        },
+        { 
+          label: 'Março / 2025',
+          receitaBruta: 2507.80,
+          impostos: 0.00,
+          receitaLiquida: 2507.80,
+          custosVariaveis: 6038.41,
+          margemContrib: -3530.61,
+          despesasFixas: 22595.85,
+          ebitda: -12669.69,
+          margemContrib2: 2642.00,
+          jurosIR: 0.00,
+          lucroLiquido: 2642.00,
+          lucroLiquido2: 0
+        }
+      ]
+    } else {
+      this.sampleMonths = [
+        { label: 'Janeiro / 2025',  receitaBruta: 420000, impostos: 63000,  receitaLiquida: 357000, custosVariaveis: 168000, margemContrib: 189000, despesasFixas: 104000, ebitda: 85000, margemContrib2: 1812.90, jurosIR: 2000, lucroLiquido: 83000, lucroLiquido2: 0 },
+        { label: 'Fevereiro / 2025',receitaBruta: 415000, impostos: 62250,  receitaLiquida: 352750, custosVariaveis: 166000, margemContrib: 186750, despesasFixas: 104000, ebitda: 82750, margemContrib2: 1812.90, jurosIR: 2000, lucroLiquido: 80000, lucroLiquido2: 0 },
+        { label: 'Março / 2025',    receitaBruta: 400000, impostos: 60000,  receitaLiquida: 340000, custosVariaveis: 160000, margemContrib: 180000, despesasFixas: 104000, ebitda: 76000, margemContrib2: 1812.90, jurosIR: 2000, lucroLiquido: 74000, lucroLiquido2: 0 }
       ]
     }
   },

@@ -652,103 +652,10 @@ export default {
       diasFaturamento:[],
       arrayFaturamentoVenda: [],
       totalVendas: 0,
-      arrayInadimplenciaVenda: [
-        {
-          title: "Pontual",
-          percent: 24,
-          color: "#91DA71",
-          cards: [
-            {
-              qtde: 8,
-              value: 200000,
-              color: "#B0F2C2",
-            },
-            {
-              qtde: 8,
-              value: 200000,
-              color: "#F2F298",
-            },
-            {
-              qtde: 4,
-              value: 100000,
-              color: "#FFB6AF",
-            },
-          ],
-        },
-        {
-          title: "Recorrente",
-          percent: 38.5,
-          color: "#4F7D6B",
-          cards: [
-            {
-              qtde: 15,
-              value: 480000,
-              color: "#B0F2C2",
-            },
-            {
-              qtde: 7,
-              value: 224000,
-              color: "#F2F298",
-            },
-            {
-              qtde: 3,
-              value: 96000,
-              color: "#FFB6AF",
-            },
-          ],
-        },
-        {
-          title: "Serviço",
-          percent: 21.6,
-          color: "#F2814B",
-          cards: [
-            {
-              qtde: 4,
-              value: 120000,
-              color: "#B0F2C2",
-            },
-            {
-              qtde: 6,
-              value: 180000,
-              color: "#F2F298",
-            },
-            {
-              qtde: 5,
-              value: 150000,
-              color: "#FFB6AF",
-            },
-          ],
-        },
-        {
-          title: "Revenda",
-          percent: 15.9,
-          color: "#9643B7",
-          cards: [
-            {
-              qtde: 2,
-              value: 66000,
-              color: "#B0F2C2",
-            },
-            {
-              qtde: 3,
-              value: 99000,
-              color: "#F2F298",
-            },
-            {
-              qtde: 5,
-              value: 165000,
-              color: "#FFB6AF",
-            },
-          ],
-        },
-      ],
     };
   },
   created() {
-    // 🔹 Simulação de login (substitua pelo retorno real do seu backend)
-    this.user = { role: "BCONTROL" };
-
-    // 🔹 Condição baseada no usuário
+    JSON.parse(localStorage.getItem("user")) ? this.user = JSON.parse(localStorage.getItem("user")) : this.$router.push('/login');
     if (this.user.role === "BCONTROL") {
       this.filters = {
         startDate: "2024-11-01",

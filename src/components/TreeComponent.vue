@@ -19,21 +19,21 @@
         <div class="col-title text-16 weight-700 text-blue">Antes da Perda</div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 870.000,00
+          <span class="money-prefix">R$</span> {{ antesPerda.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
 
-        <div class="pill light">107</div>
+        <div class="pill light">{{ antesPerda.quantidadeClientes }}</div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 12.000,00
-        </div>
-
-        <div class="pill light">
-          <span class="money-prefix">R$</span> 20.000,00
+          <span class="money-prefix">R$</span> {{ antesPerda.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 5.000,00
+          <span class="money-prefix">R$</span> {{ antesPerda.maiorTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+
+        <div class="pill light">
+          <span class="money-prefix">R$</span> {{ antesPerda.menorTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
       </div>
 
@@ -75,23 +75,23 @@
         <div class="col-title text-16 weight-700 text-blue">Após a Perda</div>
 
         <div class="pill light">
-          <span><span class="money-prefix">R$</span> 840.000,00</span>
+          <span><span class="money-prefix">R$</span> {{ aposPerda.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
         </div>
 
         <div class="pill light">
-          <span>104</span>
+          <span>{{ aposPerda.quantidadeClientes }}</span>
         </div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 8.200,00
+          <span class="money-prefix">R$</span> {{ aposPerda.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 15.000,00
+          <span class="money-prefix">R$</span> {{ aposPerda.maiorTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 4.000,00
+          <span class="money-prefix">R$</span> {{ aposPerda.menorTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
       </div>
     </div>
@@ -99,7 +99,60 @@
 </template>
 <script>
 export default {
-  name: 'ReceitasRecorrentes'
+  name: 'ReceitasRecorrentes',
+  data () {
+    return {
+      antesPerda: {
+        faturamento: 870000,
+        quantidadeClientes: 107,
+        ticketMedio: 12000,
+        maiorTicket: 20000,
+        menorTicket: 5000
+      },
+      aposPerda: {
+        faturamento: 840000,
+        quantidadeClientes: 104,
+        ticketMedio: 8200,
+        maiorTicket: 15000,
+        menorTicket: 4000
+      }
+    };
+  },
+  created() {
+    JSON.parse(localStorage.getItem("user")) ? this.user = JSON.parse(localStorage.getItem("user")) : this.$router.push('/login');
+    if (this.user.role === "BCONTROL")  {
+      this.antesPerda = {
+        faturamento: 1180.00,
+        quantidadeClientes: 1,
+        ticketMedio: 1180.00,
+        maiorTicket: 1180.00,
+        menorTicket: 1180.00
+      },
+      this.aposPerda = {
+        faturamento: 8244.00,
+        quantidadeClientes: 5,
+        ticketMedio: 1648.80,
+        maiorTicket: 2500.00,
+        menorTicket: 850.00
+      }
+    } else {
+      this.antesPerda = {
+        faturamento: 870000,
+        quantidadeClientes: 107,
+        ticketMedio: 12000,
+        maiorTicket: 20000,
+        menorTicket: 5000
+      },
+      this.aposPerda = {
+        faturamento: 840000,
+        quantidadeClientes: 104,
+        ticketMedio: 8200,
+        maiorTicket: 15000,
+        menorTicket: 4000
+      }
+    }
+  },
+
 }
 </script>
 <style scoped>
