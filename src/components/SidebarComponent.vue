@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-container">
     <div class="logo-badge">
-      <q-img src="/logo-fator-1.svg" height="80px" width="80px" />
+      <q-img :src="imageClient" height="80px" width="80px" />
     </div>
   
     <div
@@ -10,8 +10,8 @@
     >
       <div class="row items-center">
         <div class="column">
-          <span class="font-1 text-24 weight-600 text-grey-7" style="line-height: 1.3;">Success Factor</span>
-          <span class="text-16 weight-300 text-grey-7" style="letter-spacing: -0.5px;">33.486.687/0001-31</span>
+          <span class="font-1 text-24 weight-600 text-grey-7" style="line-height: 1.3;">{{ clientName }}</span>
+          <span class="text-16 weight-300 text-grey-7" style="letter-spacing: -0.5px;">{{ clientCNPJ }}</span>
         </div>
       </div>
   
@@ -70,7 +70,25 @@
 </template>
 <script>
 export default {
-
+  data() {
+    return {
+      imageClient: '',
+      clientName: '',
+      clientCNPJ: '',
+    }
+  },
+  created() {
+    JSON.parse(localStorage.getItem("user")) ? this.user = JSON.parse(localStorage.getItem("user")) : this.$router.push('/login');
+    if (this.user.role === "BCONTROL") {
+      this.imageClient = '/logo-bcontrol-quadrado.png'
+      this.clientName = 'BControl Pro'
+      this.clientCNPJ = '00.000.000/0001-91'
+    } else {
+      this.imageClient = '/logo-fator-1.svg'
+      this.clientName = 'Success Factor'
+      this.clientCNPJ = '33.486.687/0001-31'
+    }
+  },
 }
 </script>
 <style scoped>

@@ -10,7 +10,7 @@
         <q-space />
 
         <div class="row items-center q-gutter-md">
-          <span class="text-20">Olá Matheus!</span>
+          <span class="text-20">Olá Elis Ferraz!</span>
 
           <q-avatar size="50px" style="background-color: #FFFFFF; border-radius: 50%;">
             <q-icon

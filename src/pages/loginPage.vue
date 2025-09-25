@@ -120,8 +120,8 @@ export default {
 
         loading.value = true
         try {
-            console.log('Attempting login for:', login.value)
-            await sleep(0) // simula rede
+            $q.notify({ type: 'ongoing', message: `Carregando informações do Dashboard...`,  position: 'top' })
+            await sleep(10000) // simula rede
 
             const email = login.value.trim().toLowerCase()
             const found = USERS[email]
@@ -134,7 +134,6 @@ export default {
             setUser(payload)
             user.value = payload
 
-            $q.notify({ type: 'positive', message: `Welcome, ${found.role}` })
             await router.push('/dashboard/resultado-financeiro')
         } finally {
             loading.value = false
