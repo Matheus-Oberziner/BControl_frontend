@@ -1,11 +1,20 @@
 {
   "name": "bcontrol-frontend",
   "version": "0.0.1",
+  "private": true,
   "description": "A BControl Pro App",
-  "productName": "BControl",
+  "homepage": "https://github.com/Matheus-Oberziner/BControl_frontend#readme",
+  "bugs": {
+    "url": "https://github.com/Matheus-Oberziner/BControl_frontend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Matheus-Oberziner/BControl_frontend.git"
+  },
+  "license": "ISC",
   "author": "Matheus Schmidt Oberziner <matheus.oberziner@renavefacil.net>",
   "type": "module",
-  "private": true,
+  "main": "eslint.config.js",
   "scripts": {
     "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{js,cjs,mjs,vue}\"",
     "test": "echo \"No test specified\" && exit 0",
@@ -36,5 +45,6 @@
     "node": "^28 || ^26 || ^24 || ^22 || ^20 || ^18",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
-  }
+  },
+  "productName": "BControl"
 }

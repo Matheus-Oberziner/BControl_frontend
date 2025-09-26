@@ -120,13 +120,6 @@ export default {
 
         loading.value = true
         try {
-            const notif = $q.notify({
-              type: 'ongoing',
-              message: 'Carregando informações do Dashboard...',
-              position: 'top'
-            })
-            await sleep(10000) // simula rede
-
             const email = login.value.trim().toLowerCase()
             const found = USERS[email]
             if (!found || found.password !== password.value) {
@@ -134,11 +127,18 @@ export default {
             return
             }
 
+            const notif = $q.notify({
+              type: 'ongoing',
+              message: 'Carregando informações do Dashboard...',
+              position: 'top'
+            })
+            await sleep(10000) // simula rede
+
             const payload = { role: found.role, email }
             setUser(payload)
             user.value = payload
             notif() 
-            await router.push('/dashboard/resultado-financeiro')
+            await router.push('/dashboard/fluxo-financeiro')
         } finally {
             loading.value = false
         }
