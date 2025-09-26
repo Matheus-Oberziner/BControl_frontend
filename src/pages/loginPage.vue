@@ -8,62 +8,34 @@
           <div>
             <img src="/syrus-logo.png" alt="Syrus Systems" class="logo" />
           </div>
-          
+
           <!-- Título -->
           <h1 class="login-title q-mb-md">Login</h1>
           <p class="login-subtitle q-mb-md">Insira suas credenciais de e-mail para continuar</p>
-          
+
           <!-- Formulário -->
           <q-form @submit="onSubmit" ref="form" class="login-form-fields">
             <div class="q-mb-md">
-                <label class="form-label">Login</label>
-                <q-input
-                v-model="login"
-                outlined
-                dense
-                class="custom-input"
-                :input-style="{ color: '#fff' }"
-                :rules="[rules.required, rules.email]"
-                />
+              <label class="form-label">Login</label>
+              <q-input v-model="login" outlined dense class="custom-input" :input-style="{ color: '#fff' }"
+                :rules="[rules.required, rules.email]" />
             </div>
 
             <div class="q-mb-lg">
-                <label class="form-label">Senha</label>
-                <q-input
-                v-model="password"
-                type="password"
-                outlined
-                dense
-                class="custom-input"
-                :input-style="{ color: '#fff' }"
-                :rules="[rules.required, rules.min6]"
-                />
+              <label class="form-label">Senha</label>
+              <q-input v-model="password" type="password" outlined dense class="custom-input"
+                :input-style="{ color: '#fff' }" :rules="[rules.required, rules.min6]" />
             </div>
 
             <div class="row justify-between items-center q-mb-lg">
-                <q-checkbox
-                v-model="keepConnected"
-                label="Manter conectado"
-                color="white"
-                keep-color
-                dense
-                size="20px"
-                class="checkbox-custom"
-                />
-                <a href="#" class="forgot-password">Esqueci minha senha</a>
+              <q-checkbox v-model="keepConnected" label="Manter conectado" color="white" keep-color dense size="20px"
+                class="checkbox-custom" />
+              <a href="#" class="forgot-password">Esqueci minha senha</a>
             </div>
 
-            <q-btn
-                type="submit"
-                label="Entrar"
-                color="positive"
-                size="lg"
-                class="full-width login-btn q-mb-lg"
-                no-caps
-                :loading="loading"
-                :disable="loading"
-            />
-            
+            <q-btn type="submit" label="Entrar" color="positive" size="lg" class="full-width login-btn q-mb-lg" no-caps
+              :loading="loading" :disable="loading" />
+
             <!-- Link para não cliente -->
             <div class="text-center">
               <span class="not-customer">Ainda não é cliente? </span>
@@ -72,7 +44,7 @@
           </q-form>
         </div>
       </div>
-      
+
       <!-- Lado direito - Syrus -->
       <div class="col-6 flex justify-center items-center">
         <img src="/syrus.png" alt="Syrus" class="syrus-image" />
@@ -96,7 +68,7 @@ export default {
 
     const USERS = {
       'bcontrol@syrus.dev': { password: '123456', role: 'BCONTROL' },
-      'demo@syrus.dev':     { password: '123456', role: 'Demo' }
+      'demo@syrus.dev': { password: '123456', role: 'Demo' }
     }
 
     const login = ref('')
@@ -115,33 +87,33 @@ export default {
     const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
     const onSubmit = async () => {
-        const valid = await form.value?.validate()
-        if (!valid) return
+      const valid = await form.value?.validate()
+      if (!valid) return
 
-        loading.value = true
-        try {
-            const email = login.value.trim().toLowerCase()
-            const found = USERS[email]
-            if (!found || found.password !== password.value) {
-            $q.notify({ type: 'negative', message: 'Invalid email or password' })
-            return
-            }
-
-            const notif = $q.notify({
-              type: 'ongoing',
-              message: 'Carregando informações do Dashboard...',
-              position: 'top'
-            })
-            await sleep(10000) // simula rede
-
-            const payload = { role: found.role, email }
-            setUser(payload)
-            user.value = payload
-            notif() 
-            await router.push('/dashboard/fluxo-financeiro')
-        } finally {
-            loading.value = false
+      loading.value = true
+      try {
+        const email = login.value.trim().toLowerCase()
+        const found = USERS[email]
+        if (!found || found.password !== password.value) {
+          $q.notify({ type: 'negative', message: 'Invalid email or password' })
+          return
         }
+
+        const notif = $q.notify({
+          type: 'ongoing',
+          message: 'Carregando informações do Dashboard...',
+          position: 'top'
+        })
+        await sleep(10000) // simula rede
+
+        const payload = { role: found.role, email }
+        setUser(payload)
+        user.value = payload
+        notif()
+        await router.push('/dashboard/resultado-financeiro')
+      } finally {
+        loading.value = false
+      }
     }
 
 
@@ -233,8 +205,9 @@ export default {
 .checkbox-custom :deep(.q-checkbox__bg) {
   background: transparent !important;
   box-shadow: none !important;
-  border: 2px solid rgba(255,255,255,0.9);
-  border-radius: 6px;   /* cantos arredondados como na imagem */
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  /* cantos arredondados como na imagem */
 }
 
 .checkbox-custom :deep(.q-checkbox__inner--truthy .q-checkbox__bg) {
@@ -257,7 +230,7 @@ export default {
   text-decoration: underline;
 }
 
-.login-btn {    
+.login-btn {
   background: #23c91b !important;
   border-radius: 8px;
   font-size: 16px;
@@ -293,7 +266,8 @@ export default {
   }
 
   .login-form {
-    padding-top: 24px; /* ajuste o valor se quiser mais espaço */
+    padding-top: 24px;
+    /* ajuste o valor se quiser mais espaço */
   }
 
   .robot-image {
