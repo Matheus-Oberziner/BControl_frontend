@@ -104,7 +104,7 @@ export default {
           message: 'Carregando informações do Dashboard...',
           position: 'top'
         })
-        await sleep(10000) // simula rede
+        await sleep(1000) // simula rede
 
         const payload = { role: found.role, email }
         setUser(payload)
