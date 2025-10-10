@@ -281,7 +281,6 @@
         max="2099-12-31"
         style="text-transform: uppercase;"
       />
-
     </div>
 
     <div
@@ -884,7 +883,7 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 .topic-style {
   background: #FDFAFA;
   border-radius: 30px;

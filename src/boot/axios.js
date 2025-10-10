@@ -1,24 +1,58 @@
-import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 
-// Be careful when using SSR for cross-request state pollution
-// due to creating a Singleton instance here;
-// If any client changes this (global) instance, it might be a
-// good idea to move this instance creation inside of the
-// "export default () => {}" function below (which runs individually
-// for each client)
-const api = axios.create({ baseURL: 'https://api.example.com' })
+axios.defaults.baseURL = process.env.API_URL
+axios.defaults.withCredentials = false
 
-export default defineBoot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
+axios.interceptors.request.use(
+  async (config) => {
+    // const token = ''
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`
+    // }
 
-  app.config.globalProperties.$axios = axios
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
-  app.config.globalProperties.$api = api
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
-})
+axios.interceptors.response.use(
+  (response) => {
+    return response
+  },
+  async error => {
+    return Promise.reject(error)
+  }
+)
 
-export { api }
+const sendLogin = async () => {
+  const params = {
+    id: '12345678910',
+    password: '123456'
+  }
+
+  const res = await axios.post('/auth/login', params, {
+    withCredentials: true
+  })
+
+  return res.data
+}
+
+const cnpj = '73750167000143'
+
+const getRecebimentoRealizados = async params => {
+  const res = await axios.get(`/fluxo-financeiro/${cnpj}/recebimentos`, {params})
+  return res.data
+}
+
+const getPagamentosRealizados = async params => {
+  const res = await axios.get(`/fluxo-financeiro/${cnpj}/pagamentos`, {params})
+  return res.data
+}
+
+export {
+  sendLogin,
+  getRecebimentoRealizados,
+  getPagamentosRealizados
+}
