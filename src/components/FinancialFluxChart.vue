@@ -215,17 +215,17 @@ export default {
 /* colunas/mês */
 .col {
   display: grid;
-  grid-template-rows: auto 170px 24px 170px auto auto auto;
+  grid-template-rows: 17px 170px 24px 170px auto auto auto;
   justify-items: center; align-items: start;
 }
 
 /* tetos/pisos */
 .cap { color: #383838; font-size: 13px; font-weight: 400; }
-.cap-top { margin-top: 2px; }
+.cap-top { margin-top: -2px; }
 
 /* >>> AJUSTE pedida: aproximar o rótulo do máximo inferior da barra */
 .cap-bottom {
-  margin-top: -14px;    /* puxa para perto da barra inferior */
+  margin-top: -18px;    /* puxa para perto da barra inferior */
 }
 
 /* barras + labels */

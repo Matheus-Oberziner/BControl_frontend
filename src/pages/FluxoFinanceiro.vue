@@ -11,7 +11,11 @@
           <span class="font-1 text-28 weight-500 text-orange q-pl-md text-center">Fluxo Financeiro</span>
         </div>
 
-        <div class="row justify-center items-center q-gutter-md" style="padding: 0px 0px 0px 10px;">
+        <div
+          class="row items-center q-gutter-md"
+          :class="$q.screen.width <= 1460 ? 'col-12 justify-end q-mt-md' : 'justify-center'"
+          style="padding: 0px 0px 0px 10px;"
+        >
           <span class="text-16 text-grey-7">Selecione o período:</span>
 
           <q-input
@@ -55,10 +59,15 @@
       </div>
 
       <div
-        class="col-12 row justify-between items-center"
+        class="col-12 row items-center"
+        :class="$q.screen.width < 1800 ? 'justify-center' : 'justify-between'"
         style="padding: 40px 50px 40px;"
       >
-        <div class="row items-center" style="height: 112px; gap: 15px;">
+        <div
+          class="row items-center"
+          :class="$q.screen.width < 1800 ? 'col-12 justify-center' : ''"
+          style="height: 112px; gap: 15px;"
+        >
           <div
             class="border-gradient q-pa-md row items-center"
             style="width: 210px; min-height: 100%;"
@@ -112,7 +121,11 @@
           </div>
         </div>
 
-        <div class="row items-center justify-center border-orange" style="position: relative; padding: 40px 20px; gap: 15px; height: 100%;">
+        <div
+          class="row items-center justify-center border-orange"
+          style="position: relative; padding: 40px 20px; gap: 15px;"
+          :style="$q.screen.width < 1800 ? 'margin-top: 65px;' : 'height: 100%;'"
+        >
           <div
             class="row justify-center bg-white"
             style="position: absolute; top: -12.5%; border: 2px solid #FFAE7D; border-radius: 15px; padding: 8px 30px;"
