@@ -47,16 +47,12 @@
   </q-layout>
 </template>
 <script>
-import { sendLogin } from 'src/boot/axios';
 import Drawer from 'src/components/DrawerComponent.vue'
 import Sidebar from 'src/components/SidebarComponent.vue'
 export default {
   components: {
     Sidebar,
     Drawer
-  },
-  mounted () {
-    sendLogin()
   }
 }
 </script>

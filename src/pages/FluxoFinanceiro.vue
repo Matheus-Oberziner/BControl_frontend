@@ -1,7 +1,13 @@
 <template>
   <div class="row" style="padding: 40px 0px;">
     <!-- Card 1 - Fluxo Financeiro -->
-    <div class="col-12 row shadow-5" style="border-radius: 20px; padding: 25px 0px 25px; margin: 0px 0px 60px 0;">
+    <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 25px; margin: 0px 0px 60px 0;">
+      <!-- Overlay de loading para o fluxo financeiro -->
+      <template v-if="loadingFluxoFinanceiro">
+        <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.65); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+          <q-spinner-dots color="orange" size="56px" />
+        </div>
+      </template>
       <div class="col-12 row items-center justify-between" :style="$q.screen.width > 1200 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -19,6 +25,7 @@
           <span class="text-16 text-grey-7">Selecione o período:</span>
 
           <q-input
+            v-model="dataInicial"
             outlined
             dense
             type="date"
@@ -29,6 +36,7 @@
           <span class="text-16 text-grey-7">a</span>
 
           <q-input
+            v-model="dataFinal"
             outlined
             dense
             type="date"
@@ -82,7 +90,7 @@
             </div>
   
             <div class="col-12 row justify-center items-center weight-600" style="padding: 8px 0px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{formatCurrency(fluxo.saldoDia)}}</span>
             </div>
           </div>
           <div
@@ -99,7 +107,7 @@
             </div>
   
             <div class="col-12 row justify-center items-center weight-600" style="padding: 8px 0px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(fluxo.recebimentoDia) }}</span>
             </div>
           </div>
           <div
@@ -116,7 +124,7 @@
             </div>
   
             <div class="col-12 row justify-center items-center weight-600" style="padding: 8px 0px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(fluxo.pagamentoDia) }}</span>
             </div>
           </div>
         </div>
@@ -147,7 +155,7 @@
             </div>
   
             <div class="col-12 row justify-center items-center weight-600" style="padding: 8px 0px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(fluxo.saldoPeriodo) }}</span>
             </div>
           </div>
           <div
@@ -164,7 +172,7 @@
             </div>
   
             <div class="col-12 row justify-center items-center weight-600" style="padding: 8px 0px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(fluxo.recebimentoPeriodo) }}</span>
             </div>
           </div>
           <div
@@ -181,7 +189,7 @@
             </div>
   
             <div class="col-12 row justify-center items-center weight-600" style="padding: 8px 0px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(fluxo.pagamentoPeriodo)}}</span>
             </div>
           </div>
           <div
@@ -198,7 +206,7 @@
             </div>
   
             <div class="col-12 row justify-center items-center weight-600" style="padding: 8px 0px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(fluxo.saldoAcumulado) }}</span>
             </div>
           </div>
         </div>
@@ -209,8 +217,8 @@
       </div>
     </div>
 
-    <!-- Card 2 - Pagamentos e Recebimentos Diários -->
-    <div class="col-12 row shadow-5" style="border-radius: 20px; padding: 25px 0px 25px;">
+  <!-- Card 2 - Pagamentos e Recebimentos Diários -->
+  <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 25px;">
       <div class="col-12 row" :style="$q.screen.width > 1200 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 60 58" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -229,17 +237,26 @@
         class="col-12 row justify-center"
         style="padding-top: 40px;"
       >
-        <q-card
-          v-for="index in 4"
-          :key="index"
-          flat
-          class="column items-center q-pa-md"
-          style="width:350px; border-radius:22px; position: relative;"
-        >
+        <!-- Overlay para o card Pagamentos e Recebimentos Diários -->
+        <template v-if="loadingFluxoDiario">
+          <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.65); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+            <q-spinner-dots color="orange" size="56px" />
+          </div>
+        </template>
+
+        <!-- Quando não está carregando, renderiza os cards se houver dados -->
+        <template v-else>
+          <q-card
+            v-for="(dia, index) in dias"
+            :key="index"
+            flat
+            class="column items-center q-pa-md"
+            style="width:350px; border-radius:22px; position: relative;"
+          >
           <!-- Data -->
           <div class="text-center q-px-md bg-white" style="position: absolute; top: -1%;">
-            <div class="text-caption text-grey-2">02/10/2025</div>
-            <div class="text-16 weight-500 text-orange">Quinta-Feira</div>
+            <div class="text-caption text-grey-2">{{ dia.data }}</div>
+            <div class="text-16 weight-500 text-orange">{{ dia.diaSemana }}</div>
           </div>
         
           <!-- Moldura externa -->
@@ -257,7 +274,7 @@
               <div class="row items-baseline text-grey-2 q-mt-xs">
                 <span class="text-caption q-mr-xs">R$</span>
                 <span class="weight-500" style="font-size:18px; color:#8f8f8f;">
-                  820.000,00
+                  {{ formatCurrency(dia.saldoInicial) }}
                 </span>
               </div>
             </div>
@@ -276,7 +293,7 @@
                 <div class="row items-baseline text-grey-2 q-mt-sm q-mb-md">
                   <span class="text-caption q-mr-xs">R$</span>
                   <span class="weight-500" style="font-size:18px;">
-                    22.000,00
+                    {{ formatCurrency(dia.aReceber) }}
                   </span>
                 </div>
               
@@ -284,7 +301,7 @@
                 <div class="row items-baseline text-grey-2 q-mt-sm">
                   <span class="text-caption q-mr-xs">R$</span>
                   <span class="weight-500" style="font-size:18px;">
-                    16.000,00
+                    {{ formatCurrency(dia.aPagar) }}
                   </span>
                 </div>
               </div>
@@ -302,12 +319,18 @@
               <div class="row justify-center items-baseline">
                 <span class="text-caption text-white q-mr-xs">R$</span>
                 <span class="text-white weight-500" style="font-size:20px;">
-                  826.000,00
+                  {{ formatCurrency(dia.saldoFinal) }}
                 </span>
               </div>
             </div>
           </div>
-        </q-card>
+          </q-card>
+
+          <!-- Se não houver dias retornados -->
+          <div v-if="!dias || dias.length === 0" class="text-center q-pa-lg text-grey-6">
+            Nenhum dado de fluxo diário disponível para o período.
+          </div>
+        </template>
       </div>
     </div>
 
@@ -384,8 +407,8 @@
       </div>
     </div>
 
-    <!-- Card 3 - Entrada Recebimentos -->
-    <div class="col-12 row shadow-5" style="border-radius: 20px; padding: 25px 0px 5px;">
+  <!-- Card 3 - Entrada Recebimentos -->
+  <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px;">
       <div class="col-12 row" :style="$q.screen.width > 1200 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -412,13 +435,19 @@
         class="col-12 row flex justify-center items-end"
         style="padding: 40px 0px 30px; gap: 20px;"
       >
+        <!-- Overlay para o card Entrada Recebimentos -->
+        <template v-if="loadingRecebimentos">
+          <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.65); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+            <q-spinner-dots color="orange" size="56px" />
+          </div>
+        </template>
         <div
           class="q-pa-xs row items-center justify-center"
           style="width: 230px; border: 1px solid #FE721C; border-radius: 20px;"
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">65.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{  formatCurrency(resumoRecebimentos.aReceberHoje) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">A Receber Hoje</span>
           </div>
 
@@ -429,7 +458,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">120.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{  formatCurrency(resumoRecebimentos.aReceberVencer) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">A Receber | Vencer</span>
           </div>
         </div>
@@ -439,7 +468,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{  formatCurrency(resumoRecebimentos.aReceberAtrasado) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">A Receber Atrasado</span>
           </div>
 
@@ -450,7 +479,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">210.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{  formatCurrency(resumoRecebimentos.totalRecebimento) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Total Recebimentos Futuros</span>
           </div>
         </div>
@@ -461,7 +490,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="border: 1px solid #DADAD8; border-radius: 20px; padding: 15px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">60.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{  formatCurrency(resumoRecebimentos.recebido) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Recebido</span>
           </div>
 
@@ -487,23 +516,23 @@
         >
           <template #cell-status="{ row }">
             <div class="row items-center justify-center">
-              <svg v-if="row.status === 'warning'" width="35" height="35" viewBox="0 0 38 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'orange'" width="35" height="35" viewBox="0 0 38 39" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18.9999 38.25C29.3356 38.25 37.7499 29.8358 37.7499 19.5C37.7499 9.16423 29.3356 0.75 18.9999 0.75C8.66424 0.75 0.25 9.16423 0.25 19.5C0.25 29.8358 8.66424 38.25 18.9999 38.25ZM16.753 9.939C16.753 8.69938 17.7603 7.69222 18.9999 7.69222C20.2395 7.69222 21.2469 8.69939 21.2469 9.939V22.2273C21.2469 23.467 20.2395 24.4742 18.9999 24.4742C17.7603 24.4742 16.753 23.467 16.753 22.2273V9.939ZM18.9999 26.2717C20.2395 26.2717 21.2469 27.2789 21.2469 28.5186C21.2469 29.7583 20.2395 30.7655 18.9999 30.7655C17.7603 30.7655 16.753 29.7583 16.753 28.5186C16.753 27.2789 17.7603 26.2717 18.9999 26.2717Z" fill="#FF9D00"/>
               </svg>
   
-              <svg v-if="row.status === 'up'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'green'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 0.5C16.0444 0.5 12.1776 1.67298 8.8886 3.87061C5.59962 6.06823 3.03617 9.19181 1.52242 12.8463C0.00866568 16.5008 -0.387401 20.5222 0.384303 24.4018C1.15601 28.2814 3.06082 31.8451 5.85787 34.6421C8.65492 37.4392 12.2186 39.344 16.0982 40.1157C19.9778 40.8874 23.9992 40.4913 27.6537 38.9776C31.3082 37.4638 34.4318 34.9004 36.6294 31.6114C38.827 28.3224 40 24.4556 40 20.5C40 17.8736 39.4827 15.2728 38.4776 12.8463C37.4725 10.4198 35.9993 8.21503 34.1421 6.35786C32.285 4.50069 30.0802 3.0275 27.6537 2.02241C25.2272 1.01732 22.6264 0.5 20 0.5ZM31.5 21.652C31.5 22.0498 31.342 22.4313 31.0607 22.7127C30.7794 22.994 30.3978 23.152 30 23.152C29.6022 23.152 29.2206 22.994 28.9393 22.7127C28.658 22.4313 28.5 22.0498 28.5 21.652V19.512L23.964 24.048C23.3491 24.6346 22.5319 24.9619 21.682 24.9619C20.8321 24.9619 20.0149 24.6346 19.4 24.048L16.452 21.1C16.4061 21.063 16.349 21.0428 16.29 21.0428C16.2311 21.0428 16.1739 21.063 16.128 21.1L11.06 26.168C10.7757 26.433 10.3996 26.5772 10.011 26.5703C9.62236 26.5635 9.25159 26.4061 8.97676 26.1312C8.70194 25.8564 8.54451 25.4856 8.53766 25.097C8.5308 24.7084 8.67505 24.3323 8.94001 24.048L14 18.98C14.2998 18.6801 14.6557 18.4422 15.0474 18.2799C15.4391 18.1176 15.859 18.0341 16.283 18.0341C16.707 18.0341 17.1269 18.1176 17.5186 18.2799C17.9103 18.4422 18.2662 18.6801 18.566 18.98L21.512 21.926C21.5551 21.9687 21.6133 21.9927 21.674 21.9927C21.7347 21.9927 21.7929 21.9687 21.836 21.926L26.37 17.392H24.24C23.8422 17.392 23.4607 17.234 23.1793 16.9527C22.898 16.6713 22.74 16.2898 22.74 15.892C22.74 15.4942 22.898 15.1126 23.1793 14.8313C23.4607 14.55 23.8422 14.392 24.24 14.392H30C30.3973 14.3936 30.778 14.5521 31.0589 14.8331C31.3399 15.114 31.4984 15.4947 31.5 15.892V21.652Z" fill="#3FB855"/>
               </svg>
   
-              <svg v-if="row.status === 'minus'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'red'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 1.75C16.2916 1.75 12.6665 2.84967 9.58307 4.90994C6.49964 6.97022 4.09641 9.89857 2.67727 13.3247C1.25812 16.7508 0.886812 20.5208 1.61028 24.1579C2.33376 27.7951 4.11952 31.136 6.74176 33.7583C9.36399 36.3805 12.7049 38.1663 16.3421 38.8897C19.9792 39.6132 23.7492 39.2419 27.1753 37.8227C30.6014 36.4036 33.5298 34.0004 35.5901 30.9169C37.6503 27.8335 38.75 24.2084 38.75 20.5C38.7482 15.5277 36.7722 10.7597 33.2563 7.24373C29.7404 3.72782 24.9723 1.7518 20 1.75ZM31.25 22.6125H8.75001V18.3875H31.25V22.6125Z" fill="#BE3455"/>
               </svg>
   
-              <svg v-if="row.status === 'check'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'blue'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 0.5C8.9544 0.5 0 9.4544 0 20.5C0 31.5456 8.9544 40.5 20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4544 31.0456 0.5 20 0.5ZM17.6 29.1624L8.0688 19.6312L10.3312 17.3688L17.6 24.6376L29.6688 12.5688L31.9312 14.8312L17.6 29.1624Z" fill="#2B8EFF"/>
               </svg>
   
-              <svg v-if="row.status === 'question'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'default'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4543 31.0456 0.5 20 0.5C8.9543 0.5 0 9.4543 0 20.5C0 31.5456 8.9543 40.5 20 40.5ZM17.8272 23.0512C17.6606 24.172 18.6112 25.0968 19.7442 25.0968H20.6846C21.2388 25.0968 21.6976 24.666 21.7326 24.113C21.8464 23.0592 22.297 22.1398 23.0844 21.3548L24.343 20.113C25.327 19.1236 26.016 18.2258 26.4096 17.4194C26.8032 16.6022 27 15.7366 27 14.8226C27 12.8118 26.394 11.2581 25.182 10.1613C23.97 9.05376 22.266 8.5 20.07 8.5C17.8946 8.5 16.175 9.08064 14.9112 10.2419C14.1617 10.9363 13.6326 11.7902 13.3239 12.8037C12.9562 14.0108 14.0428 15.0645 15.3046 15.0645C16.3728 15.0645 17.169 14.1945 17.9122 13.3826C18.0158 13.2692 18.1186 13.157 18.2208 13.0484C18.687 12.5538 19.3034 12.3065 20.07 12.3065C21.686 12.3065 22.4938 13.2151 22.4938 15.0323C22.4938 15.6344 22.3386 16.2097 22.0278 16.758C21.717 17.2956 21.0902 18 20.1476 18.871C19.2154 19.7312 18.573 20.6076 18.2208 21.5C18.0464 21.942 17.9152 22.459 17.8272 23.0512ZM17.9412 28.2742C17.475 28.7366 17.242 29.328 17.242 30.0484C17.242 30.758 17.4698 31.344 17.9256 31.8064C18.3918 32.2688 19.003 32.5 19.7592 32.5C20.5154 32.5 21.1214 32.2688 21.5772 31.8064C22.0432 31.344 22.2764 30.758 22.2764 30.0484C22.2764 29.328 22.0382 28.7366 21.5616 28.2742C21.0954 27.801 20.4946 27.5646 19.7592 27.5646C19.0236 27.5646 18.4176 27.801 17.9412 28.2742Z" fill="#D5D5D5"/>
               </svg>
             </div>
@@ -512,8 +541,8 @@
       </div>
     </div>
 
-    <!-- Card 4 - Saída Pagamentos -->
-    <div class="col-12 row shadow-5" style="border-radius: 20px; padding: 25px 0px 5px; margin: 60px 0px 60px 0;">
+  <!-- Card 4 - Saída Pagamentos -->
+  <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px; margin: 60px 0px 60px 0;">
       <div class="col-12 row" :style="$q.screen.width > 1200 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -540,13 +569,19 @@
         class="col-12 row flex justify-center items-end"
         style="padding: 40px 0px 30px; gap: 20px;"
       >
+        <!-- Overlay para o card Saída Pagamentos -->
+        <template v-if="loadingPagamentos">
+          <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.65); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+            <q-spinner-dots color="purple" size="56px" />
+          </div>
+        </template>
         <div
           class="q-pa-xs row items-center justify-center"
           style="width: 230px; border: 1px solid #680059; border-radius: 20px;"
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">55.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoPagamentos.aPagarHoje) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">A Pagar Hoje</span>
           </div>
 
@@ -557,7 +592,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">140.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoPagamentos.aPagarVencer) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">A Pagar | Vencer</span>
           </div>
         </div>
@@ -567,7 +602,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">20.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoPagamentos.aPagarAtrasado) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">A Pagar Atrasado</span>
           </div>
 
@@ -578,7 +613,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">215.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoPagamentos.totalPagamentos) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Total Pagamentos</span>
           </div>
         </div>
@@ -589,7 +624,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="border: 1px solid #DADAD8; border-radius: 20px; padding: 15px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">50.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoPagamentos.pagos) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Pagos</span>
           </div>
 
@@ -615,23 +650,23 @@
         >
           <template #cell-status="{ row }">
             <div class="row items-center justify-center">
-              <svg v-if="row.status === 'warning'" width="35" height="35" viewBox="0 0 38 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'orange'" width="35" height="35" viewBox="0 0 38 39" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18.9999 38.25C29.3356 38.25 37.7499 29.8358 37.7499 19.5C37.7499 9.16423 29.3356 0.75 18.9999 0.75C8.66424 0.75 0.25 9.16423 0.25 19.5C0.25 29.8358 8.66424 38.25 18.9999 38.25ZM16.753 9.939C16.753 8.69938 17.7603 7.69222 18.9999 7.69222C20.2395 7.69222 21.2469 8.69939 21.2469 9.939V22.2273C21.2469 23.467 20.2395 24.4742 18.9999 24.4742C17.7603 24.4742 16.753 23.467 16.753 22.2273V9.939ZM18.9999 26.2717C20.2395 26.2717 21.2469 27.2789 21.2469 28.5186C21.2469 29.7583 20.2395 30.7655 18.9999 30.7655C17.7603 30.7655 16.753 29.7583 16.753 28.5186C16.753 27.2789 17.7603 26.2717 18.9999 26.2717Z" fill="#FF9D00"/>
               </svg>
   
-              <svg v-if="row.status === 'up'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'green'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 0.5C16.0444 0.5 12.1776 1.67298 8.8886 3.87061C5.59962 6.06823 3.03617 9.19181 1.52242 12.8463C0.00866568 16.5008 -0.387401 20.5222 0.384303 24.4018C1.15601 28.2814 3.06082 31.8451 5.85787 34.6421C8.65492 37.4392 12.2186 39.344 16.0982 40.1157C19.9778 40.8874 23.9992 40.4913 27.6537 38.9776C31.3082 37.4638 34.4318 34.9004 36.6294 31.6114C38.827 28.3224 40 24.4556 40 20.5C40 17.8736 39.4827 15.2728 38.4776 12.8463C37.4725 10.4198 35.9993 8.21503 34.1421 6.35786C32.285 4.50069 30.0802 3.0275 27.6537 2.02241C25.2272 1.01732 22.6264 0.5 20 0.5ZM31.5 21.652C31.5 22.0498 31.342 22.4313 31.0607 22.7127C30.7794 22.994 30.3978 23.152 30 23.152C29.6022 23.152 29.2206 22.994 28.9393 22.7127C28.658 22.4313 28.5 22.0498 28.5 21.652V19.512L23.964 24.048C23.3491 24.6346 22.5319 24.9619 21.682 24.9619C20.8321 24.9619 20.0149 24.6346 19.4 24.048L16.452 21.1C16.4061 21.063 16.349 21.0428 16.29 21.0428C16.2311 21.0428 16.1739 21.063 16.128 21.1L11.06 26.168C10.7757 26.433 10.3996 26.5772 10.011 26.5703C9.62236 26.5635 9.25159 26.4061 8.97676 26.1312C8.70194 25.8564 8.54451 25.4856 8.53766 25.097C8.5308 24.7084 8.67505 24.3323 8.94001 24.048L14 18.98C14.2998 18.6801 14.6557 18.4422 15.0474 18.2799C15.4391 18.1176 15.859 18.0341 16.283 18.0341C16.707 18.0341 17.1269 18.1176 17.5186 18.2799C17.9103 18.4422 18.2662 18.6801 18.566 18.98L21.512 21.926C21.5551 21.9687 21.6133 21.9927 21.674 21.9927C21.7347 21.9927 21.7929 21.9687 21.836 21.926L26.37 17.392H24.24C23.8422 17.392 23.4607 17.234 23.1793 16.9527C22.898 16.6713 22.74 16.2898 22.74 15.892C22.74 15.4942 22.898 15.1126 23.1793 14.8313C23.4607 14.55 23.8422 14.392 24.24 14.392H30C30.3973 14.3936 30.778 14.5521 31.0589 14.8331C31.3399 15.114 31.4984 15.4947 31.5 15.892V21.652Z" fill="#3FB855"/>
               </svg>
   
-              <svg v-if="row.status === 'minus'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'red'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 1.75C16.2916 1.75 12.6665 2.84967 9.58307 4.90994C6.49964 6.97022 4.09641 9.89857 2.67727 13.3247C1.25812 16.7508 0.886812 20.5208 1.61028 24.1579C2.33376 27.7951 4.11952 31.136 6.74176 33.7583C9.36399 36.3805 12.7049 38.1663 16.3421 38.8897C19.9792 39.6132 23.7492 39.2419 27.1753 37.8227C30.6014 36.4036 33.5298 34.0004 35.5901 30.9169C37.6503 27.8335 38.75 24.2084 38.75 20.5C38.7482 15.5277 36.7722 10.7597 33.2563 7.24373C29.7404 3.72782 24.9723 1.7518 20 1.75ZM31.25 22.6125H8.75001V18.3875H31.25V22.6125Z" fill="#BE3455"/>
               </svg>
   
-              <svg v-if="row.status === 'check'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'blue'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 0.5C8.9544 0.5 0 9.4544 0 20.5C0 31.5456 8.9544 40.5 20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4544 31.0456 0.5 20 0.5ZM17.6 29.1624L8.0688 19.6312L10.3312 17.3688L17.6 24.6376L29.6688 12.5688L31.9312 14.8312L17.6 29.1624Z" fill="#2B8EFF"/>
               </svg>
   
-              <svg v-if="row.status === 'question'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'default'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4543 31.0456 0.5 20 0.5C8.9543 0.5 0 9.4543 0 20.5C0 31.5456 8.9543 40.5 20 40.5ZM17.8272 23.0512C17.6606 24.172 18.6112 25.0968 19.7442 25.0968H20.6846C21.2388 25.0968 21.6976 24.666 21.7326 24.113C21.8464 23.0592 22.297 22.1398 23.0844 21.3548L24.343 20.113C25.327 19.1236 26.016 18.2258 26.4096 17.4194C26.8032 16.6022 27 15.7366 27 14.8226C27 12.8118 26.394 11.2581 25.182 10.1613C23.97 9.05376 22.266 8.5 20.07 8.5C17.8946 8.5 16.175 9.08064 14.9112 10.2419C14.1617 10.9363 13.6326 11.7902 13.3239 12.8037C12.9562 14.0108 14.0428 15.0645 15.3046 15.0645C16.3728 15.0645 17.169 14.1945 17.9122 13.3826C18.0158 13.2692 18.1186 13.157 18.2208 13.0484C18.687 12.5538 19.3034 12.3065 20.07 12.3065C21.686 12.3065 22.4938 13.2151 22.4938 15.0323C22.4938 15.6344 22.3386 16.2097 22.0278 16.758C21.717 17.2956 21.0902 18 20.1476 18.871C19.2154 19.7312 18.573 20.6076 18.2208 21.5C18.0464 21.942 17.9152 22.459 17.8272 23.0512ZM17.9412 28.2742C17.475 28.7366 17.242 29.328 17.242 30.0484C17.242 30.758 17.4698 31.344 17.9256 31.8064C18.3918 32.2688 19.003 32.5 19.7592 32.5C20.5154 32.5 21.1214 32.2688 21.5772 31.8064C22.0432 31.344 22.2764 30.758 22.2764 30.0484C22.2764 29.328 22.0382 28.7366 21.5616 28.2742C21.0954 27.801 20.4946 27.5646 19.7592 27.5646C19.0236 27.5646 18.4176 27.801 17.9412 28.2742Z" fill="#D5D5D5"/>
               </svg>
             </div>
@@ -641,7 +676,10 @@
     </div>
 
     <!-- Card 5 - Saldos -->
-    <div class="col-12 row shadow-5" style="border-radius: 20px; padding: 25px 0px 5px; margin: 0px 0px 60px 0;">
+    <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px; margin: 0px 0px 60px 0;">
+      <div v-if="loadingSaldos" style="position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.75); z-index: 50; border-radius: inherit;">
+        <q-spinner-dots color="primary" size="40px" />
+      </div>
       <div class="col-12 row" :style="$q.screen.width >= 1230 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -675,7 +713,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">55.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoSaldos.totalContaCorrente) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Saldo em Contas Correntes</span>
           </div>
         </div>
@@ -685,7 +723,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">140.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoSaldos.totalOperFinan) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Saldo em Operadoras e Financeiras</span>
           </div>
         </div>
@@ -695,7 +733,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">20.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoSaldos.totalInCash) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Dinheiro em Caixa</span>
           </div>
 
@@ -706,7 +744,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">215.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoSaldos.totalEstoque) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Total em Estoque</span>
           </div>
         </div>
@@ -714,29 +752,29 @@
 
       <div class="col-12" style="padding: 25px 60px;">
         <TableComponent
-          :columns="columns2"
-          :rows="rows2"
+          :columns="columns3"
+          :rows="rows3"
           :enable-search="false"
         >
           <template #cell-status="{ row }">
             <div class="row items-center justify-center">
-              <svg v-if="row.status === 'warning'" width="35" height="35" viewBox="0 0 38 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'orange'" width="35" height="35" viewBox="0 0 38 39" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18.9999 38.25C29.3356 38.25 37.7499 29.8358 37.7499 19.5C37.7499 9.16423 29.3356 0.75 18.9999 0.75C8.66424 0.75 0.25 9.16423 0.25 19.5C0.25 29.8358 8.66424 38.25 18.9999 38.25ZM16.753 9.939C16.753 8.69938 17.7603 7.69222 18.9999 7.69222C20.2395 7.69222 21.2469 8.69939 21.2469 9.939V22.2273C21.2469 23.467 20.2395 24.4742 18.9999 24.4742C17.7603 24.4742 16.753 23.467 16.753 22.2273V9.939ZM18.9999 26.2717C20.2395 26.2717 21.2469 27.2789 21.2469 28.5186C21.2469 29.7583 20.2395 30.7655 18.9999 30.7655C17.7603 30.7655 16.753 29.7583 16.753 28.5186C16.753 27.2789 17.7603 26.2717 18.9999 26.2717Z" fill="#FF9D00"/>
               </svg>
   
-              <svg v-if="row.status === 'up'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'green'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 0.5C16.0444 0.5 12.1776 1.67298 8.8886 3.87061C5.59962 6.06823 3.03617 9.19181 1.52242 12.8463C0.00866568 16.5008 -0.387401 20.5222 0.384303 24.4018C1.15601 28.2814 3.06082 31.8451 5.85787 34.6421C8.65492 37.4392 12.2186 39.344 16.0982 40.1157C19.9778 40.8874 23.9992 40.4913 27.6537 38.9776C31.3082 37.4638 34.4318 34.9004 36.6294 31.6114C38.827 28.3224 40 24.4556 40 20.5C40 17.8736 39.4827 15.2728 38.4776 12.8463C37.4725 10.4198 35.9993 8.21503 34.1421 6.35786C32.285 4.50069 30.0802 3.0275 27.6537 2.02241C25.2272 1.01732 22.6264 0.5 20 0.5ZM31.5 21.652C31.5 22.0498 31.342 22.4313 31.0607 22.7127C30.7794 22.994 30.3978 23.152 30 23.152C29.6022 23.152 29.2206 22.994 28.9393 22.7127C28.658 22.4313 28.5 22.0498 28.5 21.652V19.512L23.964 24.048C23.3491 24.6346 22.5319 24.9619 21.682 24.9619C20.8321 24.9619 20.0149 24.6346 19.4 24.048L16.452 21.1C16.4061 21.063 16.349 21.0428 16.29 21.0428C16.2311 21.0428 16.1739 21.063 16.128 21.1L11.06 26.168C10.7757 26.433 10.3996 26.5772 10.011 26.5703C9.62236 26.5635 9.25159 26.4061 8.97676 26.1312C8.70194 25.8564 8.54451 25.4856 8.53766 25.097C8.5308 24.7084 8.67505 24.3323 8.94001 24.048L14 18.98C14.2998 18.6801 14.6557 18.4422 15.0474 18.2799C15.4391 18.1176 15.859 18.0341 16.283 18.0341C16.707 18.0341 17.1269 18.1176 17.5186 18.2799C17.9103 18.4422 18.2662 18.6801 18.566 18.98L21.512 21.926C21.5551 21.9687 21.6133 21.9927 21.674 21.9927C21.7347 21.9927 21.7929 21.9687 21.836 21.926L26.37 17.392H24.24C23.8422 17.392 23.4607 17.234 23.1793 16.9527C22.898 16.6713 22.74 16.2898 22.74 15.892C22.74 15.4942 22.898 15.1126 23.1793 14.8313C23.4607 14.55 23.8422 14.392 24.24 14.392H30C30.3973 14.3936 30.778 14.5521 31.0589 14.8331C31.3399 15.114 31.4984 15.4947 31.5 15.892V21.652Z" fill="#3FB855"/>
               </svg>
   
-              <svg v-if="row.status === 'minus'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'red'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 1.75C16.2916 1.75 12.6665 2.84967 9.58307 4.90994C6.49964 6.97022 4.09641 9.89857 2.67727 13.3247C1.25812 16.7508 0.886812 20.5208 1.61028 24.1579C2.33376 27.7951 4.11952 31.136 6.74176 33.7583C9.36399 36.3805 12.7049 38.1663 16.3421 38.8897C19.9792 39.6132 23.7492 39.2419 27.1753 37.8227C30.6014 36.4036 33.5298 34.0004 35.5901 30.9169C37.6503 27.8335 38.75 24.2084 38.75 20.5C38.7482 15.5277 36.7722 10.7597 33.2563 7.24373C29.7404 3.72782 24.9723 1.7518 20 1.75ZM31.25 22.6125H8.75001V18.3875H31.25V22.6125Z" fill="#BE3455"/>
               </svg>
   
-              <svg v-if="row.status === 'check'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'blue'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 0.5C8.9544 0.5 0 9.4544 0 20.5C0 31.5456 8.9544 40.5 20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4544 31.0456 0.5 20 0.5ZM17.6 29.1624L8.0688 19.6312L10.3312 17.3688L17.6 24.6376L29.6688 12.5688L31.9312 14.8312L17.6 29.1624Z" fill="#2B8EFF"/>
               </svg>
   
-              <svg v-if="row.status === 'question'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="row.status === 'default'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4543 31.0456 0.5 20 0.5C8.9543 0.5 0 9.4543 0 20.5C0 31.5456 8.9543 40.5 20 40.5ZM17.8272 23.0512C17.6606 24.172 18.6112 25.0968 19.7442 25.0968H20.6846C21.2388 25.0968 21.6976 24.666 21.7326 24.113C21.8464 23.0592 22.297 22.1398 23.0844 21.3548L24.343 20.113C25.327 19.1236 26.016 18.2258 26.4096 17.4194C26.8032 16.6022 27 15.7366 27 14.8226C27 12.8118 26.394 11.2581 25.182 10.1613C23.97 9.05376 22.266 8.5 20.07 8.5C17.8946 8.5 16.175 9.08064 14.9112 10.2419C14.1617 10.9363 13.6326 11.7902 13.3239 12.8037C12.9562 14.0108 14.0428 15.0645 15.3046 15.0645C16.3728 15.0645 17.169 14.1945 17.9122 13.3826C18.0158 13.2692 18.1186 13.157 18.2208 13.0484C18.687 12.5538 19.3034 12.3065 20.07 12.3065C21.686 12.3065 22.4938 13.2151 22.4938 15.0323C22.4938 15.6344 22.3386 16.2097 22.0278 16.758C21.717 17.2956 21.0902 18 20.1476 18.871C19.2154 19.7312 18.573 20.6076 18.2208 21.5C18.0464 21.942 17.9152 22.459 17.8272 23.0512ZM17.9412 28.2742C17.475 28.7366 17.242 29.328 17.242 30.0484C17.242 30.758 17.4698 31.344 17.9256 31.8064C18.3918 32.2688 19.003 32.5 19.7592 32.5C20.5154 32.5 21.1214 32.2688 21.5772 31.8064C22.0432 31.344 22.2764 30.758 22.2764 30.0484C22.2764 29.328 22.0382 28.7366 21.5616 28.2742C21.0954 27.801 20.4946 27.5646 19.7592 27.5646C19.0236 27.5646 18.4176 27.801 17.9412 28.2742Z" fill="#D5D5D5"/>
               </svg>
             </div>
@@ -746,6 +784,7 @@
 
       <div
         class="col-12 row items-center justify-between"
+        style="border-radius: 20px; padding: 25px 0px 25px; margin: 0px 0px 60px 0;"
         :style="$q.screen.width >= 1230 ? 'padding: 0px 70px 60px;' : 'padding: 0px 30px 60px;'"
       >
         <div class="row items-center" style="gap: 20px;">
@@ -755,7 +794,7 @@
             :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
           >
             <div class="col-12 row justify-center items-center weight-600">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">55.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoSaldos.totalInvestimentos) }}</span>
               <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Saldo em Aplicações e Investimentos</span>
             </div>
           </div>
@@ -765,7 +804,7 @@
             :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
           >
             <div class="col-12 row justify-center items-center weight-600">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">55.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoSaldos.totalInvestimentoSocios) }}</span>
               <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Investimento dos Sócios</span>
             </div>
           </div>
@@ -775,7 +814,7 @@
             :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
           >
             <div class="col-12 row justify-center items-center weight-600">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">55.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoSaldos.totalObrigacoes) }}</span>
               <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Obrigrações (Adiamentos e Empréstimos)</span>
             </div>
           </div>
@@ -787,7 +826,7 @@
           :class="$q.screen.width < 1500 ? 'q-mt-md' : ''"
         >
           <div class="col-12 row justify-center items-center weight-600">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">55.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resumoSaldos.totalFinal) }}</span>
             <span class="col-12 text-12 text-grey-1 weight-400 text-center q-pt-xs">Saldo Consolidado Total</span>
           </div>
         </div>
@@ -798,6 +837,8 @@
 <script>
 import FinancialFluxChart from 'src/components/FinancialFluxChart.vue'
 import TableComponent from 'src/components/TableComponent.vue'
+import { getFluxoDiario, getFluxoFinanceiro, getRecebimentoRealizados, getPagamentosRealizados, getSaldoContas } from 'src/boot/axios'
+import { notify } from '../helpers/notify.js'
 import { ref } from 'vue'
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -808,162 +849,256 @@ export default {
     FinancialFluxChart
   },
   setup () {
+    const loadingFluxoFinanceiro = ref(false)
+    const loadingFluxoDiario = ref(false)
+    const loadingRecebimentos = ref(false)
+    const loadingPagamentos = ref(false)
+    const loadingSaldos = ref(false)
     return {
-      aplicarTodos: ref('sim')
+      aplicarTodos: ref('sim'),
+      loadingFluxoDiario,
+      loadingFluxoFinanceiro,
+      loadingRecebimentos,
+      loadingPagamentos,
+      loadingSaldos
     }
   },
   data () {
     return {
+      // timer usado para debouncing ao alterar os datepickers
+      dateChangeTimer: null,
+      dataInicial: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().substr(0, 10),
+      dataFinal: new Date().toISOString().substr(0, 10),
+      fluxo: {
+        saldoDia: 0,
+        recebimentoDia: 0,
+        pagamentoDia: 0,
+        saldoPeriodo: 0,
+        recebimentoPeriodo: 0,
+        pagamentoPeriodo: 0,
+        saldoAcumulado: 0
+      },
+      // Fluxo Diário
+      dias: [],
+      // Tabela Recebimentos
+      resumoRecebimentos: {
+        aReceberHoje: 0,
+        aReceberVencer: 0,
+        aReceberAtrasado: 0,
+        totalRecebimento: 0,
+        recebido: 0,
+        aReceberPerdido: 0
+      },
       columns: [
         { name: 'status', label: 'Status \nEntrada' },
-        { name: 'pagador', label: 'Nome do\nPagador' },
-        { name: 'previsao', label: 'Previsão do\nRecebimento' },
-        { name: 'parcela', label: 'N° Parcela' },
-        { name: 'contrato', label: 'N° Contrato' },
-        { name: 'nota', label: 'N° Nota\nFiscal' },
+        { name: 'nomePagador', label: 'Nome do\nPagador' },
+        { name: 'previsaoRecebimento', label: 'Previsão do\nRecebimento' },
+        { name: 'numeroParcela', label: 'N° Parcela' },
+        { name: 'numeroContrato', label: 'N° Contrato' },
+        { name: 'numeroNotaFiscal', label: 'N° Nota\nFiscal' },
         { name: 'valor', label: 'Valor', format: (v) => brl.format(Number(v) || 0) },
         { name: 'valorRecebido', label: 'Valor\nRecebido', format: (v) => brl.format(Number(v) || 0) },
         { name: 'valorDesconto', label: 'Valor\nDesconto', format: (v) => brl.format(Number(v) || 0) },
-        { name: 'saldo', label: 'Saldo a\nReceber', format: (v) => brl.format(Number(v) || 0) }
+        { name: 'saldoAReceber', label: 'Saldo a\nReceber', format: (v) => brl.format(Number(v) || 0) }
       ],
-      rows: [
-        {
-          status: 'warning',
-          pagador: 'Shopee',
-          previsao: '01/10/2025',
-          parcela: '01/05',
-          contrato: '0001811',
-          nota: '00031',
-          valor: 18000,
-          valorRecebido: 15500,
-          valorDesconto: 2500,
-          saldo: 2500
-        },
-        {
-          status: 'up',
-          pagador: 'Mercado Livre',
-          previsao: '01/10/2025',
-          parcela: '02/12',
-          contrato: '0001812',
-          nota: '00032',
-          valor: 25000,
-          valorRecebido: 21500,
-          valorDesconto: 3500,
-          saldo: 3500
-        },
-        {
-          status: 'minus',
-          pagador: 'Amazon',
-          previsao: '01/10/2025',
-          parcela: '01/12',
-          contrato: '0001813',
-          nota: '00033',
-          valor: 12000,
-          valorRecebido: 10400,
-          valorDesconto: 1600,
-          saldo: 1500
-        },
-        {
-          status: 'check',
-          pagador: 'Magalu',
-          previsao: '01/10/2025',
-          parcela: '07/12',
-          contrato: '0001814',
-          nota: '00034',
-          valor: 20000,
-          valorRecebido: 17000,
-          valorDesconto: 3000,
-          saldo: 3000
-        },
-        {
-          status: 'question',
-          pagador: 'Shein',
-          previsao: '01/10/2025',
-          parcela: '05/12',
-          contrato: '0001815',
-          nota: '00035',
-          valor: 10000,
-          valorRecebido: 2000,
-          valorDesconto: 8000,
-          saldo: 2000
-        }
-      ],
+      rows: [],
+      // Tabela Saídas
+      resumoPagamentos: {
+        aPagarHoje: 0,
+        aPagarVencer: 0,
+        aPagarAtrasado: 0,
+        totalPagamentos: 0,
+        pagos: 0,
+        aPagarDivida: 0
+      },
       columns2: [
         { name: 'status', label: 'Status' },
-        { name: 'credor', label: 'Nome do\nCredor' },
-        { name: 'previsao', label: 'Previsão do\nPagamento' },
-        { name: 'parcela', label: 'N° Parcela' },
-        { name: 'contrato', label: 'N° Contrato' },
-        { name: 'nota', label: 'N° Nota\nFiscal' },
+        { name: 'nomeFornecedor', label: 'Nome do\nCredor' },
+        { name: 'previsaoPagamento', label: 'Previsão do\nPagamento' },
+        { name: 'numeroParcela', label: 'N° Parcela' },
+        { name: 'numeroContrato', label: 'N° Contrato' },
+        { name: 'numeroNotaFiscal', label: 'N° Nota\nFiscal' },
         { name: 'valor', label: 'Valor', format: (v) => brl.format(Number(v) || 0) },
         { name: 'valorPago', label: 'Valor\nPago', format: (v) => brl.format(Number(v) || 0) },
         { name: 'valorDesconto', label: 'Valor\nDesconto', format: (v) => brl.format(Number(v) || 0) },
-        { name: 'saldo', label: 'Saldo a\nPagar', format: (v) => brl.format(Number(v) || 0) }
+        { name: 'saldoAPagar', label: 'Saldo a\nPagar', format: (v) => brl.format(Number(v) || 0) }
       ],
-      rows2: [
-        {
-          status: 'warning',
-          credor: 'Google ADs',
-          previsao: '01/10/2025',
-          parcela: '01/05',
-          contrato: '0001811',
-          nota: '00031',
-          valor: 20000,
-          valorPago: 18500,
-          valorDesconto: 2000,
-          saldo: 0
-        },
-        {
-          status: 'up',
-          credor: 'Facebook ADs',
-          previsao: '01/10/2025',
-          parcela: '02/12',
-          contrato: '0001812',
-          nota: '00032',
-          valor: 15000,
-          valorPago: 13000,
-          valorDesconto: 2000,
-          saldo: 0
-        },
-        {
-          status: 'minus',
-          credor: 'AWS',
-          previsao: '01/10/2025',
-          parcela: '01/12',
-          contrato: '0001813',
-          nota: '00033',
-          valor: 8000,
-          valorPago: 8000,
-          valorDesconto: 0,
-          saldo: 0
-        },
-        {
-          status: 'check',
-          credor: 'Fornecedor',
-          previsao: '01/10/2025',
-          parcela: '07/12',
-          contrato: '0001814',
-          nota: '00034',
-          valor: 10000,
-          valorPago: 10000,
-          valorDesconto: 0,
-          saldo: 0
-        },
-        {
-          status: 'question',
-          credor: 'Folha de Pgto',
-          previsao: '01/10/2025',
-          parcela: '05/12',
-          contrato: '0001815',
-          nota: '00035',
-          valor: 12000,
-          valorPago: 9000,
-          valorDesconto: 3000,
-          saldo: 0
-        }
-      ]
+      rows2: [],
+      // Saldos
+      resumoSaldos: {
+        totalContaCorrente: 0,
+        totalOperFinan: 0,
+        totalInCash: 0,
+        totalEstoque: 0,
+        totalInvestimentos: 0,
+        totalInvestimentoSocios: 0,
+        totalObrigacoes: 0,
+        totalFinal: 0
+      },
+      columns3: [
+        { name: 'status', label: 'Status' },
+        { name: 'dataUltimaConciliacao', label: 'Data da Última Conciliação' },
+        { name: 'instituicao', label: 'Instituição' },
+        { name: 'tipoConta', label: 'Tipo de Conta' },
+        { name: 'saldo', label: 'Saldo', format: (v) => brl.format(Number(v) || 0) },
+        { name: 'limiteDisponivel', label: 'Limite Disponível', format: (v) => brl.format(Number(v) || 0) },
+        { name: 'limiteMaisSaldo', label: 'Limite + Saldo', format: (v) => brl.format(Number(v) || 0) }
+      ],
+      rows3: []
     }
-  }
+  },
+  mounted () {
+    this.returnFluxoFinanceiro(),
+    this.returnFluxoDiario(),
+    this.returnRecebimentos(),
+    this.returnPagamentos(),
+    this.returnSaldos()
+  },
+  methods: {
+    // utils ===============
+    formatCurrency(value) {
+      return brl.format(Number(value) || 0)
+    },
+    toIsoZ (dateStr) {
+      // espera dateStr no formato YYYY-MM-DD
+      if (!dateStr) return null
+      return `${dateStr}T00:00:00Z`
+    },
+    //API Calls======================
+    returnFluxoFinanceiro () {
+      this.loadingFluxoFinanceiro = true
+      // prepara as datas no formato ISO com Z (ex: 2025-09-01T00:00:00Z)
+      const params = {
+        dataInicial: this.toIsoZ(this.dataInicial),
+        dataFinal: this.toIsoZ(this.dataFinal)
+      }
+      // envia as datas selecionadas como query params
+      getFluxoFinanceiro(params)
+        .then(data => {
+          this.fluxo = {
+            saldoDia: data.saldoDia,
+            recebimentoDia: data.recebimentoDia,
+            pagamentoDia: data.pagamentoDia,
+            saldoPeriodo: data.saldoPeriodo,
+            recebimentoPeriodo: data.recebimentoPeriodo,
+            pagamentoPeriodo: data.pagamentoPeriodo,
+            saldoAcumulado: data.saldoAcumulado
+          }
+        })
+        .catch((error) => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingFluxoFinanceiro = false
+        })
+    },
+    returnFluxoDiario () {
+      this.loadingFluxoDiario = true
+      // envia um objeto de params (melhor do que um número cru)
+      getFluxoDiario({ diasUteis: 5 })
+        .then(data => {
+          this.dias = data.dias
+        })
+        .catch((error) => {
+          this.dias = []
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingFluxoDiario = false
+        })
+    },
+    returnRecebimentos () {
+      this.loadingRecebimentos = true
+      // prepara as datas no formato ISO com Z (ex: 2025-09-01T00:00:00Z)
+      const params = {
+        dataInicial: this.toIsoZ(this.dataInicial),
+        dataFinal: this.toIsoZ(this.dataFinal)
+      }
+      // envia as datas selecionadas como query params
+      getRecebimentoRealizados(params)
+        .then(data => {
+          this.resumoRecebimentos = {
+            aReceberHoje: data.resumo.aReceberHoje,
+            aReceberVencer: data.resumo.aReceberVencer,
+            aReceberAtrasado: data.resumo.aReceberAtrasado,
+            totalRecebimento: data.resumo.totalRecebimento,
+            recebido: data.resumo.recebido,
+            aReceberPerdido: data.resumo.aReceberPerdido
+          }
+          this.rows = data.itens
+        })
+        .catch((error) => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingRecebimentos = false
+        })
+    },
+    returnPagamentos () {
+      this.loadingPagamentos = true
+      const params = {
+        dataInicial: this.toIsoZ(this.dataInicial),
+        dataFinal: this.toIsoZ(this.dataFinal)
+      }
+      getPagamentosRealizados(params)
+        .then(data => {
+          this.resumoPagamentos = {
+            aPagarHoje: data.resumo.aPagarHoje,
+            aPagarVencer: data.resumo.aPagarVencer,
+            aPagarAtrasado: data.resumo.aPagarAtrasado,
+            totalPagamentos: data.resumo.totalPagamentos,
+            pagos: data.resumo.pagos,
+            aPagarDivida: data.resumo.aPagarDivida
+          }
+          this.rows2 = data.itens
+        })
+        .catch((error) => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingPagamentos = false
+        })
+    },
+    returnSaldos () {
+      this.loadingSaldos = true
+      getSaldoContas()
+        .then(data => {
+          this.resumoSaldos = {
+            totalContaCorrente: data.totalContaCorrente,
+            totalOperFinan: data.totalOperFinan,
+            totalInCash: data.totalInCash,
+            totalEstoque: data.totalEstoque,
+            totalInvestimentos: data.totalInvestimentos,
+            totalInvestimentoSocios: data.totalInvestimentoSocios,
+            totalObrigacoes: data.totalObrigacoes,
+            totalFinal: data.totalFinal
+          }
+          this.rows3 = data.contas
+        })
+        .catch((error) => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingSaldos = false
+        })
+  },
+  // Debounced handler: quando o usuário altera as datas, reexecuta as requisições relevantes
+  onDateChange () {
+      // limpa timer anterior
+      if (this.dateChangeTimer) clearTimeout(this.dateChangeTimer)
+      // debounce curto para evitar múltiplas requisições durante a digitação/edição
+      this.dateChangeTimer = setTimeout(() => {
+        this.returnFluxoFinanceiro()
+        this.returnRecebimentos()
+        this.returnPagamentos()
+        this.dateChangeTimer = null
+      }, 250)
+    }
+  },
+  watch: {
+    dataInicial () { this.onDateChange() },
+    dataFinal () { this.onDateChange() }
+  },
 }
 </script>
 <style scoped>

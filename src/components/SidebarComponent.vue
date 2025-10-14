@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-container">
     <div class="logo-badge">
-      <q-img src="/logo-fator-1.svg" height="80px" width="80px" />
+      <q-img :src="logoSrc" height="80px" width="80px" />
     </div>
   
     <div
@@ -10,8 +10,8 @@
     >
       <div class="row items-center">
         <div class="column">
-          <span class="font-1 text-24 weight-600 text-grey-7" style="line-height: 1.3;">Success Factor</span>
-          <span class="text-16 weight-300 text-grey-7" style="letter-spacing: -0.5px;">33.486.687/0001-31</span>
+          <span class="font-1 text-24 weight-600 text-grey-7" style="line-height: 1.3;">{{ companyName }}</span>
+          <span class="text-16 weight-300 text-grey-7" style="letter-spacing: -0.5px;">{{ companyCnpj }}</span>
         </div>
       </div>
   
@@ -69,8 +69,39 @@
   </div>
 </template>
 <script>
-export default {
+import { computed } from 'vue'
+import { useUserStore } from '../stores/user'
 
+export default {
+  setup () {
+    const userStore = useUserStore()
+
+    const company = computed(() => userStore.company || {})
+    const companyName = computed(() => company.value.razaoSocial || '')
+    const logoSrc = computed(() => company.value.logo || '')
+
+    console.log('Company data:', company.value.logo)
+    function formatCnpj (input) {
+      if (input === null || input === undefined) return ''
+      const str = String(input).replace(/\D/g, '')
+      if (str.length !== 14) {
+        return String(input) || ''
+      }
+      return str.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+    }
+
+    const companyCnpj = computed(() => {
+      const raw = company.value.cnpj || ''
+      const formatted = formatCnpj(raw)
+      return formatted
+    })
+
+    return {
+      companyName,
+      companyCnpj,
+      logoSrc
+    }
+  }
 }
 </script>
 <style scoped>

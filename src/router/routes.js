@@ -7,6 +7,10 @@ const routes = [
       { path: 'fluxo-financeiro', component: () => import('src/pages/FluxoFinanceiro.vue') }
     ]
   },
+  {
+    path: '/login',
+    component: () => import('src/pages/loginPage.vue') ,
+  },
 
   // Always leave this as last one,
   // but you can also remove it
@@ -16,7 +20,7 @@ const routes = [
     beforeEnter: (to, from, next) => {
       // Se for diretório raiz direciona para página de login
       if (to.path === '/') {
-        next('/dashboard/resultado-financeiro')
+        next('/login')
       } else {
         next()
       }

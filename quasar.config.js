@@ -44,7 +44,7 @@ export default defineConfig((/* ctx */) => {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
       env: {
-        API_URL: 'http://ec2-3-134-104-38.us-east-2.compute.amazonaws.com:8080/v1'
+        API_URL: 'http://localhost:8080/v1'
       },
       // vueRouterBase,
       // vueDevtools,
@@ -95,7 +95,11 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        'Notify',
+        'Loading',
+        'Dialog'
+      ]
     },
 
     // animations: 'all', // --- includes all animations
