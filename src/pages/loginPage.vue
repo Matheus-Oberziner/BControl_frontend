@@ -34,7 +34,7 @@
               <a href="#" class="forgot-password">Esqueci minha senha</a>
             </div>
 
-            <q-btn type="submit" label="Entrar" color="positive" size="lg" class="full-width login-btn q-mb-lg" no-caps
+            <q-btn label="Entrar" color="positive" size="lg" class="full-width login-btn q-mb-lg" no-caps
               @click="submit()" />
 
             <!-- Link para não cliente -->
