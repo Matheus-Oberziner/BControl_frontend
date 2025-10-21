@@ -44,7 +44,7 @@ export default defineConfig((/* ctx */) => {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
       env: {
-        API_URL: 'http://localhost:8080/v1'
+        API_URL: 'https://api-syrus.fatorxtech.com/v1'
       },
       // vueRouterBase,
       // vueDevtools,

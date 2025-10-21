@@ -119,7 +119,7 @@ axios.interceptors.response.use(
 
 const sendLogin = async params => {
   const res = await axios.post('/auth/login', params, {
-    withCredentials: true,
+    withCredentials: false
   });
   return res.data
 }
