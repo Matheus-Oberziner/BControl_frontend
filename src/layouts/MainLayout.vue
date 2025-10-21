@@ -10,7 +10,7 @@
         <q-space />
 
         <div class="row items-center q-gutter-md">
-          <span class="text-20">Olá Matheus!</span>
+          <span class="text-20">{{ greeting }}</span>
 
           <q-avatar size="50px" style="background-color: #FFFFFF; border-radius: 50%;">
             <q-icon
@@ -47,12 +47,30 @@
   </q-layout>
 </template>
 <script>
+import { computed } from 'vue'
+import { useUserStore } from 'stores/user'
 import Drawer from 'src/components/DrawerComponent.vue'
 import Sidebar from 'src/components/SidebarComponent.vue'
+
 export default {
   components: {
     Sidebar,
     Drawer
+  },
+  setup () {
+    const store = useUserStore()
+
+    // derive a user name from userInfo (supports different possible keys)
+    const userName = computed(() => {
+      const ui = store.userInfo || {}
+      return ui.name || ui.nome || ui.razaoSocial || ''
+    })
+
+    const greeting = computed(() => (userName.value ? `Olá ${userName.value}!` : 'Olá!'))
+
+    return {
+      greeting
+    }
   }
 }
 </script>

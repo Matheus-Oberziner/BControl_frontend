@@ -1,7 +1,7 @@
 <template>
   <div class="row" style="padding: 40px 0px;">
     <!-- Card 1 - Fluxo Financeiro -->
-    <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 25px; margin: 0px 0px 60px 0;">
+    <div ref="cardFluxoFinanceiro" class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 25px; margin: 0px 0px 60px 0;">
       <!-- Overlay de loading para o fluxo financeiro -->
       <template v-if="loadingFluxoFinanceiro">
         <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.65); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
@@ -212,13 +212,13 @@
         </div>
       </div>
 
-      <div class="col-12 row justify-center" style="padding: 20px 0 40px;">
+      <!-- <div class="col-12 row justify-center" style="padding: 20px 0 40px;">
         <FinancialFluxChart />
-      </div>
+      </div> -->
     </div>
 
   <!-- Card 2 - Pagamentos e Recebimentos Diários -->
-  <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 25px;">
+  <div ref="cardFluxoDiario" class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 25px;">
       <div class="col-12 row" :style="$q.screen.width > 1200 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 60 58" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -345,6 +345,8 @@
           flat
           rounded
           style="margin: 0px 10px;"
+          @click="scrollTo('cardRecebimentos')"
+          type="button"
         >
           <template #default>
             <svg width="40" height="40" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -358,6 +360,8 @@
           flat
           rounded
           style="margin: 0px 10px;"
+          @click="scrollTo('cardPagamentos')"
+          type="button"
         >
           <template #default>
             <svg width="40" height="40" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -371,6 +375,8 @@
           flat
           rounded
           style="margin: 0px 10px;"
+          @click="scrollTo('cardSaldos')"
+          type="button"
         >
           <template #default>
             <svg width="40" height="40" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -408,7 +414,7 @@
     </div>
 
   <!-- Card 3 - Entrada Recebimentos -->
-  <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px;">
+  <div ref="cardRecebimentos" class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px;">
       <div class="col-12 row" :style="$q.screen.width > 1200 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -542,7 +548,7 @@
     </div>
 
   <!-- Card 4 - Saída Pagamentos -->
-  <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px; margin: 60px 0px 60px 0;">
+  <div ref="cardPagamentos" class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px; margin: 60px 0px 60px 0;">
       <div class="col-12 row" :style="$q.screen.width > 1200 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -676,7 +682,7 @@
     </div>
 
     <!-- Card 5 - Saldos -->
-    <div class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px; margin: 0px 0px 60px 0;">
+  <div ref="cardSaldos" class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px 5px; margin: 0px 0px 60px 0;">
       <div v-if="loadingSaldos" style="position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.75); z-index: 50; border-radius: inherit;">
         <q-spinner-dots color="primary" size="40px" />
       </div>
@@ -835,18 +841,19 @@
   </div>
 </template>
 <script>
-import FinancialFluxChart from 'src/components/FinancialFluxChart.vue'
+// import FinancialFluxChart from 'src/components/FinancialFluxChart.vue'
 import TableComponent from 'src/components/TableComponent.vue'
 import { getFluxoDiario, getFluxoFinanceiro, getRecebimentoRealizados, getPagamentosRealizados, getSaldoContas } from 'src/boot/axios'
 import { notify } from '../helpers/notify.js'
 import { ref } from 'vue'
 
-const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+// formatter: pt-BR number with 2 fraction digits, no currency symbol
+const brl = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 export default {
   components: {
     TableComponent,
-    FinancialFluxChart
+    // FinancialFluxChart
   },
   setup () {
     const loadingFluxoFinanceiro = ref(false)
@@ -860,7 +867,7 @@ export default {
       loadingFluxoFinanceiro,
       loadingRecebimentos,
       loadingPagamentos,
-      loadingSaldos
+      loadingSaldos,
     }
   },
   data () {
@@ -880,6 +887,12 @@ export default {
       },
       // Fluxo Diário
       dias: [],
+  // flags para controlar carregamento por visibilidade
+  loadedFluxoFinanceiro: false,
+  loadedFluxoDiario: false,
+  loadedRecebimentos: false,
+  loadedPagamentos: false,
+  loadedSaldos: false,
       // Tabela Recebimentos
       resumoRecebimentos: {
         aReceberHoje: 0,
@@ -948,14 +961,76 @@ export default {
     }
   },
   mounted () {
-    this.returnFluxoFinanceiro(),
-    this.returnFluxoDiario(),
-    this.returnRecebimentos(),
-    this.returnPagamentos(),
-    this.returnSaldos()
+    // Não disparamos as requisições imediatamente para evitar "choque" de requisições.
+    // Usaremos IntersectionObserver para carregar cada card quando ele entrar em viewport.
+    this._io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return
+        const target = entry.target
+        // verifica cada card pelo elemento observado
+        if (this.$refs && this.$refs.cardFluxoFinanceiro && target === this.$refs.cardFluxoFinanceiro) {
+          if (!this.loadedFluxoFinanceiro) {
+            this.returnFluxoFinanceiro()
+            this.loadedFluxoFinanceiro = true
+          }
+        }
+        if (this.$refs && this.$refs.cardFluxoDiario && target === this.$refs.cardFluxoDiario) {
+          if (!this.loadedFluxoDiario) {
+            this.returnFluxoDiario()
+            this.loadedFluxoDiario = true
+          }
+        }
+        if (this.$refs && this.$refs.cardRecebimentos && target === this.$refs.cardRecebimentos) {
+          if (!this.loadedRecebimentos) {
+            this.returnRecebimentos()
+            this.loadedRecebimentos = true
+          }
+        }
+        if (this.$refs && this.$refs.cardPagamentos && target === this.$refs.cardPagamentos) {
+          if (!this.loadedPagamentos) {
+            this.returnPagamentos()
+            this.loadedPagamentos = true
+          }
+        }
+        if (this.$refs && this.$refs.cardSaldos && target === this.$refs.cardSaldos) {
+          if (!this.loadedSaldos) {
+            this.returnSaldos()
+            this.loadedSaldos = true
+          }
+        }
+        // se já observamos e carregamos, podemos desregistrar o elemento
+        if (this._io && entry.isIntersecting) this._io.unobserve(target)
+      })
+    }, { root: null, rootMargin: '0px', threshold: 0.15 })
+
+    // registra os elementos (usar $refs quando montado)
+    // alguns refs podem ser null se o elemento não existir; protegemos com try/catch
+    try {
+      if (this.$refs.cardFluxoFinanceiro) this._io.observe(this.$refs.cardFluxoFinanceiro)
+      if (this.$refs.cardFluxoDiario) this._io.observe(this.$refs.cardFluxoDiario)
+      if (this.$refs.cardRecebimentos) this._io.observe(this.$refs.cardRecebimentos)
+      if (this.$refs.cardPagamentos) this._io.observe(this.$refs.cardPagamentos)
+      if (this.$refs.cardSaldos) this._io.observe(this.$refs.cardSaldos)
+    } catch (err) {
+      // fallback: se IntersectionObserver não estiver disponível, carrega imediatamente
+      console.warn('IntersectionObserver observe registration failed:', err)
+      if (typeof IntersectionObserver === 'undefined') {
+        this.returnFluxoFinanceiro()
+        this.returnFluxoDiario()
+        this.returnRecebimentos()
+        this.returnPagamentos()
+        this.returnSaldos()
+      }
+    }
+  },
+  beforeUnmount () {
+    if (this._io) {
+      try { this._io.disconnect() } catch (err) { console.warn('io disconnect failed', err) }
+    }
   },
   methods: {
     // utils ===============
+    // returns a localized number string (pt-BR) without currency symbol
     formatCurrency(value) {
       return brl.format(Number(value) || 0)
     },
@@ -963,6 +1038,25 @@ export default {
       // espera dateStr no formato YYYY-MM-DD
       if (!dateStr) return null
       return `${dateStr}T00:00:00Z`
+    },
+    // scroll suave para o elemento referenciado (refName deve existir em $refs)
+    scrollTo (refName) {
+      try {
+        const el = this.$refs[refName]
+        if (!el) {
+          console.warn('scrollTo: ref not found', refName)
+          return
+        }
+        // calcula posição do elemento na página
+        const rect = el.getBoundingClientRect()
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+        // offset - reduz um pouco para deixar espaço superior (ajuste conforme layout)
+        const offset = 200
+        const top = rect.top + scrollTop - offset
+        window.scrollTo({ top, behavior: 'smooth' })
+      } catch (err) {
+        console.warn('scrollTo error', err)
+      }
     },
     //API Calls======================
     returnFluxoFinanceiro () {
@@ -1088,9 +1182,14 @@ export default {
       if (this.dateChangeTimer) clearTimeout(this.dateChangeTimer)
       // debounce curto para evitar múltiplas requisições durante a digitação/edição
       this.dateChangeTimer = setTimeout(() => {
-        this.returnFluxoFinanceiro()
-        this.returnRecebimentos()
-        this.returnPagamentos()
+        // Re-executa apenas as requisições das seções que já foram carregadas
+        if (this.loadedFluxoFinanceiro) this.returnFluxoFinanceiro()
+        setTimeout(() => {
+          if (this.loadedRecebimentos) this.returnRecebimentos()
+        }, 100)
+        setTimeout(() => {
+          if (this.loadedPagamentos) this.returnPagamentos()
+        }, 200)
         this.dateChangeTimer = null
       }, 250)
     }
