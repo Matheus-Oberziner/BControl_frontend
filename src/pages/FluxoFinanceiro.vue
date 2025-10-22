@@ -1089,6 +1089,8 @@ export default {
     returnFluxoDiario () {
       this.loadingFluxoDiario = true
       // envia um objeto de params (melhor do que um número cru)
+      setTimeout(() => {
+      }, 20000)
       getFluxoDiario({ diasUteis: 5 })
         .then(data => {
           this.dias = data.dias
@@ -1186,10 +1188,10 @@ export default {
         if (this.loadedFluxoFinanceiro) this.returnFluxoFinanceiro()
         setTimeout(() => {
           if (this.loadedRecebimentos) this.returnRecebimentos()
-        }, 100)
+        }, 10000)
         setTimeout(() => {
           if (this.loadedPagamentos) this.returnPagamentos()
-        }, 200)
+        }, 20000)
         this.dateChangeTimer = null
       }, 250)
     }

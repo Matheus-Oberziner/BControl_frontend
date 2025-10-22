@@ -1,7 +1,13 @@
 <template>
   <div class="row" style="padding: 40px 0px;">
     <!-- Card 1 - Resultado Financeiro -->
-    <div class="col-12 row shadow-5" style="border-radius: 20px; padding: 25px 0px;">
+    <div ref="cardResultadoFinanceiro" class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px;">
+      <!-- Overlay de loading para o resultado financeiro -->
+      <template v-if="loadingResultadoFinanceiro">
+        <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+          <q-spinner-dots color="blue" size="56px" />
+        </div>
+      </template>
       <div class="col-12 row" :style="$q.screen.width > 1200 ? 'padding: 0px 70px;' : 'padding: 0px 30px;'">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -292,6 +298,8 @@
         flat
         rounded
         style="margin: 0px 10px;"
+        @click="scrollTo('cardFaturamento')"
+        type="button"
       >
         <template #default>
           <svg width="40" height="40" viewBox="0 0 45 51" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -305,6 +313,8 @@
         flat
         rounded
         style="margin: 0px 10px;"
+        @click="scrollTo('cardInadimplencia')"
+        type="button"
       >
         <template #default>
           <svg width="40" height="40" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -318,6 +328,8 @@
         flat
         rounded
         style="margin: 0px 10px;"
+        @click="scrollTo('cardPerdaRecorrencia')"
+        type="button"
       >
         <template #default>
           <svg width="40" height="40" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -331,6 +343,8 @@
         flat
         rounded
         style="margin: 0px 10px;"
+        @click="scrollTo('cardDespesas')"
+        type="button"
       >
         <template #default>
           <svg width="40" height="40" viewBox="0 0 51 47" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -344,6 +358,8 @@
         flat
         rounded
         style="margin: 0px 10px;"
+        @click="scrollTo('cardMargemContribuicao')"
+        type="button"
       >
         <template #default>
           <svg width="40" height="40" viewBox="0 0 51 43" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -357,6 +373,8 @@
         flat
         rounded
         style="margin: 0px 10px;"
+        @click="scrollTo('cardDRE')"
+        type="button"
       >
         <template #default>
           <svg width="40" height="40" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -368,7 +386,13 @@
     </div>
 
     <!-- Card 2 - Faturamento -->
-    <div class="col-12 row shadow-5" style="border-radius: 20px; padding: 25px 0px;">
+    <div ref="cardFaturamento" class="col-12 row shadow-5" style="position: relative; border-radius: 20px; padding: 25px 0px;">
+      <!-- Overlay de loading para o faturamento -->
+      <template v-if="loadingFaturamento">
+        <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+          <q-spinner-dots color="blue" size="56px" />
+        </div>
+      </template>
       <div class="col-12 row items-start justify-between" style="padding: 0px 10px 0px 70px;">
         <div class="row items-center q-py-sm q-px-md topic-style">
           <svg width="45" height="45" viewBox="0 0 57 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -601,22 +625,63 @@
     </div>
 
     <!-- Card 3 - Inadimplência -->
-    <Card3 />
+    <div ref="cardInadimplencia" style="position: relative; width: 100%;">
+      <!-- Overlay de loading para inadimplência -->
+      <template v-if="loadingInadimplencia">
+        <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+          <q-spinner-dots color="blue" size="56px" />
+        </div>
+      </template>
+      <Card3 />
+    </div>
 
     <!-- Card 4 - Perda de Receita Recorrente -->
-     <Card4 />
+    <div ref="cardPerdaRecorrencia" style="position: relative; width: 100%;">
+      <!-- Overlay de loading para perda de recorrência -->
+      <template v-if="loadingPerdaRecorrencia">
+        <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+          <q-spinner-dots color="blue" size="56px" />
+        </div>
+      </template>
+      <Card4 />
+    </div>
 
     <!-- Card 5 - Despesas por Centro de Custo -->
-     <Card5 />
+    <div ref="cardDespesas" style="position: relative; width: 100%;">
+      <!-- Overlay de loading para despesas -->
+      <template v-if="loadingDespesas">
+        <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+          <q-spinner-dots color="blue" size="56px" />
+        </div>
+      </template>
+      <Card5 />
+    </div>
 
     <!-- Card 6 - Margem de Contribuição -->
-     <Card6 />
+    <div ref="cardMargemContribuicao" style="position: relative; width: 100%;">
+      <!-- Overlay de loading para margem de contribuição -->
+      <template v-if="loadingMargemContribuicao">
+        <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+          <q-spinner-dots color="blue" size="56px" />
+        </div>
+      </template>
+      <Card6 />
+    </div>
 
     <!-- Card 7 - DRE -->
-     <Card7 />
+    <div ref="cardDRE" style="position: relative; width: 100%;">
+      <!-- Overlay de loading para DRE -->
+      <template v-if="loadingDRE">
+        <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 50; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+          <q-spinner-dots color="blue" size="56px" />
+        </div>
+      </template>
+      <Card7 />
+    </div>
   </div>
 </template>
 <script>
+import { ref } from 'vue'
 import StrokedGauge from 'src/components/StrokedGauge.vue'
 import CustomBarChart from 'src/components/CustomBarChart.vue'
 import CardComponent from 'src/components/CardComponent.vue'
@@ -646,8 +711,35 @@ export default {
     Card6,
     Card7
   },
+  setup () {
+    const loadingResultadoFinanceiro = ref(false)
+    const loadingFaturamento = ref(false)
+    const loadingInadimplencia = ref(false)
+    const loadingPerdaRecorrencia = ref(false)
+    const loadingDespesas = ref(false)
+    const loadingMargemContribuicao = ref(false)
+    const loadingDRE = ref(false)
+    
+    return {
+      loadingResultadoFinanceiro,
+      loadingFaturamento,
+      loadingInadimplencia,
+      loadingPerdaRecorrencia,
+      loadingDespesas,
+      loadingMargemContribuicao,
+      loadingDRE
+    }
+  },
   data () {
     return {
+      // flags para controlar carregamento por visibilidade
+      loadedResultadoFinanceiro: false,
+      loadedFaturamento: false,
+      loadedInadimplencia: false,
+      loadedPerdaRecorrencia: false,
+      loadedDespesas: false,
+      loadedMargemContribuicao: false,
+      loadedDRE: false,
       arrayComparativos: [
         {
           title: 'Inadinplência',
@@ -879,6 +971,158 @@ export default {
           ]
         }
       ]
+    }
+  },
+  mounted () {
+    // Usaremos IntersectionObserver para carregar cada card quando ele entrar em viewport.
+    this._io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return
+        const target = entry.target
+        // verifica cada card pelo elemento observado
+        if (this.$refs && this.$refs.cardResultadoFinanceiro && target === this.$refs.cardResultadoFinanceiro) {
+          if (!this.loadedResultadoFinanceiro) {
+            this.loadResultadoFinanceiro()
+            this.loadedResultadoFinanceiro = true
+          }
+        }
+        if (this.$refs && this.$refs.cardFaturamento && target === this.$refs.cardFaturamento) {
+          if (!this.loadedFaturamento) {
+            this.loadFaturamento()
+            this.loadedFaturamento = true
+          }
+        }
+        if (this.$refs && this.$refs.cardInadimplencia && target === this.$refs.cardInadimplencia) {
+          if (!this.loadedInadimplencia) {
+            this.loadInadimplencia()
+            this.loadedInadimplencia = true
+          }
+        }
+        if (this.$refs && this.$refs.cardPerdaRecorrencia && target === this.$refs.cardPerdaRecorrencia) {
+          if (!this.loadedPerdaRecorrencia) {
+            this.loadPerdaRecorrencia()
+            this.loadedPerdaRecorrencia = true
+          }
+        }
+        if (this.$refs && this.$refs.cardDespesas && target === this.$refs.cardDespesas) {
+          if (!this.loadedDespesas) {
+            this.loadDespesas()
+            this.loadedDespesas = true
+          }
+        }
+        if (this.$refs && this.$refs.cardMargemContribuicao && target === this.$refs.cardMargemContribuicao) {
+          if (!this.loadedMargemContribuicao) {
+            this.loadMargemContribuicao()
+            this.loadedMargemContribuicao = true
+          }
+        }
+        if (this.$refs && this.$refs.cardDRE && target === this.$refs.cardDRE) {
+          if (!this.loadedDRE) {
+            this.loadDRE()
+            this.loadedDRE = true
+          }
+        }
+        // se já observamos e carregamos, podemos desregistrar o elemento
+        if (this._io && entry.isIntersecting) this._io.unobserve(target)
+      })
+    }, { root: null, rootMargin: '0px', threshold: 0.15 })
+
+    // registra os elementos (usar $refs quando montado)
+    try {
+      if (this.$refs.cardResultadoFinanceiro) this._io.observe(this.$refs.cardResultadoFinanceiro)
+      if (this.$refs.cardFaturamento) this._io.observe(this.$refs.cardFaturamento)
+      if (this.$refs.cardInadimplencia) this._io.observe(this.$refs.cardInadimplencia)
+      if (this.$refs.cardPerdaRecorrencia) this._io.observe(this.$refs.cardPerdaRecorrencia)
+      if (this.$refs.cardDespesas) this._io.observe(this.$refs.cardDespesas)
+      if (this.$refs.cardMargemContribuicao) this._io.observe(this.$refs.cardMargemContribuicao)
+      if (this.$refs.cardDRE) this._io.observe(this.$refs.cardDRE)
+    } catch (err) {
+      // fallback: se IntersectionObserver não estiver disponível, carrega imediatamente
+      console.warn('IntersectionObserver observe registration failed:', err)
+      if (typeof IntersectionObserver === 'undefined') {
+        this.loadResultadoFinanceiro()
+        this.loadFaturamento()
+        this.loadInadimplencia()
+        this.loadPerdaRecorrencia()
+        this.loadDespesas()
+        this.loadMargemContribuicao()
+        this.loadDRE()
+      }
+    }
+  },
+  beforeUnmount () {
+    if (this._io) {
+      try { this._io.disconnect() } catch (err) { console.warn('io disconnect failed', err) }
+    }
+  },
+  methods: {
+    // scroll suave para o elemento referenciado (refName deve existir em $refs)
+    scrollTo (refName) {
+      try {
+        const el = this.$refs[refName]
+        if (!el) {
+          console.warn('scrollTo: ref not found', refName)
+          return
+        }
+        // calcula posição do elemento na página
+        const rect = el.getBoundingClientRect()
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+        // offset - reduz um pouco para deixar espaço superior (ajuste conforme layout)
+        const offset = 200
+        const top = rect.top + scrollTop - offset
+        window.scrollTo({ top, behavior: 'smooth' })
+      } catch (err) {
+        console.warn('scrollTo error', err)
+      }
+    },
+    loadResultadoFinanceiro () {
+      this.loadingResultadoFinanceiro = true
+      // Simula loading de 2 segundos
+      setTimeout(() => {
+        this.loadingResultadoFinanceiro = false
+      }, 2000000)
+    },
+    loadFaturamento () {
+      this.loadingFaturamento = true
+      // Simula loading de 2 segundos
+      setTimeout(() => {
+        this.loadingFaturamento = false
+      }, 2000000)
+    },
+    loadInadimplencia () {
+      this.loadingInadimplencia = true
+      // Simula loading de 2 segundos
+      setTimeout(() => {
+        this.loadingInadimplencia = false
+      }, 2000000)
+    },
+    loadPerdaRecorrencia () {
+      this.loadingPerdaRecorrencia = true
+      // Simula loading de 2 segundos
+      setTimeout(() => {
+        this.loadingPerdaRecorrencia = false
+      }, 2000000)
+    },
+    loadDespesas () {
+      this.loadingDespesas = true
+      // Simula loading de 2 segundos
+      setTimeout(() => {
+        this.loadingDespesas = false
+      }, 2000000)
+    },
+    loadMargemContribuicao () {
+      this.loadingMargemContribuicao = true
+      // Simula loading de 2 segundos
+      setTimeout(() => {
+        this.loadingMargemContribuicao = false
+      }, 2000000)
+    },
+    loadDRE () {
+      this.loadingDRE = true
+      // Simula loading de 2 segundos
+      setTimeout(() => {
+        this.loadingDRE = false
+      }, 2000000)
     }
   }
 }
