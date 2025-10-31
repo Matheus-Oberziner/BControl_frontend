@@ -212,9 +212,11 @@
         </div>
       </div>
 
-      <!-- <div class="col-12 row justify-center" style="padding: 20px 0 40px;">
-        <FinancialFluxChart />
-      </div> -->
+      <div class="col-12 row justify-center" style="padding: 20px 0 40px;">
+        <FinancialFluxChart
+          :items="meses"
+        />
+      </div>
     </div>
 
   <!-- Card 2 - Pagamentos e Recebimentos Diários -->
@@ -841,9 +843,9 @@
   </div>
 </template>
 <script>
-// import FinancialFluxChart from 'src/components/FinancialFluxChart.vue'
+import FinancialFluxChart from 'src/components/FinancialFluxChart.vue'
 import TableComponent from 'src/components/TableComponent.vue'
-import { getFluxoDiario, getFluxoFinanceiro, getRecebimentoRealizados, getPagamentosRealizados, getSaldoContas } from 'src/boot/axios'
+import { getFluxoDiario, getFluxoFinanceiro, getRecebimentoRealizados, getPagamentosRealizados, getSaldoContas, getFluxoMensal } from 'src/boot/axios'
 import { notify } from '../helpers/notify.js'
 import { ref } from 'vue'
 
@@ -853,7 +855,7 @@ const brl = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFr
 export default {
   components: {
     TableComponent,
-    // FinancialFluxChart
+    FinancialFluxChart
   },
   setup () {
     const loadingFluxoFinanceiro = ref(false)
@@ -861,6 +863,7 @@ export default {
     const loadingRecebimentos = ref(false)
     const loadingPagamentos = ref(false)
     const loadingSaldos = ref(false)
+    const loadingFluxoMensal = ref(false)
     return {
       aplicarTodos: ref('sim'),
       loadingFluxoDiario,
@@ -868,6 +871,7 @@ export default {
       loadingRecebimentos,
       loadingPagamentos,
       loadingSaldos,
+      loadingFluxoMensal
     }
   },
   data () {
@@ -887,12 +891,12 @@ export default {
       },
       // Fluxo Diário
       dias: [],
-  // flags para controlar carregamento por visibilidade
-  loadedFluxoFinanceiro: false,
-  loadedFluxoDiario: false,
-  loadedRecebimentos: false,
-  loadedPagamentos: false,
-  loadedSaldos: false,
+      // flags para controlar carregamento por visibilidade
+      loadedFluxoFinanceiro: false,
+      loadedFluxoDiario: false,
+      loadedRecebimentos: false,
+      loadedPagamentos: false,
+      loadedSaldos: false,
       // Tabela Recebimentos
       resumoRecebimentos: {
         aReceberHoje: 0,
@@ -957,7 +961,8 @@ export default {
         { name: 'limiteDisponivel', label: 'Limite Disponível', format: (v) => brl.format(Number(v) || 0) },
         { name: 'limiteMaisSaldo', label: 'Limite + Saldo', format: (v) => brl.format(Number(v) || 0) }
       ],
-      rows3: []
+      rows3: [],
+      meses: []
     }
   },
   mounted () {
@@ -969,6 +974,11 @@ export default {
         const target = entry.target
         // verifica cada card pelo elemento observado
         if (this.$refs && this.$refs.cardFluxoFinanceiro && target === this.$refs.cardFluxoFinanceiro) {
+          if (!this.loadedFluxoFinanceiro) {
+            this.returnFluxoFinanceiro()
+            this.returnFluxoMensal()
+            this.loadedFluxoFinanceiro = true
+          }
           if (!this.loadedFluxoFinanceiro) {
             this.returnFluxoFinanceiro()
             this.loadedFluxoFinanceiro = true
@@ -1016,6 +1026,7 @@ export default {
       console.warn('IntersectionObserver observe registration failed:', err)
       if (typeof IntersectionObserver === 'undefined') {
         this.returnFluxoFinanceiro()
+        this.returnFluxoMensal()
         this.returnFluxoDiario()
         this.returnRecebimentos()
         this.returnPagamentos()
@@ -1177,15 +1188,48 @@ export default {
         .finally(() => {
           this.loadingSaldos = false
         })
-  },
-  // Debounced handler: quando o usuário altera as datas, reexecuta as requisições relevantes
-  onDateChange () {
+    },
+    returnFluxoMensal () {
+      this.loadingFluxoMensal = true
+      getFluxoMensal()
+        .then(data => {
+          const itens = Array.isArray(data?.itens) ? data.itens : []
+          const meses = []
+
+          for (let i = 0; i < 5 && i < itens.length; i++) {
+            const item = itens[i] || {}
+
+            meses.push({
+              month: item.label,
+              topCap: item.aReceberPrevisto,
+              receber: { value: item.aReceber, color: '#FE721C' },
+              pagar: { value: item.aPagar, color: '#680059' },
+              bottomCap: item.aPagarPrevisto,
+              saldo: item.saldo
+            })
+          }
+
+          this.meses = meses
+        })
+        .catch((error) => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingFluxoMensal = false
+        })
+    },
+    // Debounced handler: quando o usuário altera as datas, reexecuta as requisições relevantes
+    onDateChange () {
       // limpa timer anterior
       if (this.dateChangeTimer) clearTimeout(this.dateChangeTimer)
       // debounce curto para evitar múltiplas requisições durante a digitação/edição
       this.dateChangeTimer = setTimeout(() => {
         // Re-executa apenas as requisições das seções que já foram carregadas
-        if (this.loadedFluxoFinanceiro) this.returnFluxoFinanceiro()
+        if (this.loadedFluxoFinanceiro) {
+          this.returnFluxoFinanceiro()
+          this.returnFluxoMensal()
+        }
+
         setTimeout(() => {
           if (this.loadedRecebimentos) this.returnRecebimentos()
         }, 10000)

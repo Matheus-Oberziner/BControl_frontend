@@ -87,7 +87,7 @@ export default {
     },
     calcHeight (item) {
       const projetado = Number(this.chartData.find(i => i.label === 'Projetado')?.value) || 0
-      if (!projetado) return 0
+      // if (!projetado) return 0
 
       const hasPE = this.chartData.some(i => i.label === 'Ponto de Equilíbrio')
       const reserve = hasPE ? 30 : 0
@@ -95,9 +95,23 @@ export default {
 
       if (item.label === 'Ponto de Equilíbrio') return reserve
 
-      const percent = (Number(item.value) / projetado) * span
+      if (projetado > 0) {
+        const percent = (Number(item.value / projetado) * span)
+        return Math.max(0, Math.min(percent, span))
+      }
+
+      const others = this.chartData.filter(i => i.label !== 'Projetado' && i.label !== 'Ponto de Equilíbrio')
+      const maxVal = Math.max(...others.map(o => Number(o.value) || 0), 0)
+
+      // se nem as outras têm valor, fica 0 mesmo
+      if (!maxVal) return 0
+
+      const percent = (Number(item.value) / maxVal) * span
       return Math.max(0, Math.min(percent, span))
     }
+  },
+  mounted () {
+    console.log(this.chartData)
   }
 }
 </script>

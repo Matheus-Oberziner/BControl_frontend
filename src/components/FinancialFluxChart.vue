@@ -104,15 +104,7 @@ export default {
   props: {
     items: {
       type: Array,
-      default: () => ([
-        { month: 'MAR / 2025', topCap: 500000, receber: { value: 390000, color: '#FE721C' }, pagar: { value: 300000, color: '#680059' }, bottomCap: 350000, saldo: 90000 },
-        { month: 'ABR / 2025', topCap: 500000, receber: { value: 390000, color: '#FE721C' }, pagar: { value: 350000, color: '#680059' }, bottomCap: 350000, saldo: 90000 },
-        { month: 'MAI / 2025', topCap: 500000, receber: { value: 420000, color: '#FE721C' }, pagar: { value: 315000, color: '#680059' }, bottomCap: 350000, saldo: 105000 },
-        { month: 'JUN / 2025', topCap: 500000, receber: { value: 415000, color: '#FE721C' }, pagar: { value: 320000, color: '#680059' }, bottomCap: 350000, saldo: 95000 },
-        { month: 'JUL / 2025', topCap: 500000, receber: { value: 420000, color: '#FE721C' }, pagar: { value: 325000, color: '#680059' }, bottomCap: 350000, saldo: 95000 },
-        { month: 'AGO / 2025', topCap: 500000, receber: { value: 420000, color: '#FE721C' }, pagar: { value: 320000, color: '#680059' }, bottomCap: 350000, saldo: 100000 },
-        { month: 'SET / 2025', topCap: 500000, receber: { value: 437000, color: '#FE721C' }, pagar: { value: 330000, color: '#680059' }, bottomCap: 350000, saldo: 107000 }
-      ])
+      required: true
     }
   },
   computed: {

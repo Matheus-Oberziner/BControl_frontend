@@ -160,6 +160,12 @@ const getSaldoContas = async params => {
   return res.data
 }
 
+const getFluxoMensal = async () => {
+  let company = JSON.parse(localStorage.getItem('company'))
+  const res = await axios.get(`/fluxo-financeiro/${company?.cnpj}/fluxo-mensal`)
+  return res.data
+}
+
 export {
   sendLogin,
   getRecebimentoRealizados,
@@ -167,5 +173,6 @@ export {
   getSaldoContas,
   getFluxoDiario,
   getFluxoFinanceiro,
-  getCompany
+  getCompany,
+  getFluxoMensal
 }
