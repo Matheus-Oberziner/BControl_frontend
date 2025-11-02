@@ -80,7 +80,6 @@ export default {
     const companyName = computed(() => company.value.razaoSocial || '')
     const logoSrc = computed(() => company.value.logo || '')
 
-    console.log('Company data:', company.value.logo)
     function formatCnpj (input) {
       if (input === null || input === undefined) return ''
       const str = String(input).replace(/\D/g, '')

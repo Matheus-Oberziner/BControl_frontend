@@ -845,7 +845,7 @@
 <script>
 import FinancialFluxChart from 'src/components/FinancialFluxChart.vue'
 import TableComponent from 'src/components/TableComponent.vue'
-import { getFluxoDiario, getFluxoFinanceiro, getRecebimentoRealizados, getPagamentosRealizados, getSaldoContas, getFluxoMensal } from 'src/boot/axios'
+import { getFluxoDiario, getFluxoFinanceiro, getRecebimentoRealizados, getPagamentosRealizados, getSaldoContas } from 'src/boot/axios'
 import { notify } from '../helpers/notify.js'
 import { ref } from 'vue'
 
@@ -976,7 +976,6 @@ export default {
         if (this.$refs && this.$refs.cardFluxoFinanceiro && target === this.$refs.cardFluxoFinanceiro) {
           if (!this.loadedFluxoFinanceiro) {
             this.returnFluxoFinanceiro()
-            this.returnFluxoMensal()
             this.loadedFluxoFinanceiro = true
           }
           if (!this.loadedFluxoFinanceiro) {
@@ -1026,7 +1025,6 @@ export default {
       console.warn('IntersectionObserver observe registration failed:', err)
       if (typeof IntersectionObserver === 'undefined') {
         this.returnFluxoFinanceiro()
-        this.returnFluxoMensal()
         this.returnFluxoDiario()
         this.returnRecebimentos()
         this.returnPagamentos()
@@ -1089,6 +1087,23 @@ export default {
             pagamentoPeriodo: data.pagamentoPeriodo,
             saldoAcumulado: data.saldoAcumulado
           }
+          const itens = Array.isArray(data?.fluxoMensal) ? data.fluxoMensal : []
+          const meses = []
+
+          for (let i = 0; i < itens.length; i++) {
+            const item = itens[i] || {}
+
+            meses.push({
+              month: item.label,
+              topCap: item.aReceberPrevisto,
+              receber: { value: item.aReceber, color: '#FE721C' },
+              pagar: { value: item.aPagar, color: '#680059' },
+              bottomCap: item.aPagarPrevisto,
+              saldo: item.saldo
+            })
+          }
+          console.log('Meses para o gráfico:', meses)
+          this.meses = meses
         })
         .catch((error) => {
           notify.showFromHttp(error)
@@ -1189,35 +1204,6 @@ export default {
           this.loadingSaldos = false
         })
     },
-    returnFluxoMensal () {
-      this.loadingFluxoMensal = true
-      getFluxoMensal()
-        .then(data => {
-          const itens = Array.isArray(data?.itens) ? data.itens : []
-          const meses = []
-
-          for (let i = 0; i < 5 && i < itens.length; i++) {
-            const item = itens[i] || {}
-
-            meses.push({
-              month: item.label,
-              topCap: item.aReceberPrevisto,
-              receber: { value: item.aReceber, color: '#FE721C' },
-              pagar: { value: item.aPagar, color: '#680059' },
-              bottomCap: item.aPagarPrevisto,
-              saldo: item.saldo
-            })
-          }
-
-          this.meses = meses
-        })
-        .catch((error) => {
-          notify.showFromHttp(error)
-        })
-        .finally(() => {
-          this.loadingFluxoMensal = false
-        })
-    },
     // Debounced handler: quando o usuário altera as datas, reexecuta as requisições relevantes
     onDateChange () {
       // limpa timer anterior
@@ -1227,7 +1213,6 @@ export default {
         // Re-executa apenas as requisições das seções que já foram carregadas
         if (this.loadedFluxoFinanceiro) {
           this.returnFluxoFinanceiro()
-          this.returnFluxoMensal()
         }
 
         setTimeout(() => {

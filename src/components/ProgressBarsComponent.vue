@@ -97,7 +97,6 @@ export default defineComponent({
     
     // Lifecycle hooks
     onMounted(() => {
-      console.log('Gráfico de barras progressivas carregado')
     })
     
     return {
