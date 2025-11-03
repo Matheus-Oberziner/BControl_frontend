@@ -858,12 +858,12 @@ export default {
     FinancialFluxChart
   },
   setup () {
-    const loadingFluxoFinanceiro = ref(false)
-    const loadingFluxoDiario = ref(false)
-    const loadingRecebimentos = ref(false)
-    const loadingPagamentos = ref(false)
-    const loadingSaldos = ref(false)
-    const loadingFluxoMensal = ref(false)
+    const loadingFluxoFinanceiro = ref(true)
+    const loadingFluxoDiario = ref(true)
+    const loadingRecebimentos = ref(true)
+    const loadingPagamentos = ref(true)
+    const loadingSaldos = ref(true)
+    const loadingFluxoMensal = ref(true)
     return {
       aplicarTodos: ref('sim'),
       loadingFluxoDiario,
@@ -967,48 +967,27 @@ export default {
   },
   mounted () {
     // Não disparamos as requisições imediatamente para evitar "choque" de requisições.
-    // Usaremos IntersectionObserver para carregar cada card quando ele entrar em viewport.
+    // Usaremos IntersectionObserver para detectar visibilidade, mas iremos enfileirar
+    // os carregamentos e executá-los sequencialmente respeitando a ordem de scroll.
+    this._pendingLoads = [] // nomes dos refs aguardando carregamento
+    this._isProcessingLoads = false
+
     this._io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return
         const target = entry.target
-        // verifica cada card pelo elemento observado
-        if (this.$refs && this.$refs.cardFluxoFinanceiro && target === this.$refs.cardFluxoFinanceiro) {
-          if (!this.loadedFluxoFinanceiro) {
-            this.returnFluxoFinanceiro()
-            this.loadedFluxoFinanceiro = true
+        // tenta descobrir o nome do ref associado ao elemento observado
+        try {
+          const refName = Object.keys(this.$refs).find(k => this.$refs[k] === target)
+          if (refName) {
+            this._enqueueLoad(refName)
           }
-          if (!this.loadedFluxoFinanceiro) {
-            this.returnFluxoFinanceiro()
-            this.loadedFluxoFinanceiro = true
-          }
+        } catch (err) {
+          console.warn('failed to determine ref for observed element', err)
         }
-        if (this.$refs && this.$refs.cardFluxoDiario && target === this.$refs.cardFluxoDiario) {
-          if (!this.loadedFluxoDiario) {
-            this.returnFluxoDiario()
-            this.loadedFluxoDiario = true
-          }
-        }
-        if (this.$refs && this.$refs.cardRecebimentos && target === this.$refs.cardRecebimentos) {
-          if (!this.loadedRecebimentos) {
-            this.returnRecebimentos()
-            this.loadedRecebimentos = true
-          }
-        }
-        if (this.$refs && this.$refs.cardPagamentos && target === this.$refs.cardPagamentos) {
-          if (!this.loadedPagamentos) {
-            this.returnPagamentos()
-            this.loadedPagamentos = true
-          }
-        }
-        if (this.$refs && this.$refs.cardSaldos && target === this.$refs.cardSaldos) {
-          if (!this.loadedSaldos) {
-            this.returnSaldos()
-            this.loadedSaldos = true
-          }
-        }
-        // se já observamos e carregamos, podemos desregistrar o elemento
-        if (this._io && entry.isIntersecting) this._io.unobserve(target)
+  // não desregistramos aqui — deixamos o processador decidir quando remover,
+  // porém desregistrar agora evita múltiplos gatilhos do mesmo elemento
+  try { if (this._io && entry.isIntersecting) this._io.unobserve(target) } catch (err) { console.warn('io.unobserve failed', err) }
       })
     }, { root: null, rootMargin: '0px', threshold: 0.15 })
 
@@ -1024,11 +1003,12 @@ export default {
       // fallback: se IntersectionObserver não estiver disponível, carrega imediatamente
       console.warn('IntersectionObserver observe registration failed:', err)
       if (typeof IntersectionObserver === 'undefined') {
-        this.returnFluxoFinanceiro()
-        this.returnFluxoDiario()
-        this.returnRecebimentos()
-        this.returnPagamentos()
-        this.returnSaldos()
+        // executa sequencialmente se não houver IntersectionObserver
+        this._enqueueLoad('cardFluxoFinanceiro')
+        this._enqueueLoad('cardFluxoDiario')
+        this._enqueueLoad('cardRecebimentos')
+        this._enqueueLoad('cardPagamentos')
+        this._enqueueLoad('cardSaldos')
       }
     }
   },
@@ -1067,6 +1047,70 @@ export default {
         console.warn('scrollTo error', err)
       }
     },
+
+    // Queue manager: enfileira carregamentos detectados pelo IntersectionObserver
+    _enqueueLoad (refName) {
+      // mapeia os nomes de ref para flags 'loaded' existentes
+      const allowed = ['cardFluxoFinanceiro', 'cardFluxoDiario', 'cardRecebimentos', 'cardPagamentos', 'cardSaldos']
+      if (!allowed.includes(refName)) return
+      if (this._pendingLoads.includes(refName)) return
+      // evita re-enfileirar se já carregado
+      const mapLoaded = {
+        cardFluxoFinanceiro: 'loadedFluxoFinanceiro',
+        cardFluxoDiario: 'loadedFluxoDiario',
+        cardRecebimentos: 'loadedRecebimentos',
+        cardPagamentos: 'loadedPagamentos',
+        cardSaldos: 'loadedSaldos'
+      }
+      if (this[mapLoaded[refName]]) return
+      this._pendingLoads.push(refName)
+      // dispara processamento (se não estiver em andamento)
+      this._processLoadQueue()
+    },
+
+    async _processLoadQueue () {
+      if (this._isProcessingLoads) return
+      this._isProcessingLoads = true
+
+      while (this._pendingLoads.length > 0) {
+        // ordena pela posição na página (do topo para baixo)
+        this._pendingLoads.sort((a, b) => {
+          const elA = this.$refs[a]
+          const elB = this.$refs[b]
+          if (!elA || !elB) return 0
+          const posA = elA.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop)
+          const posB = elB.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop)
+          return posA - posB
+        })
+
+        const next = this._pendingLoads.shift()
+        try {
+          if (next === 'cardFluxoFinanceiro') {
+            await this.returnFluxoFinanceiro()
+            this.loadedFluxoFinanceiro = true
+          } else if (next === 'cardFluxoDiario') {
+            await this.returnFluxoDiario()
+            this.loadedFluxoDiario = true
+          } else if (next === 'cardRecebimentos') {
+            await this.returnRecebimentos()
+            this.loadedRecebimentos = true
+          } else if (next === 'cardPagamentos') {
+            await this.returnPagamentos()
+            this.loadedPagamentos = true
+          } else if (next === 'cardSaldos') {
+            await this.returnSaldos()
+            this.loadedSaldos = true
+          }
+        } catch (err) {
+          console.warn('Sequential load failed for', next, err)
+        } finally {
+          // garante que não vamos observar de novo
+          try { if (this._io && this.$refs[next]) this._io.unobserve(this.$refs[next]) } catch (e) { void e }
+        }
+      }
+
+      this._isProcessingLoads = false
+    },
     //API Calls======================
     returnFluxoFinanceiro () {
       this.loadingFluxoFinanceiro = true
@@ -1075,8 +1119,8 @@ export default {
         dataInicial: this.toIsoZ(this.dataInicial),
         dataFinal: this.toIsoZ(this.dataFinal)
       }
-      // envia as datas selecionadas como query params
-      getFluxoFinanceiro(params)
+  // envia as datas selecionadas como query params
+  return getFluxoFinanceiro(params)
         .then(data => {
           this.fluxo = {
             saldoDia: data.saldoDia,
@@ -1117,7 +1161,7 @@ export default {
       // envia um objeto de params (melhor do que um número cru)
       setTimeout(() => {
       }, 20000)
-      getFluxoDiario({ diasUteis: 5 })
+  return getFluxoDiario({ diasUteis: 5 })
         .then(data => {
           this.dias = data.dias
         })
@@ -1136,8 +1180,8 @@ export default {
         dataInicial: this.toIsoZ(this.dataInicial),
         dataFinal: this.toIsoZ(this.dataFinal)
       }
-      // envia as datas selecionadas como query params
-      getRecebimentoRealizados(params)
+  // envia as datas selecionadas como query params
+  return getRecebimentoRealizados(params)
         .then(data => {
           this.resumoRecebimentos = {
             aReceberHoje: data.resumo.aReceberHoje,
@@ -1162,7 +1206,7 @@ export default {
         dataInicial: this.toIsoZ(this.dataInicial),
         dataFinal: this.toIsoZ(this.dataFinal)
       }
-      getPagamentosRealizados(params)
+  return getPagamentosRealizados(params)
         .then(data => {
           this.resumoPagamentos = {
             aPagarHoje: data.resumo.aPagarHoje,
@@ -1183,7 +1227,7 @@ export default {
     },
     returnSaldos () {
       this.loadingSaldos = true
-      getSaldoContas()
+  return getSaldoContas()
         .then(data => {
           this.resumoSaldos = {
             totalContaCorrente: data.totalContaCorrente,
