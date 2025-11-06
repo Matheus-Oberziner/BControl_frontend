@@ -1,49 +1,56 @@
 import axios from 'axios'
+import { parseJwt } from 'src/helpers/parseJwt'
 import { useUserStore } from 'src/stores/user'
 
 axios.defaults.baseURL = process.env.API_URL
 axios.defaults.withCredentials = false
 
+// --- CONFIG para o refresh-token
+const refreshJwt = axios.create({
+  baseURL: axios.defaults.baseURL,
+  withCredentials: false
+})
+
 let refreshPromise = null
 
-// function setUserInfoFromToken (accessToken) {
-//   const p = parseJwt.parse(accessToken);
-//   const userInfo = {
-//     id: p.sub,
-//     name: p.name,
-//     email: p.email,
-//     role: p.role
-//   };
-//   const store = useUserStore();
-//   store.setUserInfo(userInfo);
-// }
+function setUserInfoFromToken (accessToken) {
+  const p = parseJwt.parse(accessToken);
+  const userInfo = {
+    id: p.sub,
+    name: p.name,
+    email: p.email,
+    role: p.role
+  };
+  const store = useUserStore();
+  store.setUserInfo(userInfo);
+}
 
 async function getOrStartRefresh () {
-  // if (!refreshPromise) {
-  //   const store = useUserStore()
-  //   refreshPromise = refreshJwt.post('/auth/refresh', {})
-  //     .then(({ data }) => {
-  //       // Atualiza sessão e userInfo
-  //       store.setUser(data)
-  //       setUserInfoFromToken(data.access_token)
-  //       return data.access_token
-  //     })
-  //     .catch((err) => {
-  //       // Falhou o refresh -> limpa sessão e vai pro login
-  //       store.deleteSession()
-  //       window.location.href = '/#/login'
-  //       throw err
-  //     })
-  //     .finally(() => { refreshPromise = null })
-  // }
-  // return refreshPromise
+  if (!refreshPromise) {
+    const store = useUserStore()
+    refreshPromise = refreshJwt.post('/auth/refresh', { refreshToken: store.user.refreshToken })
+      .then(({ data }) => {
+        // Atualiza sessão e userInfo
+        store.setUser(data)
+        setUserInfoFromToken(data.accessToken)
+        return data.accessToken
+      })
+      .catch((err) => {
+        // Falhou o refresh -> limpa sessão e vai pro login
+        store.deleteSession()
+        window.location.href = '/#/login'
+        throw err
+      })
+      .finally(() => { refreshPromise = null })
+  }
+  return refreshPromise
   // Falhou o refresh -> limpa sessão e vai pro login
-  console.log("Refresh de token não implementado")
-  const store = useUserStore()
-  store.deleteSession()
-  window.location.href = '/#/login'
-  refreshPromise = null
-  throw "Sessão expirada. Efetue novamente o login"
+  // console.log("Refresh de token não implementado")
+  // const store = useUserStore()
+  // store.deleteSession()
+  // window.location.href = '/#/login'
+  // refreshPromise = null
+  // throw "Sessão expirada. Efetue novamente o login"
 }
 
 axios.interceptors.request.use(
@@ -160,6 +167,12 @@ const getSaldoContas = async params => {
   return res.data
 }
 
+const getFluxoMensal = async () => {
+  let company = JSON.parse(localStorage.getItem('company'))
+  const res = await axios.get(`/fluxo-financeiro/${company?.cnpj}/fluxo-mensal`)
+  return res.data
+}
+
 export {
   sendLogin,
   getRecebimentoRealizados,
@@ -167,5 +180,6 @@ export {
   getSaldoContas,
   getFluxoDiario,
   getFluxoFinanceiro,
-  getCompany
+  getCompany,
+  getFluxoMensal
 }
