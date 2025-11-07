@@ -132,7 +132,7 @@ const sendLogin = async params => {
 }
 
 const getCompany = async params => {
-  const res = await axios.get(`/empresa/`, {params})
+  const res = await axios.get(`/auth/empresas`, {params})
   return res.data
 }
 

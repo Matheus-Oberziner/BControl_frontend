@@ -98,8 +98,23 @@ export default {
               this.store.setUserInfo(userInfo)
               this.store.setUser(data)
 
+              // getCompany now returns a list of available companies
               getCompany().then(companyData => {
-                this.store.setCompany(companyData)
+                // Expecting an array; save to store
+                if (Array.isArray(companyData)) {
+                  this.store.setCompanyList(companyData)
+                  // choose the first company by default (if any)
+                  if (companyData.length > 0) {
+                    console.log('companyData[0]:', companyData[0]);
+                    this.store.setCompanySelected(companyData[0])
+                  }
+                } else if (companyData) {
+                  // fallback: old single-object response
+                  this.store.setCompany(companyData)
+                  this.store.setCompanyList([companyData])
+                  this.store.setCompanySelected(companyData)
+                }
+
                 this.$q.loading.hide()
                 this.$router.push({ path: '/dashboard/fluxo-financeiro' })
               }).catch((error) => {

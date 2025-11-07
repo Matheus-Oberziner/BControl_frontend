@@ -9,17 +9,32 @@
 
         <q-space />
 
-        <div class="row items-center q-gutter-md">
-          <span class="text-20">{{ greeting }}</span>
-
-          <q-avatar size="50px" style="background-color: #FFFFFF; border-radius: 50%;">
-            <q-icon
-              name="person"
-              color="black"
-              size="44px"
+          <div class="row items-center q-gutter-md">
+            <!-- Company selector populated after login -->
+            <q-select
+              v-if="companyOptions.length > 0"
+              dense
+              outlined
+              class="company-select"
+              style="min-width: 220px; max-width: 480px; background: white; border-radius: 11px;"
+              :options="companyOptions"
+              option-label="label"
+              option-value="value"
+              v-model="selectedCompany"
+              map-options
+              emit-value  
             />
-          </q-avatar>
-        </div>
+
+            <span class="text-20">{{ greeting }}</span>
+
+            <q-avatar size="50px" style="background-color: #FFFFFF; border-radius: 50%;">
+              <q-icon
+                name="person"
+                color="black"
+                size="44px"
+              />
+            </q-avatar>
+          </div>
       </q-toolbar>
 
       <div class="row justify-center" style="width: 100%;">
@@ -47,7 +62,7 @@
   </q-layout>
 </template>
 <script>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useUserStore } from 'stores/user'
 import Drawer from 'src/components/DrawerComponent.vue'
 import Sidebar from 'src/components/SidebarComponent.vue'
@@ -68,8 +83,37 @@ export default {
 
     const greeting = computed(() => (userName.value ? `Olá ${userName.value}!` : 'Olá!'))
 
+    // company list and selected company (from store)
+    const companyList = computed(() => store.companyList || [])
+
+    // Map companies to options { label, value } where value is the whole company object
+    const companyOptions = computed(() =>
+      companyList.value.map(c => ({
+        label: c.razaoSocial || c.cnpj || 'Empresa',
+        value: c              // aqui vai o objeto da empresa
+      }))
+    )
+
+    const selectedCompany = computed({
+      get: () => store.companySelected,
+      set: (company) => {
+        // company is expected to be an object (our option.value)
+        store.setCompanySelected(company)
+      }
+    })
+    
+    // 🔥 quando a empresa mudar, recarrega a página
+    watch(selectedCompany, (newVal, oldVal) => {
+      if (newVal && newVal.cnpj !== oldVal?.cnpj) {
+        console.log('Empresa alterada, recarregando página...')
+        window.location.reload() // 👈 força reload total
+      }
+    })
+
     return {
-      greeting
+      greeting,
+      companyOptions,
+      selectedCompany
     }
   }
 }

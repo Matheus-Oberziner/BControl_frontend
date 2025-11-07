@@ -4,7 +4,11 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     user: JSON.parse(localStorage.getItem('user')),
     userInfo: JSON.parse(localStorage.getItem('userInfo')),
-    company: JSON.parse(localStorage.getItem('company'))
+    company: JSON.parse(localStorage.getItem('company')),
+    // list of companies returned by the API
+    companyList: JSON.parse(localStorage.getItem('companyList')) || [],
+    // currently selected company (object)
+    companySelected: JSON.parse(localStorage.getItem('companySelected')) || null
   }),
 
   getters: {
@@ -33,13 +37,37 @@ export const useUserStore = defineStore('user', {
       localStorage.setItem('company', JSON.stringify(updatedCompany))
       this.company = updatedCompany
     },
+    setCompanyList (list) {
+      const arr = Array.isArray(list) ? list : []
+      localStorage.setItem('companyList', JSON.stringify(arr))
+      this.companyList = arr
+    },
+    setCompanySelected (company) {
+      // store selected company as full object
+      localStorage.setItem('companySelected', JSON.stringify(company || null))
+      this.companySelected = company || null
+     
+      // keep legacy `company` key (used elsewhere) in sync with selected
+      if (company) {
+        // replace whole company entry with selected
+        localStorage.setItem('company', JSON.stringify(company))
+        this.company = company
+      } else {
+        localStorage.removeItem('company')
+        this.company = null
+      }
+    },
     deleteSession () {
       localStorage.removeItem('user')
       localStorage.removeItem('userInfo')
       localStorage.removeItem('company')
+      localStorage.removeItem('companyList')
+      localStorage.removeItem('companySelected')
       this.user = null
       this.userInfo = null
       this.company = null
+      this.companyList = []
+      this.companySelected = null
     }
   }
 })
