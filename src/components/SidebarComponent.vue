@@ -1,7 +1,11 @@
 <template>
   <div class="sidebar-container">
     <div class="logo-badge">
-      <q-img :src="logoSrc" height="80px" width="80px" />
+      <!-- q-img com 'contain' garante que a imagem mantenha aspect-ratio
+           e não seja esticada; usamos uma classe para forçar o tamanho
+           interno e object-fit na imagem real. O badge agora é quadrado
+           (sem arredondamento) para manter a forma desejada. -->
+      <q-img :src="logoSrc" class="logo-img" contain />
     </div>
   
     <div
@@ -145,6 +149,7 @@ export default {
   border: 5px solid black;
   border-radius: 15px;
   background-color: #FFFFFF;
+  overflow: hidden; /* garante que imagem não transborde do círculo */
 
   /* centraliza o q-img */
   display: flex;
@@ -153,5 +158,17 @@ export default {
 
   /* garante que padding conte no tamanho total */
   box-sizing: border-box;
+}
+
+/* limita o tamanho interno da imagem e garante object-fit: contain na tag img real
+   (q-img renderiza a imagem interna como .q-img__image) */
+:deep(.logo-img) {
+  width: 80%;
+  height: 80%;
+}
+:deep(.logo-img .q-img__image) {
+  object-fit: contain !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 </style>
