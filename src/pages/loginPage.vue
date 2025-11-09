@@ -5,33 +5,41 @@
       <div class="col-6 flex column flex-center">
         <div class="login-form">
           <!-- Logo -->
-          <div>
+          <div class="logo-container q-mb-xl">
             <img src="/syrus-logo.png" alt="Syrus Systems" class="logo" />
           </div>
 
           <!-- Título -->
-          <h1 class="login-title q-mb-md">Login</h1>
-          <p class="login-subtitle q-mb-md">Insira suas credenciais de e-mail para continuar</p>
+          <h1 class="login-title q-mb-sm">Login</h1>
+          <p class="login-subtitle q-mb-xl">Insira suas credenciais para continuar</p>
 
           <!-- Formulário -->
           <q-form ref="restLoginForm" class="login-form-fields">
             <div class="q-mb-md">
               <label class="form-label">Login</label>
-              <q-input v-model="id" outlined dense class="custom-input" :input-style="{ color: '#fff' }"
-                :rules="[ val => val && val.length > 0 || 'Campo obrigatório']" />
+              <q-input 
+                v-model="id" 
+                outlined 
+                dense 
+                class="custom-input" 
+                :input-style="{ color: '#fff' }"
+                mask="###.###.###-##"
+                unmasked-value
+                placeholder="000.000.000-00"
+                :rules="[ val => val && val.length !== 14 || 'Campo obrigatório']" />
             </div>
 
-            <div class="q-mb-lg">
+            <div class="q-mb-md">
               <label class="form-label">Senha</label>
               <q-input v-model="password" type="password" outlined dense class="custom-input"
                 :input-style="{ color: '#fff' }" :rules="[ val => val && val.length > 5 || 'Campo obrigatório']" 
                 @keyup.enter="submit()"/>
             </div>
 
-            <div class="row justify-between items-center q-mb-lg">
-              <q-checkbox v-model="keepConnected" label="Manter conectado" color="white" keep-color dense size="20px"
+            <div class="row justify-between items-center q-mb-xl">
+              <q-checkbox v-model="keepConnected" label="Manter Conectado" color="white" keep-color dense 
                 class="checkbox-custom" />
-              <a href="#" class="forgot-password">Esqueci minha senha</a>
+              <router-link to="/redefinir-senha" class="forgot-password">Esqueci minha senha</router-link>
             </div>
 
             <q-btn label="Entrar" color="positive" size="lg" class="full-width login-btn q-mb-lg" no-caps
@@ -47,7 +55,7 @@
       </div>
 
       <!-- Lado direito - Syrus -->
-      <div class="col-6 flex justify-center items-center">
+      <div class="col-6 flex justify-center items-center right-side">
         <img src="/syrus.png" alt="Syrus" class="syrus-image" />
       </div>
     </div>
@@ -72,7 +80,8 @@ export default {
     return {
       id: null,
       password: null,
-      accept: false
+      accept: false,
+      keepConnected: false
     }
   },
 
@@ -139,36 +148,69 @@ export default {
 
 <style scoped>
 .login-page {
-  background: linear-gradient(90deg, #5d61e1 0%, black 100%);
+  background: linear-gradient(135deg, #0a0f0d 0%, #0d2818 50%, #000000 100%);
   min-height: 100vh;
   height: 100vh;
   font-family: 'Inter', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grid pattern overlay */
+.login-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+
+.full-height {
+  min-height: 100vh;
+  margin: 0;
 }
 
 .login-form {
-  max-width: 400px;
+  max-width: 480px;
   width: 100%;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.logo-container {
+  margin-bottom: 48px;
 }
 
 .logo {
-  height: 60px;
+  height: 80px;
 }
 
 .login-title {
   color: white;
   font-size: 48px;
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.2;
+  margin-bottom: 8px;
 }
 
 .login-subtitle {
-  color: white;
-  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+  font-weight: 400;
+  margin-bottom: 48px;
 }
 
 .form-label {
   color: white;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 500;
   display: block;
   margin-bottom: 8px;
 }
@@ -178,10 +220,11 @@ export default {
 }
 
 .custom-input :deep(.q-field__control) {
-  background: transparent;
-  border: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.05);
+  border: 1.5px solid rgba(16, 185, 129, 0.4);
   border-radius: 8px;
   color: white;
+  min-height: 48px;
 }
 
 .custom-input :deep(.q-field__control):before {
@@ -198,95 +241,140 @@ export default {
 }
 
 .custom-input :deep(.q-field__control):hover {
-  border-color: #10b981;
+  border-color: rgba(16, 185, 129, 0.6);
+  background: rgba(16, 185, 129, 0.08);
 }
 
 .custom-input :deep(.q-field--focused .q-field__control) {
   border-color: #10b981;
-  box-shadow: 0 0 0 1px #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.checkbox-custom {
+  font-size: 14px;
 }
 
 .checkbox-custom :deep(.q-checkbox__label) {
-  color: #fff;
-  font-size: 16px;
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .checkbox-custom :deep(.q-checkbox__inner) {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .checkbox-custom :deep(.q-checkbox__bg) {
   background: transparent !important;
-  box-shadow: none !important;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: 6px;
-  /* cantos arredondados como na imagem */
+  border: 2px solid rgba(16, 185, 129, 0.5);
+  border-radius: 4px;
 }
 
 .checkbox-custom :deep(.q-checkbox__inner--truthy .q-checkbox__bg) {
-  background: #fff !important;
-  border-color: #fff !important;
+  background: #10b981 !important;
+  border-color: #10b981 !important;
 }
 
 .checkbox-custom :deep(.q-checkbox__svg) {
-  stroke: #1c1c1c;
+  stroke: #000;
   stroke-width: 3;
 }
 
 .forgot-password {
-  color: #23c91b;
+  color: #10b981;
   text-decoration: none;
   font-size: 14px;
+  font-weight: 400;
+  transition: all 0.3s ease;
 }
 
 .forgot-password:hover {
-  text-decoration: underline;
+  color: #0ea972;
+  text-decoration: none;
 }
 
 .login-btn {
-  background: #23c91b !important;
+  background: #10b981 !important;
   border-radius: 8px;
   font-size: 16px;
-  font-weight: 500;
-  height: 48px;
+  font-weight: 600;
+  height: 50px;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background: #0ea972 !important;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
 }
 
 .not-customer {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 14px;
+  font-weight: 400;
 }
 
 .request-quote {
   color: #10b981;
   text-decoration: none;
   font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .request-quote:hover {
-  text-decoration: underline;
+  color: #0ea972;
+  text-decoration: none;
+}
+
+.right-side {
+  position: relative;
 }
 
 .syrus-image {
-  max-height: 80vh;
-  max-width: 100%;
+  max-height: 75vh;
+  max-width: 90%;
   object-fit: contain;
+  position: relative;
+  z-index: 1;
 }
 
-/* Responsividade */
+/* Responsive */
 @media (max-width: 1024px) {
   .col-6 {
     width: 100%;
   }
 
   .login-form {
-    padding-top: 24px;
-    /* ajuste o valor se quiser mais espaço */
+    padding-top: 40px;
   }
 
-  .robot-image {
+  .right-side {
     display: none;
+  }
+
+  .login-title {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-form {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .login-title {
+    font-size: 36px;
+  }
+
+  .login-subtitle {
+    font-size: 14px;
   }
 }
 </style>

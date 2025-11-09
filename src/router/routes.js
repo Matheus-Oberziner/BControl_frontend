@@ -11,6 +11,15 @@ const routes = [
     path: '/login',
     component: () => import('src/pages/loginPage.vue') ,
   },
+  {
+    path: '/redefinir-senha',
+    children: [
+      { path: '', component: () => import('src/pages/ResetPasswordPage.vue') },
+      { path: 'verificar-codigo', component: () => import('src/pages/VerifyCodePage.vue') },
+      //{ path: 'criar-nova-senha', component: () => import('src/pages/CreateNewPassword.vue') }
+    ]
+  },
+
 
   // Always leave this as last one,
   // but you can also remove it
