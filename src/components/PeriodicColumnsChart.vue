@@ -27,7 +27,7 @@
     <div class="horizontal-line"></div>
     <div class="col-12 horizontal-line"></div>
     <div
-      v-for="(mes, index) in meses"
+      v-for="(mes, index) in mesesMuted"
       :key="index"
       class="chart-item"
     >
@@ -71,50 +71,43 @@ import CustomBarChart from './CustomBarChart.vue'
 
 export default {
   components: { CustomBarChart },
-  data () {
-    return {
-      meses: [
-        {
-          label: 'JUN / 2025',
+
+  props: {
+    meses: {
+      type: Array,
+      required: true
+    }
+  },
+
+  computed: {
+    mesesMuted () {
+      if (!Array.isArray(this.meses)) return []
+
+      return this.meses.map(mesItem => {
+        return {
+          label: mesItem.label,
           chartData: [
-            { value: 420000, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
-            { value: 420000, label: 'Faturamento', color: 'blue', bgColor: '#0047A1' },
-            { value: 300000, label: 'Ponto de Equilíbrio', color: 'pink', bgColor: '#FF3CC7' }
-          ]
-        },
-        {
-          label: 'JUL / 2025',
-          chartData: [
-            { value: 420000, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
-            { value: 430000, label: 'Faturamento', color: 'blue', bgColor: '#0047A1' },
-            { value: 305000, label: 'Ponto de Equilíbrio', color: 'pink', bgColor: '#FF3CC7' }
-          ]
-        },
-        {
-          label: 'AGO / 2025',
-          chartData: [
-            { value: 420000, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
-            { value: 415000, label: 'Faturamento', color: 'blue', bgColor: '#0047A1' },
-            { value: 310000, label: 'Ponto de Equilíbrio', color: 'pink', bgColor: '#FF3CC7' }
-          ]
-        },
-        {
-          label: 'SET / 2025',
-          chartData: [
-            { value: 420000, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
-            { value: 400000, label: 'Faturamento', color: 'blue', bgColor: '#0047A1' },
-            { value: 310000, label: 'Ponto de Equilíbrio', color: 'pink', bgColor: '#FF3CC7' }
-          ]
-        },
-        {
-          label: 'OUT / 2025',
-          chartData: [
-            { value: 420000, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
-            { value: 415000, label: 'Faturamento', color: 'blue', bgColor: '#0047A1' },
-            { value: 315000, label: 'Ponto de Equilíbrio', color: 'pink', bgColor: '#FF3CC7' }
+            {
+              value: mesItem.projetado,
+              label: 'Projetado',
+              color: 'gray',
+              bgColor: '#f0f0f0'
+            },
+            {
+              value: mesItem.faturamento,
+              label: 'Faturamento',
+              color: 'blue',
+              bgColor: '#0047A1'
+            },
+            {
+              value: mesItem.equilibrio,
+              label: 'Ponto de Equilíbrio',
+              color: 'pink',
+              bgColor: '#FF3CC7'
+            }
           ]
         }
-      ]
+      })
     }
   },
   methods: {

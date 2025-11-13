@@ -210,7 +210,7 @@ export default {
   gap: 4px;
 }
 
-.chart-wrapper { position: relative; display: inline-block; }
+.chart-wrapper { position: relative; display: inline-block; padding: 5px; }
 .label-left { position: absolute; top: -10px; left: -20px; font-weight: 300; color: #666; font-size: 16px; user-select: none; }
 .info-right { position: absolute; top: -5px; right: -70px; }
 .right-label { display: flex; align-items: center; gap: 4px; }

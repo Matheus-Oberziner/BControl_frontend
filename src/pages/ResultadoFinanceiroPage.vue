@@ -67,7 +67,7 @@
           </div>
 
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">105.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resultado.faturamento) }}</span>
           </div>
 
           <div class="row justify-center">
@@ -96,7 +96,7 @@
           </div>
 
           <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-            <span class="text-12 q-pr-xs">R$</span><span class="text-16">98.000,00</span>
+            <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resultado.receita) }}</span>
           </div>
 
           <div class="row justify-center">
@@ -130,7 +130,7 @@
             </div>
 
             <div class="col-12 row justify-center items-center weight-600" style="padding: 20px 0px;">
-              <span class="text-12 q-pr-xs">R$</span><span class="text-16">17.000,00</span>
+              <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(resultado.lucroLiquido.value) }}</span>
             </div>
 
             <div class="row justify-center">
@@ -139,7 +139,7 @@
           </div>
 
           <div style="height: 130px;">
-            <StrokedGauge :value="16" />
+            <StrokedGauge :value="resultado.lucroLiquido.percent" />
           </div>
         </div>
 
@@ -154,19 +154,19 @@
             <CustomBarChart
               :chartData="[
                 {
-                  value: 500000,
+                  value: resultado.chart.projetado,
                   label: 'Projetado',
                   color: 'gray',
                   bgColor: '#f0f0f0'
                 },
                 {
-                  value: 250000,
+                  value: resultado.chart.faturamento,
                   label: 'Faturamento',
                   color: 'blue',
                   bgColor: '#0047A1'
                 },
                 {
-                  value: 70000,
+                  value: resultado.chart.pontoEquilibrio,
                   label: 'Ponto de Equilíbrio',
                   color: 'pink',
                   bgColor: '#FF3CC7'
@@ -188,7 +188,7 @@
               style="padding: 40px 0px 15px; margin: 0px 30px 20px;"
             >
               <div
-                v-for="(item, index) in arrayComparativos"
+                v-for="(item, index) in resultado.comparativos"
                 :key="index"
                 class="q-pa-sm"
                 style="display: flex; flex-direction: column; justify-content: space-between; min-width: 240px;"
@@ -256,7 +256,7 @@
                   
                     <template #right-label>
                       <q-icon name="chevron_left" size="md" />
-                      <span class="percent-box">{{ item.percent }}%</span>
+                      <span class="percent-box">{{ item.percent.toFixed(1).replace('.', ',') }}%</span>
                     </template>
                   </DonutRadial>
                 </div>
@@ -405,19 +405,19 @@
         <div class="row items-center" :class="$q.screen.width < 1664 ? 'col-12 justify-end' : ''">
           <div class="row items-center q-gutter-md" :class="$q.screen.width < 1664 ? 'q-pt-md' : ''">
             <div
-              v-for="(item, index) in arrayFaturamento"
+              v-for="(item, index) in faturamento.array"
               :key="index"
               class="row items-center justify-center border-gradient"
               style="width: 180px; padding: 20px 5px;"
             >
               <span class="col-12 text-16 weight-300 text-grey-1 text-center q-pb-sm">{{ item.title }}</span>
                 
-              <span class="text-12 weight-600 q-pr-xs">R$</span><span class="text-16 weight-600">{{ item.value }}</span>
+              <span class="text-12 weight-600 q-pr-xs">R$</span><span class="text-16 weight-600">{{ formatCurrency(item.value) }}</span>
             </div>
           </div>
   
-          <div class="q-pl-md" :class="$q.screen.width < 1324 ? 'col-12 row justify-end' : ''" :style="$q.screen.width < 1324 ? 'padding: 40px 0px;' : ''">
-            <CustomLinearProgress />
+          <div class="q-pl-xl" :class="$q.screen.width < 1324 ? 'col-12 row justify-end' : ''" :style="$q.screen.width < 1324 ? 'padding: 40px 0px;' : ''">
+            <CustomLinearProgress :progress="(faturamento.performance / 100) || 0" />
           </div>
         </div>
       </div>
@@ -425,13 +425,7 @@
       <div class="col-12 row justify-center fancy-scroll" style="padding: 60px 50px;">
         <div style="width: 80%;">
           <PeriodicColumnsChart
-            :meses="[
-              { label: 'JUN / 2025', projetado: 420000, faturamento: 420000, equilibrio: 300000 },
-              { label: 'JUL / 2025', projetado: 420000, faturamento: 430000, equilibrio: 305000 },
-              { label: 'AGO / 2025', projetado: 420000, faturamento: 415000, equilibrio: 310000 },
-              { label: 'SET / 2025', projetado: 420000, faturamento: 400000, equilibrio: 310000 },
-              { label: 'OUT / 2025', projetado: 420000, faturamento: 415000, equilibrio: 315000 }
-            ]"
+            :meses="faturamento.meses"
           />
         </div>
       </div>
@@ -452,19 +446,19 @@
                   <CustomBarChart
                     :chartData="[
                       {
-                        value: 420000.00,
+                        value: faturamento.desempenhoDiario.projetado,
                         label: 'Projetado',
                         color: 'gray',
                         bgColor: '#f0f0f0'
                       },
                       {
-                        value: 200000.00,
+                        value: faturamento.desempenhoDiario.faturamento,
                         label: 'Faturamento',
                         color: 'blue',
                         bgColor: '#0047A1'
                       },
                       {
-                        value: 300000.00,
+                        value: faturamento.desempenhoDiario.pontoEquilibrio,
                         label: 'Ponto de Equilíbrio',
                         color: 'pink',
                         bgColor: '#FF3CC7'
@@ -695,6 +689,12 @@ import Card4 from 'src/components/CardsResultadoFinanceiro.vue/Card4.vue'
 import Card5 from 'src/components/CardsResultadoFinanceiro.vue/Card5.vue'
 import Card6 from 'src/components/CardsResultadoFinanceiro.vue/Card6.vue'
 import Card7 from 'src/components/CardsResultadoFinanceiro.vue/Card7.vue'
+import { getFaturamento, getResultadoFinanceiro } from 'src/boot/axios'
+import { notify } from 'src/helpers/notify'
+
+// formatter: pt-BR number with 2 fraction digits, no currency symbol
+const brl = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
 export default {
   components: {
     StrokedGauge,
@@ -712,13 +712,13 @@ export default {
     Card7
   },
   setup () {
-    const loadingResultadoFinanceiro = ref(false)
-    const loadingFaturamento = ref(false)
-    const loadingInadimplencia = ref(false)
-    const loadingPerdaRecorrencia = ref(false)
-    const loadingDespesas = ref(false)
-    const loadingMargemContribuicao = ref(false)
-    const loadingDRE = ref(false)
+    const loadingResultadoFinanceiro = ref(true)
+    const loadingFaturamento = ref(true)
+    const loadingInadimplencia = ref(true)
+    const loadingPerdaRecorrencia = ref(true)
+    const loadingDespesas = ref(true)
+    const loadingMargemContribuicao = ref(true)
+    const loadingDRE = ref(true)
     
     return {
       loadingResultadoFinanceiro,
@@ -740,61 +740,30 @@ export default {
       loadedDespesas: false,
       loadedMargemContribuicao: false,
       loadedDRE: false,
-      arrayComparativos: [
-        {
-          title: 'Inadinplência',
-          value: 3000,
-          percent: 3
+      resultado: {
+        faturamento: 0,
+        receita: 0,
+        lucroLiquido: {
+          value: 0,
+          percent: 0
         },
-        {
-          title: 'Perda Receita Recorrente',
-          value: 1500,
-          percent: 1.5
+        chart: {
+          projetado: 0,
+          faturamento: 0,
+          pontoEquilibrio: 0
         },
-        {
-          title: 'Lucro Bruto',
-          value: 34000,
-          percent: 32
-        },
-        {
-          title: 'Despesas',
-          value: 66000,
-          percent: 63
-        },
-        {
-          title: 'CSV',
-          value: 7500,
-          percent: 7
-        },
-        {
-          title: 'CMV',
-          value: 15000,
-          percent: 14
-        },
-        {
-          title: 'Margem de Contribuição',
-          value: 23000,
-          percent: 22
+        comparativos: []
+      },
+      faturamento: {
+        array: [],
+        performance: 0,
+        meses: [],
+        desempenhoDiario: {
+          projetado: 0,
+          faturamento: 0,
+          pontoEquilibrio: 0
         }
-      ],
-      arrayFaturamento: [
-        {
-          title: 'Total Período',
-          value: '2.080.000,00'
-        },
-        {
-          title: 'Média Mensal',
-          value: '416.000,00'
-        },
-        {
-          title: 'Maior Mensal',
-          value: '430.000,00'
-        },
-        {
-          title: 'Menor Mensal',
-          value: '400.000,00'
-        }
-      ],
+      },
       arrayFaturamentoVenda: [
         {
           title: 'Pontual',
@@ -974,60 +943,33 @@ export default {
     }
   },
   mounted () {
-    // Usaremos IntersectionObserver para carregar cada card quando ele entrar em viewport.
+    // Não disparamos as requisições imediatamente para evitar "choque" de requisições.
+    // Usaremos IntersectionObserver para detectar visibilidade, mas iremos enfileirar
+    // os carregamentos e executá-los sequencialmente respeitando a ordem de scroll.
+    this._pendingLoads = [] // nomes dos refs aguardando carregamento
+    this._isProcessingLoads = false
+
     this._io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return
         const target = entry.target
-        // verifica cada card pelo elemento observado
-        if (this.$refs && this.$refs.cardResultadoFinanceiro && target === this.$refs.cardResultadoFinanceiro) {
-          if (!this.loadedResultadoFinanceiro) {
-            this.loadResultadoFinanceiro()
-            this.loadedResultadoFinanceiro = true
+        // tenta descobrir o nome do ref associado ao elemento observado
+        try {
+          const refName = Object.keys(this.$refs).find(k => this.$refs[k] === target)
+          if (refName) {
+            this._enqueueLoad(refName)
           }
+        } catch (err) {
+          console.warn('failed to determine ref for observed element', err)
         }
-        if (this.$refs && this.$refs.cardFaturamento && target === this.$refs.cardFaturamento) {
-          if (!this.loadedFaturamento) {
-            this.loadFaturamento()
-            this.loadedFaturamento = true
-          }
-        }
-        if (this.$refs && this.$refs.cardInadimplencia && target === this.$refs.cardInadimplencia) {
-          if (!this.loadedInadimplencia) {
-            this.loadInadimplencia()
-            this.loadedInadimplencia = true
-          }
-        }
-        if (this.$refs && this.$refs.cardPerdaRecorrencia && target === this.$refs.cardPerdaRecorrencia) {
-          if (!this.loadedPerdaRecorrencia) {
-            this.loadPerdaRecorrencia()
-            this.loadedPerdaRecorrencia = true
-          }
-        }
-        if (this.$refs && this.$refs.cardDespesas && target === this.$refs.cardDespesas) {
-          if (!this.loadedDespesas) {
-            this.loadDespesas()
-            this.loadedDespesas = true
-          }
-        }
-        if (this.$refs && this.$refs.cardMargemContribuicao && target === this.$refs.cardMargemContribuicao) {
-          if (!this.loadedMargemContribuicao) {
-            this.loadMargemContribuicao()
-            this.loadedMargemContribuicao = true
-          }
-        }
-        if (this.$refs && this.$refs.cardDRE && target === this.$refs.cardDRE) {
-          if (!this.loadedDRE) {
-            this.loadDRE()
-            this.loadedDRE = true
-          }
-        }
-        // se já observamos e carregamos, podemos desregistrar o elemento
-        if (this._io && entry.isIntersecting) this._io.unobserve(target)
+  // não desregistramos aqui — deixamos o processador decidir quando remover,
+  // porém desregistrar agora evita múltiplos gatilhos do mesmo elemento
+  try { if (this._io && entry.isIntersecting) this._io.unobserve(target) } catch (err) { console.warn('io.unobserve failed', err) }
       })
     }, { root: null, rootMargin: '0px', threshold: 0.15 })
 
     // registra os elementos (usar $refs quando montado)
+    // alguns refs podem ser null se o elemento não existir; protegemos com try/catch
     try {
       if (this.$refs.cardResultadoFinanceiro) this._io.observe(this.$refs.cardResultadoFinanceiro)
       if (this.$refs.cardFaturamento) this._io.observe(this.$refs.cardFaturamento)
@@ -1040,13 +982,14 @@ export default {
       // fallback: se IntersectionObserver não estiver disponível, carrega imediatamente
       console.warn('IntersectionObserver observe registration failed:', err)
       if (typeof IntersectionObserver === 'undefined') {
-        this.loadResultadoFinanceiro()
-        this.loadFaturamento()
-        this.loadInadimplencia()
-        this.loadPerdaRecorrencia()
-        this.loadDespesas()
-        this.loadMargemContribuicao()
-        this.loadDRE()
+        // executa sequencialmente se não houver IntersectionObserver
+        this._enqueueLoad('cardResultadoFinanceiro')
+        this._enqueueLoad('cardFaturamento')
+        this._enqueueLoad('cardInadimplencia')
+        this._enqueueLoad('cardPerdaRecorrencia')
+        this._enqueueLoad('cardDespesas')
+        this._enqueueLoad('cardMargemContribuicao')
+        this._enqueueLoad('cardDRE')
       }
     }
   },
@@ -1056,6 +999,16 @@ export default {
     }
   },
   methods: {
+    // utils ===============
+    // returns a localized number string (pt-BR) without currency symbol
+    formatCurrency(value) {
+      return brl.format(Number(value) || 0)
+    },
+    toIsoZ (dateStr) {
+      // espera dateStr no formato YYYY-MM-DD
+      if (!dateStr) return null
+      return `${dateStr}T00:00:00Z`
+    },
     // scroll suave para o elemento referenciado (refName deve existir em $refs)
     scrollTo (refName) {
       try {
@@ -1075,49 +1028,238 @@ export default {
         console.warn('scrollTo error', err)
       }
     },
-    loadResultadoFinanceiro () {
+    // Queue manager: enfileira carregamentos detectados pelo IntersectionObserver
+    _enqueueLoad (refName) {
+      // mapeia os nomes de ref para flags 'loaded' existentes
+      const allowed = ['cardResultadoFinanceiro', 'cardFaturamento', 'cardInadimplencia', 'cardPerdaRecorrencia', 'cardDespesas', 'cardMargemContribuicao', 'cardDRE']
+      if (!allowed.includes(refName)) return
+      if (this._pendingLoads.includes(refName)) return
+      // evita re-enfileirar se já carregado
+      const mapLoaded = {
+        cardResultadoFinanceiro: 'loadedResultadoFinanceiro',
+        cardFaturamento: 'loadedFaturamento',
+        cardInadimplencia: 'loadedInadimplencia',
+        cardPerdaRecorrencia: 'loadedPerdaRecorrencia',
+        cardDespesas: 'loadedDespesas',
+        cardMargemContribuicao: 'loadedMargemContribuicao',
+        cardDRE: 'loadedDRE'
+      }
+      if (this[mapLoaded[refName]]) return
+      this._pendingLoads.push(refName)
+      // dispara processamento (se não estiver em andamento)
+      this._processLoadQueue()
+    },
+
+    async _processLoadQueue () {
+      if (this._isProcessingLoads) return
+      this._isProcessingLoads = true
+
+      while (this._pendingLoads.length > 0) {
+        // ordena pela posição na página (do topo para baixo)
+        this._pendingLoads.sort((a, b) => {
+          const elA = this.$refs[a]
+          const elB = this.$refs[b]
+          if (!elA || !elB) return 0
+          const posA = elA.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop)
+          const posB = elB.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop)
+          return posA - posB
+        })
+
+        const next = this._pendingLoads.shift()
+        try {
+          if (next === 'cardResultadoFinanceiro') {
+            await this.returnResultadoFinanceiro()
+            this.loadedResultadoFinanceiro = true
+          } else if (next === 'cardFaturamento') {
+            await this.returnFaturamento()
+            this.loadedFaturamento = true
+          } else if (next === 'cardInadimplencia') {
+            await this.returnInadimplencia()
+            this.loadedInadimplencia = true
+          } else if (next === 'cardPerdaRecorrencia') {
+            await this.returnPerdaRecorrencia()
+            this.loadedPerdaRecorrencia = true
+          } else if (next === 'cardDespesas') {
+            await this.returnDespesas()
+            this.loadedDespesas = true
+          } else if (next === 'cardMargemContribuicao') {
+            await this.returnMargemContribuicao()
+            this.loadedMargemContribuicao = true
+          } else if (next === 'cardDRE') {
+            await this.returnDRE()
+            this.loadedDRE = true
+          }
+        } catch (err) {
+          console.warn('Sequential load failed for', next, err)
+        } finally {
+          // garante que não vamos observar de novo
+          try { if (this._io && this.$refs[next]) this._io.unobserve(this.$refs[next]) } catch (e) { void e }
+        }
+      }
+
+      this._isProcessingLoads = false
+    },
+
+    returnResultadoFinanceiro () {
       this.loadingResultadoFinanceiro = true
-      // Simula loading de 2 segundos
-      setTimeout(() => {
-        this.loadingResultadoFinanceiro = false
-      }, 2000000)
+      
+      return getResultadoFinanceiro()
+        .then(data => {
+          const calcPercent = (value) => {
+            if (!data.faturamentoTotal) return 0
+            const result = (value / data.faturamentoTotal) * 100
+            return Number.isFinite(result) ? result : 0
+          }
+
+          this.resultado = {
+            faturamento: data.faturamentoTotal,
+            receita: data.receitaTotal,
+            lucroLiquido: { 
+              value: data.lucroLiquido,
+              percent: calcPercent(data.lucroLiquido)
+            },
+            chart: {
+              projetado: data.faturamentoTotal,
+              faturamento: data.faturamentoTotal,
+              pontoEquilibrio: data.pontoEquilibrio
+            },
+            comparativos: [
+              {
+                title: 'Inadinplência',
+                value: data.inadimplenciaValor,
+                percent: calcPercent(data.inadimplenciaValor)
+              },
+              {
+                title: 'Perda Receita Recorrente',
+                value: data.perdaRecorrenteValor,
+                percent: calcPercent(data.perdaRecorrenteValor)
+              },
+              {
+                title: 'Lucro Bruto',
+                value: data.lucroBruto,
+                percent: calcPercent(data.lucroBruto)
+              },
+              {
+                title: 'Despesas',
+                value: data.despesaTotal,
+                percent: calcPercent(data.despesaTotal)
+              },
+              {
+                title: 'CSV',
+                value: data.csv,
+                percent: calcPercent(data.csv)
+              },
+              {
+                title: 'CMV',
+                value: data.cmv,
+                percent: calcPercent(data.cmv)
+              },
+              {
+                title: 'Margem de Contribuição',
+                value: data.margemContribuicao,
+                percent: calcPercent(data.margemContribuicao)
+              }
+            ]
+          }
+        })
+        .catch((error) => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingResultadoFinanceiro = false
+        })
     },
-    loadFaturamento () {
+    returnFaturamento () {
       this.loadingFaturamento = true
-      // Simula loading de 2 segundos
-      setTimeout(() => {
-        this.loadingFaturamento = false
-      }, 2000000)
+      
+      return getFaturamento()
+        .then(data => {
+          const mountArray = (faturamento) => {
+            const monthLabelsPt = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
+
+            const meses = faturamento?.Meses ?? []
+
+            return meses.map((mesItem) => {
+              const ano = mesItem.Mes.substring(0, 4);
+              const mesNumero = mesItem.Mes.substring(5, 7);
+              const mesIndex = Number(mesNumero) - 1;
+
+              const label = `${monthLabelsPt[mesIndex]} / ${ano}`;
+
+              return {
+                label,
+                projetado: mesItem.Projetado,
+                faturamento: mesItem.Realizado,
+                equilibrio: mesItem.PontoEquilibrio
+              }
+            })
+          }
+
+          this.faturamento = {
+            array: [
+              {
+                title: 'Total Período',
+                value: data.faturamento.TotalPeriodo
+              },
+              {
+                title: 'Média Mensal',
+                value: data.faturamento.MediaMensal
+              },
+              {
+                title: 'Maior Mensal',
+                value: data.faturamento.MaiorFaturamento
+              },
+              {
+                title: 'Menor Mensal',
+                value: data.faturamento.MenorFaturamento
+              }
+            ],
+            performance: data.faturamento.performancePerc,
+            meses: mountArray(data.faturamento),
+            desempenhoDiario: {
+              projetado: data.faturamento.TotalPeriodo,
+              faturamento: data.faturamento.TotalProjetadoPeriodo,
+              pontoEquilibrio: data.faturamento.PontoEquilibrio
+            }
+          }
+        })
+        .catch(error => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingFaturamento = false
+        })
     },
-    loadInadimplencia () {
+
+    returnInadimplencia () {
       this.loadingInadimplencia = true
       // Simula loading de 2 segundos
       setTimeout(() => {
         this.loadingInadimplencia = false
       }, 2000000)
     },
-    loadPerdaRecorrencia () {
+    returnPerdaRecorrencia () {
       this.loadingPerdaRecorrencia = true
       // Simula loading de 2 segundos
       setTimeout(() => {
         this.loadingPerdaRecorrencia = false
       }, 2000000)
     },
-    loadDespesas () {
+    returnDespesas () {
       this.loadingDespesas = true
       // Simula loading de 2 segundos
       setTimeout(() => {
         this.loadingDespesas = false
       }, 2000000)
     },
-    loadMargemContribuicao () {
+    returnMargemContribuicao () {
       this.loadingMargemContribuicao = true
       // Simula loading de 2 segundos
       setTimeout(() => {
         this.loadingMargemContribuicao = false
       }, 2000000)
     },
-    loadDRE () {
+    returnDRE () {
       this.loadingDRE = true
       // Simula loading de 2 segundos
       setTimeout(() => {

@@ -36,13 +36,15 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 
 export default {
-  setup () {
-    // valor atual (0..1). pode vir de API, etc.
-    const progress = ref(0.42)
-    return { progress }
+  // valor 0..1
+  props: {
+    progress: {
+      type: Number,
+      required: true,
+      default: 0
+    }
   },
 
   data () {
