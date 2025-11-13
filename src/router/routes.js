@@ -19,7 +19,12 @@ const routes = [
       //{ path: 'criar-nova-senha', component: () => import('src/pages/CreateNewPassword.vue') }
     ]
   },
-
+  {
+    path: '/home',
+    children: [
+      { path: 'clients', component: () => import('src/pages/ClientsPage.vue') }
+    ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it
