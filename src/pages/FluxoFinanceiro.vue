@@ -966,56 +966,21 @@ export default {
     }
   },
   mounted () {
-    // Não disparamos as requisições imediatamente para evitar "choque" de requisições.
-    // Usaremos IntersectionObserver para detectar visibilidade, mas iremos enfileirar
-    // os carregamentos e executá-los sequencialmente respeitando a ordem de scroll.
-    this._pendingLoads = [] // nomes dos refs aguardando carregamento
+    this._pendingLoads = []
     this._isProcessingLoads = false
 
-    this._io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return
-        const target = entry.target
-        // tenta descobrir o nome do ref associado ao elemento observado
-        try {
-          const refName = Object.keys(this.$refs).find(k => this.$refs[k] === target)
-          if (refName) {
-            this._enqueueLoad(refName)
-          }
-        } catch (err) {
-          console.warn('failed to determine ref for observed element', err)
-        }
-  // não desregistramos aqui — deixamos o processador decidir quando remover,
-  // porém desregistrar agora evita múltiplos gatilhos do mesmo elemento
-  try { if (this._io && entry.isIntersecting) this._io.unobserve(target) } catch (err) { console.warn('io.unobserve failed', err) }
-      })
-    }, { root: null, rootMargin: '0px', threshold: 0.15 })
+    // Enfileira na ordem de prioridade desejada
+    this._pendingLoads.push('cardFluxoFinanceiro')
+    this._pendingLoads.push('cardFluxoDiario')
+    this._pendingLoads.push('cardRecebimentos')
+    this._pendingLoads.push('cardPagamentos')
+    this._pendingLoads.push('cardSaldos')
 
-    // registra os elementos (usar $refs quando montado)
-    // alguns refs podem ser null se o elemento não existir; protegemos com try/catch
-    try {
-      if (this.$refs.cardFluxoFinanceiro) this._io.observe(this.$refs.cardFluxoFinanceiro)
-      if (this.$refs.cardFluxoDiario) this._io.observe(this.$refs.cardFluxoDiario)
-      if (this.$refs.cardRecebimentos) this._io.observe(this.$refs.cardRecebimentos)
-      if (this.$refs.cardPagamentos) this._io.observe(this.$refs.cardPagamentos)
-      if (this.$refs.cardSaldos) this._io.observe(this.$refs.cardSaldos)
-    } catch (err) {
-      // fallback: se IntersectionObserver não estiver disponível, carrega imediatamente
-      console.warn('IntersectionObserver observe registration failed:', err)
-      if (typeof IntersectionObserver === 'undefined') {
-        // executa sequencialmente se não houver IntersectionObserver
-        this._enqueueLoad('cardFluxoFinanceiro')
-        this._enqueueLoad('cardFluxoDiario')
-        this._enqueueLoad('cardRecebimentos')
-        this._enqueueLoad('cardPagamentos')
-        this._enqueueLoad('cardSaldos')
-      }
-    }
+    // Inicia o processamento sequencial
+    this._processLoadQueue()
   },
   beforeUnmount () {
-    if (this._io) {
-      try { this._io.disconnect() } catch (err) { console.warn('io disconnect failed', err) }
-    }
+    // sem IntersectionObserver, nada para desconectar aqui
   },
   methods: {
     // utils ===============
@@ -1048,7 +1013,7 @@ export default {
       }
     },
 
-    // Queue manager: enfileira carregamentos detectados pelo IntersectionObserver
+    // Queue manager: enfileira carregamentos para processamento sequencial
     _enqueueLoad (refName) {
       // mapeia os nomes de ref para flags 'loaded' existentes
       const allowed = ['cardFluxoFinanceiro', 'cardFluxoDiario', 'cardRecebimentos', 'cardPagamentos', 'cardSaldos']
@@ -1103,9 +1068,6 @@ export default {
           }
         } catch (err) {
           console.warn('Sequential load failed for', next, err)
-        } finally {
-          // garante que não vamos observar de novo
-          try { if (this._io && this.$refs[next]) this._io.unobserve(this.$refs[next]) } catch (e) { void e }
         }
       }
 
