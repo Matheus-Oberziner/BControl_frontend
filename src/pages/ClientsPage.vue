@@ -151,7 +151,7 @@ export default {
         this.clients = cachedList.map((c, idx) => ({
           id: idx,
           name: c.razaoSocial || c.nome || c.cnpj || 'Empresa',
-          active: true,
+          active: c.ativo,
           favorite: false,
           raw: c
         }))
@@ -173,7 +173,7 @@ export default {
         this.clients = list.map((c, idx) => ({
           id: idx,
           name: c.razaoSocial || c.nome || c.cnpj || 'Empresa',
-          active: true,
+          active: c.ativo,
           favorite: false,
           raw: c
         }))
