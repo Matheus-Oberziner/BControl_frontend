@@ -25,7 +25,6 @@
                 :input-style="{ color: '#fff' }"
                 mask="###.###.###-##"
                 unmasked-value
-                placeholder="000.000.000-00"
                 :rules="[ val => val && val.length !== 14 || 'Campo obrigatório']" />
             </div>
 
@@ -39,7 +38,7 @@
             <div class="row justify-between items-center q-mb-xl">
               <q-checkbox v-model="keepConnected" label="Manter Conectado" color="white" keep-color dense 
                 class="checkbox-custom" />
-              <router-link to="/redefinir-senha" class="forgot-password">Esqueci minha senha</router-link>
+              <a href="#" @click.prevent="forgotPassword" class="forgot-password">Esqueci minha senha</a>
             </div>
 
             <q-btn label="Entrar" color="positive" size="lg" class="full-width login-btn q-mb-lg" no-caps
@@ -152,6 +151,29 @@ export default {
             })
         }
       })
+    },
+    forgotPassword () {
+      // ensure CPF is filled before navigating to reset flow
+      const cpf = this.id
+      if (!cpf) {
+        notify.show('Por favor preencha o CPF antes de solicitar redefinição de senha.', 'warning')
+        return
+      }
+
+      // Accept masked or unmasked CPF (###.###.###-## => 14 chars, or only digits => 11)
+      const len = String(cpf).length
+      if (len !== 11 && len !== 14) {
+        notify.show('CPF inválido. Verifique se está completo.', 'warning')
+        return
+      }
+
+      // Save CPF in store (temporary) and navigate to reset page
+      try {
+        this.store.setResetCpf(cpf)
+        this.$router.push({ path: '/redefinir-senha' })
+      } catch (err) {
+        notify.showFromHttp(err)
+      }
     },
   }
 

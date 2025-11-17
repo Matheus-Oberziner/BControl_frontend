@@ -17,7 +17,7 @@
           <span class="font-1 text-28 weight-500 text-orange q-pl-md text-center">Fluxo Financeiro</span>
         </div>
 
-        <div
+        <!-- <div
           class="row items-center q-gutter-md"
           :class="$q.screen.width <= 1460 ? 'col-12 justify-end q-mt-md' : 'justify-center'"
           style="padding: 0px 0px 0px 10px;"
@@ -63,7 +63,7 @@
             size="36px"
             class="text-16"
           />
-        </div>
+        </div> -->
       </div>
 
       <div
@@ -138,7 +138,7 @@
             class="row justify-center bg-white"
             style="position: absolute; top: -12.5%; border: 2px solid #FFAE7D; border-radius: 15px; padding: 8px 30px;"
           >
-            <span class="text-20 text-orange font-1 weight-600">Período</span>
+            <span class="text-20 text-orange font-1 weight-600">Mês Atual</span>
           </div>
 
           <div
@@ -395,6 +395,7 @@
         <q-input
           outlined
           dense
+          v-model="dataInicial"
           type="date"
           max="2099-12-31"
           color="white"
@@ -407,10 +408,21 @@
         <q-input
           outlined
           dense
+          v-model="dataFinal"
           type="date"
           max="2099-12-31"
           style="text-transform: uppercase; color-scheme: dark;"
           input-style="color: #FFFFFF;"
+        />
+        <q-btn
+          outline
+          rounded
+          text-color="white"
+          no-caps
+          label="Aplicar Filtro"
+          class="q-ml-md"
+          style="text-transform: uppercase; color-scheme: dark;"
+          @click="applyPeriodoFilter"
         />
       </div>
     </div>
@@ -521,6 +533,7 @@
           :columns="columns"
           :rows="rows"
           :enable-search="false"
+          :show-actions="true"
         >
           <template #cell-status="{ row }">
             <div class="row items-center justify-center">
@@ -535,7 +548,11 @@
               <svg v-if="row.status === 'red'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 1.75C16.2916 1.75 12.6665 2.84967 9.58307 4.90994C6.49964 6.97022 4.09641 9.89857 2.67727 13.3247C1.25812 16.7508 0.886812 20.5208 1.61028 24.1579C2.33376 27.7951 4.11952 31.136 6.74176 33.7583C9.36399 36.3805 12.7049 38.1663 16.3421 38.8897C19.9792 39.6132 23.7492 39.2419 27.1753 37.8227C30.6014 36.4036 33.5298 34.0004 35.5901 30.9169C37.6503 27.8335 38.75 24.2084 38.75 20.5C38.7482 15.5277 36.7722 10.7597 33.2563 7.24373C29.7404 3.72782 24.9723 1.7518 20 1.75ZM31.25 22.6125H8.75001V18.3875H31.25V22.6125Z" fill="#BE3455"/>
               </svg>
-  
+
+              <svg v-if="row.status === 'redPlus'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 0C8.95456 0 0 8.95456 0 20C0 31.0454 8.95456 40 20 40C31.0454 40 40 31.0454 40 20C40 8.95456 31.0454 0 20 0ZM31.0521 29.1905L29.1905 31.0521L20 21.8616L10.8095 31.0521L8.94794 29.1905L18.1384 20L8.94794 10.8095L10.8095 8.94794L20 18.1384L29.1905 8.94794L31.0521 10.8095L21.8616 20L31.0521 29.1905Z" fill="#FF0000"/>
+              </svg>
+
               <svg v-if="row.status === 'blue'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 0.5C8.9544 0.5 0 9.4544 0 20.5C0 31.5456 8.9544 40.5 20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4544 31.0456 0.5 20 0.5ZM17.6 29.1624L8.0688 19.6312L10.3312 17.3688L17.6 24.6376L29.6688 12.5688L31.9312 14.8312L17.6 29.1624Z" fill="#2B8EFF"/>
               </svg>
@@ -544,6 +561,16 @@
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4543 31.0456 0.5 20 0.5C8.9543 0.5 0 9.4543 0 20.5C0 31.5456 8.9543 40.5 20 40.5ZM17.8272 23.0512C17.6606 24.172 18.6112 25.0968 19.7442 25.0968H20.6846C21.2388 25.0968 21.6976 24.666 21.7326 24.113C21.8464 23.0592 22.297 22.1398 23.0844 21.3548L24.343 20.113C25.327 19.1236 26.016 18.2258 26.4096 17.4194C26.8032 16.6022 27 15.7366 27 14.8226C27 12.8118 26.394 11.2581 25.182 10.1613C23.97 9.05376 22.266 8.5 20.07 8.5C17.8946 8.5 16.175 9.08064 14.9112 10.2419C14.1617 10.9363 13.6326 11.7902 13.3239 12.8037C12.9562 14.0108 14.0428 15.0645 15.3046 15.0645C16.3728 15.0645 17.169 14.1945 17.9122 13.3826C18.0158 13.2692 18.1186 13.157 18.2208 13.0484C18.687 12.5538 19.3034 12.3065 20.07 12.3065C21.686 12.3065 22.4938 13.2151 22.4938 15.0323C22.4938 15.6344 22.3386 16.2097 22.0278 16.758C21.717 17.2956 21.0902 18 20.1476 18.871C19.2154 19.7312 18.573 20.6076 18.2208 21.5C18.0464 21.942 17.9152 22.459 17.8272 23.0512ZM17.9412 28.2742C17.475 28.7366 17.242 29.328 17.242 30.0484C17.242 30.758 17.4698 31.344 17.9256 31.8064C18.3918 32.2688 19.003 32.5 19.7592 32.5C20.5154 32.5 21.1214 32.2688 21.5772 31.8064C22.0432 31.344 22.2764 30.758 22.2764 30.0484C22.2764 29.328 22.0382 28.7366 21.5616 28.2742C21.0954 27.801 20.4946 27.5646 19.7592 27.5646C19.0236 27.5646 18.4176 27.801 17.9412 28.2742Z" fill="#D5D5D5"/>
               </svg>
             </div>
+          </template>
+          <template #row-actions="{ row }">
+            <q-btn
+              flat
+              dense
+              round
+              color="grey-1"
+              icon="visibility"
+              @click="abrirDetalheTitulo(row, 'RECEBIMENTO')"
+            />
           </template>
         </TableComponent>
       </div>
@@ -655,6 +682,7 @@
           :columns="columns2"
           :rows="rows2"
           :enable-search="false"
+          :show-actions="true"
         >
           <template #cell-status="{ row }">
             <div class="row items-center justify-center">
@@ -669,6 +697,10 @@
               <svg v-if="row.status === 'red'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 1.75C16.2916 1.75 12.6665 2.84967 9.58307 4.90994C6.49964 6.97022 4.09641 9.89857 2.67727 13.3247C1.25812 16.7508 0.886812 20.5208 1.61028 24.1579C2.33376 27.7951 4.11952 31.136 6.74176 33.7583C9.36399 36.3805 12.7049 38.1663 16.3421 38.8897C19.9792 39.6132 23.7492 39.2419 27.1753 37.8227C30.6014 36.4036 33.5298 34.0004 35.5901 30.9169C37.6503 27.8335 38.75 24.2084 38.75 20.5C38.7482 15.5277 36.7722 10.7597 33.2563 7.24373C29.7404 3.72782 24.9723 1.7518 20 1.75ZM31.25 22.6125H8.75001V18.3875H31.25V22.6125Z" fill="#BE3455"/>
               </svg>
+
+              <svg v-if="row.status === 'redPlus'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 0C8.95456 0 0 8.95456 0 20C0 31.0454 8.95456 40 20 40C31.0454 40 40 31.0454 40 20C40 8.95456 31.0454 0 20 0ZM31.0521 29.1905L29.1905 31.0521L20 21.8616L10.8095 31.0521L8.94794 29.1905L18.1384 20L8.94794 10.8095L10.8095 8.94794L20 18.1384L29.1905 8.94794L31.0521 10.8095L21.8616 20L31.0521 29.1905Z" fill="#FF0000"/>
+              </svg>
   
               <svg v-if="row.status === 'blue'" width="35" height="35" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 0.5C8.9544 0.5 0 9.4544 0 20.5C0 31.5456 8.9544 40.5 20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4544 31.0456 0.5 20 0.5ZM17.6 29.1624L8.0688 19.6312L10.3312 17.3688L17.6 24.6376L29.6688 12.5688L31.9312 14.8312L17.6 29.1624Z" fill="#2B8EFF"/>
@@ -678,6 +710,16 @@
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M20 40.5C31.0456 40.5 40 31.5456 40 20.5C40 9.4543 31.0456 0.5 20 0.5C8.9543 0.5 0 9.4543 0 20.5C0 31.5456 8.9543 40.5 20 40.5ZM17.8272 23.0512C17.6606 24.172 18.6112 25.0968 19.7442 25.0968H20.6846C21.2388 25.0968 21.6976 24.666 21.7326 24.113C21.8464 23.0592 22.297 22.1398 23.0844 21.3548L24.343 20.113C25.327 19.1236 26.016 18.2258 26.4096 17.4194C26.8032 16.6022 27 15.7366 27 14.8226C27 12.8118 26.394 11.2581 25.182 10.1613C23.97 9.05376 22.266 8.5 20.07 8.5C17.8946 8.5 16.175 9.08064 14.9112 10.2419C14.1617 10.9363 13.6326 11.7902 13.3239 12.8037C12.9562 14.0108 14.0428 15.0645 15.3046 15.0645C16.3728 15.0645 17.169 14.1945 17.9122 13.3826C18.0158 13.2692 18.1186 13.157 18.2208 13.0484C18.687 12.5538 19.3034 12.3065 20.07 12.3065C21.686 12.3065 22.4938 13.2151 22.4938 15.0323C22.4938 15.6344 22.3386 16.2097 22.0278 16.758C21.717 17.2956 21.0902 18 20.1476 18.871C19.2154 19.7312 18.573 20.6076 18.2208 21.5C18.0464 21.942 17.9152 22.459 17.8272 23.0512ZM17.9412 28.2742C17.475 28.7366 17.242 29.328 17.242 30.0484C17.242 30.758 17.4698 31.344 17.9256 31.8064C18.3918 32.2688 19.003 32.5 19.7592 32.5C20.5154 32.5 21.1214 32.2688 21.5772 31.8064C22.0432 31.344 22.2764 30.758 22.2764 30.0484C22.2764 29.328 22.0382 28.7366 21.5616 28.2742C21.0954 27.801 20.4946 27.5646 19.7592 27.5646C19.0236 27.5646 18.4176 27.801 17.9412 28.2742Z" fill="#D5D5D5"/>
               </svg>
             </div>
+          </template>
+          <template #row-actions="{ row }">
+            <q-btn
+              flat
+              dense
+              round
+              color="grey-1"
+              icon="visibility"
+              @click="abrirDetalheTitulo(row, 'PAGAMENTO')"
+            />
           </template>
         </TableComponent>
       </div>
@@ -789,7 +831,13 @@
           </template>
         </TableComponent>
       </div>
-
+      <DetalheTituloDialog
+        v-model="detalheTituloDialog"
+        :titulo="detalheTitulo"
+        :loading="detalheTituloLoading"
+        :tipo="tipoTituloAtual"
+        @imprimir="imprimirTitulo"
+      />
       <div
         class="col-12 row items-center justify-between"
         style="border-radius: 20px; padding: 25px 0px 25px; margin: 0px 0px 60px 0;"
@@ -845,7 +893,8 @@
 <script>
 import FinancialFluxChart from 'src/components/FinancialFluxChart.vue'
 import TableComponent from 'src/components/TableComponent.vue'
-import { getFluxoDiario, getFluxoFinanceiro, getRecebimentoRealizados, getPagamentosRealizados, getSaldoContas } from 'src/boot/axios'
+import DetalheTituloDialog from 'src/components/DetalheTituloDialog.vue'
+import { getFluxoDiario, getFluxoFinanceiro, getRecebimentoRealizados, getPagamentosRealizados, getSaldoContas, getFluxoMensal, getTituloDetalhe } from 'src/boot/axios'
 import { notify } from '../helpers/notify.js'
 import { ref } from 'vue'
 
@@ -855,7 +904,8 @@ const brl = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFr
 export default {
   components: {
     TableComponent,
-    FinancialFluxChart
+    FinancialFluxChart,
+    DetalheTituloDialog
   },
   setup () {
     const loadingFluxoFinanceiro = ref(true)
@@ -875,11 +925,20 @@ export default {
     }
   },
   data () {
+    const now = new Date()
+    const primeiroDiaMes = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().substr(0, 10)
+    const ultimoDiaMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().substr(0, 10)
+
     return {
       // timer usado para debouncing ao alterar os datepickers
       dateChangeTimer: null,
-      dataInicial: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().substr(0, 10),
-      dataFinal: new Date().toISOString().substr(0, 10),
+      dataInicial: primeiroDiaMes,
+      dataFinal: ultimoDiaMes,
+      // Detalhe Título Dialog
+      detalheTituloDialog: false,
+      detalheTituloLoading: false,
+      detalheTitulo: null,
+      tipoTituloAtual: null,
       fluxo: {
         saldoDia: 0,
         recebimentoDia: 0,
@@ -993,6 +1052,14 @@ export default {
       if (!dateStr) return null
       return `${dateStr}T00:00:00Z`
     },
+    imprimirTitulo() {
+      // Implementar lógica de impressão
+      console.log('Imprimir título:', this.detalheTitulo);
+      this.$q.notify({
+        type: 'info',
+        message: 'Funcionalidade de impressão em desenvolvimento'
+      });
+    },
     // scroll suave para o elemento referenciado (refName deve existir em $refs)
     scrollTo (refName) {
       try {
@@ -1012,7 +1079,34 @@ export default {
         console.warn('scrollTo error', err)
       }
     },
+    async abrirDetalheTitulo (row, tipo) {
+      if (!row.codigo) {
+        return
+      }
 
+      this.tipoTituloAtual = tipo
+      // abre o modal imediatamente e mostra loading
+      this.detalheTituloDialog = true
+      this.detalheTituloLoading = true
+      this.detalheTitulo = null // limpa dados anteriores
+
+      try {
+        const params = { codigoTitulo: row.codigo }
+        const data = await getTituloDetalhe(params)
+
+        this.detalheTitulo = data
+      } catch (err) {
+        console.error(err)
+        this.$q.notify({
+          type: 'negative',
+          message: 'Erro ao carregar detalhes do título.'
+        })
+        // se quiser, pode fechar o dialog em caso de erro:
+        this.detalheTituloDialog = false
+      } finally {
+        this.detalheTituloLoading = false
+      }
+    },
     // Queue manager: enfileira carregamentos para processamento sequencial
     _enqueueLoad (refName) {
       // mapeia os nomes de ref para flags 'loaded' existentes
@@ -1076,13 +1170,8 @@ export default {
     //API Calls======================
     returnFluxoFinanceiro () {
       this.loadingFluxoFinanceiro = true
-      // prepara as datas no formato ISO com Z (ex: 2025-09-01T00:00:00Z)
-      const params = {
-        dataInicial: this.toIsoZ(this.dataInicial),
-        dataFinal: this.toIsoZ(this.dataFinal)
-      }
   // envia as datas selecionadas como query params
-  return getFluxoFinanceiro(params)
+  return getFluxoFinanceiro()
         .then(data => {
           this.fluxo = {
             saldoDia: data.saldoDia,
@@ -1093,23 +1182,39 @@ export default {
             pagamentoPeriodo: data.pagamentoPeriodo,
             saldoAcumulado: data.saldoAcumulado
           }
-          const itens = Array.isArray(data?.fluxoMensal) ? data.fluxoMensal : []
-          const meses = []
 
-          for (let i = 0; i < itens.length; i++) {
-            const item = itens[i] || {}
+          // Após carregar o resumo do fluxo, solicita o fluxo mensal separado
+          this.loadingFluxoMensal = true
+          // solicita especificamente os últimos 6 meses ao endpoint
+          return getFluxoMensal({ meses: 6 })
+            .then(mData => {
+              // suporta diferentes formatos retornados pela API
+              const itens = Array.isArray(mData?.fluxoMensal)
+                ? mData.fluxoMensal
+                : Array.isArray(mData?.itens)
+                  ? mData.itens
+                  : Array.isArray(mData) ? mData : []
 
-            meses.push({
-              month: item.label,
-              topCap: item.aReceberPrevisto,
-              receber: { value: item.aReceber, color: '#FE721C' },
-              pagar: { value: item.aPagar, color: '#680059' },
-              bottomCap: item.aPagarPrevisto,
-              saldo: item.saldo
+              const meses = []
+              for (let i = 0; i < itens.length; i++) {
+                const item = itens[i] || {}
+                meses.push({
+                  month: item.label,
+                  topCap: item.aReceberPrevisto,
+                  receber: { value: item.aReceber, color: '#FE721C' },
+                  pagar: { value: item.aPagar, color: '#680059' },
+                  bottomCap: item.aPagarPrevisto,
+                  saldo: item.saldo
+                })
+              }
+              this.meses = meses
             })
-          }
-          console.log('Meses para o gráfico:', meses)
-          this.meses = meses
+            .catch((err) => {
+              notify.showFromHttp(err)
+            })
+            .finally(() => {
+              this.loadingFluxoMensal = false
+            })
         })
         .catch((error) => {
           notify.showFromHttp(error)
@@ -1230,11 +1335,19 @@ export default {
         this.dateChangeTimer = null
       }, 250)
     }
-  },
-  watch: {
-    dataInicial () { this.onDateChange() },
-    dataFinal () { this.onDateChange() }
-  },
+    ,
+    // Aplica o filtro quando o usuário clica no botão 'Filtrar'
+    applyPeriodoFilter () {
+      // dispara as requisições apenas para as seções já carregadas, mantendo o comportamento anterior
+      try {
+        if (this.loadedRecebimentos)  this.returnRecebimentos()
+
+        if (this.loadedPagamentos) this.returnPagamentos()
+      } catch (err) {
+        console.warn('applyPeriodoFilter error', err)
+      }
+    }
+  }
 }
 </script>
 <style scoped>

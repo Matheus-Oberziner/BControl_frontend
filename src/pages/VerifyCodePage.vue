@@ -23,43 +23,72 @@
           </div>
 
           <!-- Título -->
-          <h1 class="verify-title q-mb-sm">Verificar Código</h1>
-          <p class="verify-subtitle q-mb-xl">Digite o código que você recebeu no campo abaixo:</p>
+          <h1 class="verify-title q-mb-sm">Redefinir Senha</h1>
+          <p class="verify-subtitle q-mb-xl">Insira o código que você recebeu e escolha uma nova senha:</p>
 
-          <!-- Campos de Código -->
-          <div class="code-inputs q-mb-xl">
-            <q-input
-              v-for="(digit, index) in 4"
-              :key="index"
-              v-model="code[index]"
-              outlined
-              class="code-input"
-              input-class="text-center"
-              mask="#"
-              maxlength="1"
-              @keyup="handleKeyup($event, index)"
-              :ref="`input${index}`"
+          <form autocomplete="off" @submit.prevent="submitCode">
+            <!-- Campos de Código -->
+            <div class="code-inputs q-mb-sm">
+              <q-input
+                v-for="(digit, index) in 4"
+                :key="index"
+                v-model="code[index]"
+                outlined
+                class="code-input"
+                input-class="text-center"
+                mask="#"
+                maxlength="1"
+                @keyup="handleKeyup($event, index)"
+                :ref="`input${index}`"
+                :input-attrs="{ autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: false, inputmode: 'numeric', name: 'code' + index }"
+              />
+            </div>
+
+            <!-- Campos de Senha -->
+            <div class="password-section q-mb-md">
+              <label class="form-label">Nova senha</label>
+              <q-input
+                v-model="password"
+                type="password"
+                outlined
+                dense
+                :input-style="{ color: '#fff' }"
+                :rules="[val => !!val || 'Senha é obrigatória', val => (val && val.length >= 6) || 'Mínimo 6 caracteres']"
+                class="q-mb-sm custom-input"
+                :input-attrs="{ autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: false}"
+              />
+              <label class="form-label">Confirmar senha</label>
+              <q-input
+                v-model="confirmPassword"
+                type="password"
+                dense
+                outlined
+                class="custom-input"
+                :rules="[val => !!val || 'Confirmação é obrigatória', val => val === password || 'As senhas não coincidem']"
+                :input-attrs="{ autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: false}"
+              />
+            </div>
+
+            <!-- Link de Reenviar -->
+            <div class="q-mb-lg text-center">
+              <span class="resend-text">
+                Não recebeu o código?
+                <a class="resend-link" @click="resendCode">
+                  Reenviar código
+                </a>
+              </span>
+            </div>
+
+            <!-- Botão Enviar -->
+            <q-btn
+              no-caps
+              type="submit"
+              label="Redefinir senha"
+              class="submit-btn full-width"
+              :disable="!isFormValid || loading"
+              :loading="loading"
             />
-          </div>
-
-          <!-- Link de Reenviar -->
-          <div class="resend-section q-mb-xl text-center">
-            <span class="resend-text">
-              Não recebeu nenhum código?
-              <a class="resend-link" @click="resendCode">
-                Reenviar código
-              </a>
-            </span>
-          </div>
-
-          <!-- Botão Enviar -->
-          <q-btn
-            no-caps
-            label="Enviar"
-            class="submit-btn full-width"
-            :disable="!isCodeComplete"
-            @click="submitCode"
-          />
+          </form>
         </div>
       </div>
 
@@ -72,10 +101,16 @@
 </template>
 
 <script>
+import axios from 'axios'
+import { useUserStore } from 'stores/user'
+
 export default {
   data() {
     return {
-      code: ["", "", "", ""]
+      code: ["", "", "", ""],
+      password: '',
+      confirmPassword: '',
+      loading: false,
     };
   },
 
@@ -85,6 +120,15 @@ export default {
     },
     isCodeComplete() {
       return this.code.every(d => d !== "");
+    }
+    , passwordValid() {
+      return this.password && this.password.length >= 6
+    }
+    , passwordsMatch() {
+      return this.password === this.confirmPassword
+    }
+    , isFormValid() {
+      return this.isCodeComplete && this.passwordValid && this.passwordsMatch
     }
   },
 
@@ -114,20 +158,48 @@ export default {
       }
     },
 
-    submitCode() {
-      if (this.isCodeComplete) {
-        console.log("Código completo:", this.codeString);
-        this.$router.push({ path: '/redefinir-senha/criar-nova-senha' });
+    async submitCode() {
+      if (!this.isFormValid) {
+        this.$q.notify({ message: 'Preencha corretamente o código e as senhas.', color: 'negative' })
+        return
+      }
+
+      this.loading = true
+      try {
+        // Pega o id salvo pela tela de reset (ResetPasswordPage)
+        const store = useUserStore()
+        const id = store.resetCpf
+
+        if (!id) {
+          this.$q.notify({ message: 'Não foi possível identificar o usuário. Volte e tente novamente.', color: 'negative' })
+          this.$router.push({ path: '/redefinir-senha' })
+          return
+        }
+
+        // Ajuste o endpoint abaixo conforme a API real
+        const endpoint = '/auth/reset-password'
+        const payload = {
+          id: id,
+          code: this.codeString,
+          newPassword: this.password,
+          confirmPassword: this.confirmPassword
+        }
+
+        const res = await axios.post(endpoint, payload)
+
+        this.$q.notify({ message: res.data?.message || 'Senha redefinida com sucesso!', color: 'positive' })
+        // Redireciona para login ou página desejada
+        this.$router.push({ path: '/login' })
+      } catch (err) {
+        const msg = err?.response?.data?.message || err.message || 'Ocorreu um erro'
+        this.$q.notify({ message: msg, color: 'negative' })
+      } finally {
+        this.loading = false
       }
     },
 
     resendCode() {
-      this.$q.notify({
-        message: 'Código reenviado com sucesso!',
-        color: 'positive',
-        position: 'top',
-        icon: 'check_circle'
-      });
+      this.$router.push({ path: '/redefinir-senha' })
     }
   }
 }
@@ -216,12 +288,56 @@ export default {
   display: flex;
   gap: 16px;
   justify-content: center;
-  margin-bottom: 48px;
+  margin-bottom: 24px;
 }
 
 .code-input {
   width: 80px;
   height: 80px;
+}
+
+.form-label {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.custom-input {
+  margin-bottom: 0;
+}
+
+.custom-input :deep(.q-field__control) {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1.5px solid rgba(16, 185, 129, 0.4);
+  border-radius: 8px;
+  color: white;
+  min-height: 48px;
+}
+
+.custom-input :deep(.q-field__control):before {
+  border: none;
+}
+
+.custom-input :deep(.q-field__control):after {
+  border: none;
+}
+
+.custom-input :deep(.q-field__native) {
+  color: white !important;
+  padding: 12px 16px;
+}
+
+.custom-input :deep(.q-field__control):hover {
+  border-color: rgba(16, 185, 129, 0.6);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.custom-input :deep(.q-field--focused .q-field__control) {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.08);
 }
 
 .code-input :deep(.q-field__control) {
@@ -258,10 +374,6 @@ export default {
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
   background: rgba(16, 185, 129, 0.08);
-}
-
-.resend-section {
-  margin-bottom: 48px;
 }
 
 .resend-text {

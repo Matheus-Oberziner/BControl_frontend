@@ -70,7 +70,8 @@
           </slot>
         </div>
 
-        <div v-if="enableSearch" class="text-right">
+        <!-- COLUNA DE AÇÕES POR LINHA -->
+        <div v-if="enableSearch || showActions" class="text-center">
           <slot name="row-actions" :row="row" />
         </div>
       </div>
@@ -91,7 +92,10 @@ export default {
     rowHeight: { type: Number, default: 68 },
 
     // padrão de corte por caracteres
-    maxCharsPerCell: { type: Number, default: 35 }
+    maxCharsPerCell: { type: Number, default: 35 },
+
+    // NOVO: controla se existe coluna de ações mesmo sem search
+    showActions: { type: Boolean, default: false }
   },
   data () {
     return {
@@ -104,7 +108,9 @@ export default {
   },
   computed: {
     gridTemplate () {
-      const count = this.columns.length + (this.enableSearch ? 1 : 0)
+      // se tiver search ou actions, soma 1 coluna extra
+      const extra = (this.enableSearch || this.showActions) ? 1 : 0
+      const count = this.columns.length + extra
       return `grid-template-columns: repeat(${count}, 1fr); gap: 12px; align-items: center;`
     },
     filteredRows () {

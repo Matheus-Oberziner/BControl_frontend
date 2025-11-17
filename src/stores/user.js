@@ -5,6 +5,8 @@ export const useUserStore = defineStore('user', {
     user: JSON.parse(localStorage.getItem('user')),
     userInfo: JSON.parse(localStorage.getItem('userInfo')),
     company: JSON.parse(localStorage.getItem('company')),
+    // temporary in-memory CPF used during reset flow
+    resetCpf: null,
     // list of companies returned by the API
     companyList: JSON.parse(localStorage.getItem('companyList')) || [],
     // currently selected company (object)
@@ -56,6 +58,14 @@ export const useUserStore = defineStore('user', {
         localStorage.removeItem('company')
         this.company = null
       }
+    },
+    // Password reset CPF handling
+    setResetCpf (cpf) {
+      // keep only digits to be safe
+      this.resetCpf = cpf ? String(cpf) : null
+    },
+    clearResetCpf () {
+      this.resetCpf = null
     },
     deleteSession () {
       localStorage.removeItem('user')

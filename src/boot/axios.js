@@ -136,6 +136,16 @@ const getCompany = async params => {
   return res.data
 }
 
+const getResetInfo = async params => {
+  const res = await axios.get(`/auth/reset-info`, { params })
+  return res.data
+}
+
+const forgotPassword = async params => {
+  const res = await axios.post(`/auth/forgot-password`, params)
+  return res.data
+}
+
 // EndPoints de fluxo financeiro ===============================================
 const getFluxoFinanceiro = async params => {
   let company = JSON.parse(localStorage.getItem('company'))
@@ -155,6 +165,12 @@ const getRecebimentoRealizados = async params => {
   return res.data
 }
 
+const getTituloDetalhe = async (params) => {
+  let company = JSON.parse(localStorage.getItem('company'))
+  const res = await axios.get(`/fluxo-financeiro/${company?.cnpj}/titulo-detalhe`, { params })
+  return res.data
+}
+
 const getPagamentosRealizados = async params => {
   let company = JSON.parse(localStorage.getItem('company'))
   const res = await axios.get(`/fluxo-financeiro/${company?.cnpj}/pagamentos`, {params})
@@ -167,9 +183,9 @@ const getSaldoContas = async params => {
   return res.data
 }
 
-const getFluxoMensal = async () => {
+const getFluxoMensal = async (params = {}) => {
   let company = JSON.parse(localStorage.getItem('company'))
-  const res = await axios.get(`/fluxo-financeiro/${company?.cnpj}/fluxo-mensal`)
+  const res = await axios.get(`/fluxo-financeiro/${company?.cnpj}/fluxo-mensal`, { params })
   return res.data
 }
 // ============================================================================
@@ -221,10 +237,13 @@ export {
   getFluxoFinanceiro,
   getCompany,
   getFluxoMensal,
+  getResetInfo,
+  forgotPassword,
   getResultadoFinanceiro,
   getDespesasCentroCusto,
   getDreMensal,
   getFaturamento,
   getInadimplencia,
-  getPerdaReceitaRecorrente
+  getPerdaReceitaRecorrente,
+  getTituloDetalhe
 }

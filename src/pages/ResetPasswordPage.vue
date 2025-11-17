@@ -42,7 +42,7 @@
                       <q-icon name="email" size="24px" class="option-icon" />
                       <span class="option-label">Email</span>
                     </div>
-                    <span class="option-value">******@gmail.com</span>
+                    <span class="option-value">{{ emailMask }}</span>
                   </div>
                 </template>
               </q-radio>
@@ -62,7 +62,7 @@
                       <q-icon name="sms" size="24px" class="option-icon" />
                       <span class="option-label">SMS</span>
                     </div>
-                    <span class="option-value">(55) +11 ****-5212</span>
+                    <span class="option-value">{{ smsMask }}</span>
                   </div>
                 </template>
               </q-radio>
@@ -83,7 +83,9 @@
               no-caps
               label="Solicitar Código"
               class="submit-btn"
-              @click="$router.push({ path: '/redefinir-senha/verificar-codigo' })"
+              :loading="isLoading"
+              :disable="isLoading"
+              @click="sendCode"
             />
           </div>
         </div>
@@ -98,12 +100,101 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useUserStore } from 'stores/user'
+import { getResetInfo, forgotPassword } from 'boot/axios'
+import { notify } from '../helpers/notify.js'
 
 export default {
   setup () {
+  const radio = ref('email')
+  const emailMask = ref('******@gmail.com')
+  const smsMask = ref('(55) +11 ****-5212')
+  const isLoading = ref(false)
+
+    const store = useUserStore()
+    const router = useRouter()
+
+    const $q = useQuasar()
+
+    onMounted(async () => {
+      // Only proceed if CPF was saved by the login page
+      if (!store.resetCpf) {
+        // nothing to identify the user, go back to login
+        router.push({ path: '/login' })
+        return
+      }
+
+      isLoading.value = true
+      // show global loading indicator
+      $q.loading.show()
+      try {
+        const res = await getResetInfo({ cpf: store.resetCpf })
+
+        const methods = res.methods || res.data?.methods || []
+
+        if (Array.isArray(methods) && methods.length > 0) {
+          methods.forEach(m => {
+            const t = (m.type || '').toLowerCase()
+            const label = m.label || m.mask || m.value
+            if (t === 'email' && label) emailMask.value = label
+            if ((t === 'sms' || t === 'phone') && label) smsMask.value = label
+          })
+
+          // set default selected radio to first available method
+          const firstType = (methods[0].type || '').toLowerCase()
+          if (firstType === 'sms' || firstType === 'phone') {
+            radio.value = 'sms'
+          } else {
+            radio.value = 'email'
+          }
+        } 
+      } catch (err) {
+        notify.showFromHttp(err)
+      } finally {
+        isLoading.value = false
+        $q.loading.hide()
+      }
+  })
+
+  // send code to selected method (email or sms)
+    const sendCode = async () => {
+      if (!store.resetCpf) {
+        router.push({ path: '/login' })
+        return
+      }
+
+      const method = radio.value || 'email'
+
+      isLoading.value = true
+      $q.loading.show()
+      try {
+        const payload = { id: store.resetCpf, method }
+        const res = await forgotPassword(payload)
+
+        if (res && res.message) {
+          notify.show(res.message, 'positive')
+        } else {
+          notify.show('Código enviado. Verifique seu e-mail ou SMS.', 'positive')
+        }
+
+        router.push({ path: '/redefinir-senha/verificar-codigo' })
+      } catch (err) {
+        notify.showFromHttp(err)
+      } finally {
+        isLoading.value = false
+        $q.loading.hide()
+      }
+    }
+
     return {
-      radio: ref('email')
+      radio,
+      emailMask,
+      smsMask,
+      isLoading,
+      sendCode
     }
   }
 }

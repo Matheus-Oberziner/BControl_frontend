@@ -211,12 +211,6 @@ export default {
 
     accessClient(client) {
       if (client.active) {
-        this.$q.notify({
-          message: `Acessando ${client.name}`,
-          color: 'positive',
-          position: 'top',
-          timeout: 1500
-        });
 
         // se o card veio de uma empresa (raw) seleciona a empresa na store e navega
         const store = useUserStore()
