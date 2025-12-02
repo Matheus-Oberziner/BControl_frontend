@@ -29,9 +29,52 @@
             </pattern>
           </defs>
 
-          <!-- Arco restante -->
+          <circle
+            v-if="isZero && !semicircle"
+            :cx="center"
+            :cy="center"
+            :r="radius"
+            :stroke="restStroke"
+            :stroke-width="strokeWidth"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
           <path
-            v-if="darkPath"
+            v-else-if="isZero && semicircle"
+            :d="zeroPath"
+            :stroke="restStroke"
+            :stroke-width="strokeWidth"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+
+          <!-- 100%: só o círculo de progresso -->
+          <circle
+            v-else-if="isFull && !semicircle"
+            :cx="center"
+            :cy="center"
+            :r="radius"
+            :stroke="progressColor"
+            :stroke-width="strokeWidth"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+          <path
+            v-else-if="isFull && semicircle"
+            :d="fullPath"
+            :stroke="progressColor"
+            :stroke-width="strokeWidth"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+
+          <!-- Arco restante (entre 0 e 100) -->
+          <path
+            v-else-if="darkPath"
             :d="darkPath"
             :stroke="restStroke"
             :stroke-width="strokeWidth"
@@ -42,7 +85,7 @@
             pathLength="100"
           />
 
-          <!-- Arco de progresso (animado) -->
+          <!-- Arco de progresso (entre 0 e 100) -->
           <path
             v-if="lightPath"
             :d="lightPath"
@@ -55,7 +98,7 @@
             pathLength="100"
           />
 
-          <!-- Dots para ângulos muito pequenos -->
+          <!-- Dots só entre 0 e 100 -->
           <circle
             v-if="drawLightDot"
             :cx="dotPos.x"
@@ -119,45 +162,82 @@ export default {
   },
 
   computed: {
-    radius () { return (this.size / 2) - (this.strokeWidth / 2) },
+    radius () {
+      const margin = 2
+      return (this.size / 2) - (this.strokeWidth / 2) - margin
+    },
     circumference () { return 2 * Math.PI * this.radius },
     gapPx () {
       const min = 1
       const max = Math.max(1, this.circumference * 0.05)
       return Math.min(max, Math.max(min, this.strokeWidth))
     },
-    gapAngle () { return (this.gapPx / this.circumference) * 360 },
+    gapAngle () {
+      if (this.value === 0 || this.value === 100) return 0
+      const min = 1
+      const max = Math.max(1, this.circumference * 0.05)
+      return (Math.min(max, Math.max(min, this.strokeWidth)) / this.circumference) * 360
+    },
 
     arcSpanDeg () { return this.arcSpan != null ? this.arcSpan : (this.semicircle ? 180 : 360) },
     startAngleEff () { return this.semicircle ? this.startAngleSemi : this.startAngle },
     svgHeight () { return this.semicircle ? Math.ceil(this.size / 2 + this.strokeWidth) : this.size },
-    viewBoxStr () { return `0 0 ${this.size} ${this.svgHeight}` },
+    viewBoxStr () { return `-3 -3 ${this.size + 6} ${this.svgHeight + 6}` },
 
     valueAngle () { return (this.value / 100) * this.arcSpanDeg },
 
-    drawLightDot () { return this.value > 0 && this.valueAngle <= this.gapAngle + 0.0001 },
-    drawDarkDot () { return this.value < 100 && (this.arcSpanDeg - this.valueAngle) <= this.gapAngle + 0.0001 },
+    isZero () { return this.value <= 0 },
+    isFull () { return this.value >= 100 },
+
+    drawLightDot () {
+      return this.value > 0 && this.value < 100 &&
+             this.valueAngle <= this.gapAngle + 0.0001
+    },
+    drawDarkDot () {
+      return this.value > 0 && this.value < 100 &&
+             (this.arcSpanDeg - this.valueAngle) <= this.gapAngle + 0.0001
+    },
 
     lightPath () {
-      if (this.value <= 0) return null
-      if (this.value >= 100) {
-        return this.describeArc(this.center, this.center, this.radius, this.startAngleEff + 0.001, this.startAngleEff + this.arcSpanDeg - 0.001)
-      }
+      // só desenha arco entre 0 e 100
+      if (this.isZero || this.isFull) return null
       if (this.drawLightDot) return null
+
       const start = this.startAngleEff + (this.gapAngle / 2)
       const end   = this.startAngleEff + this.valueAngle - (this.gapAngle / 2)
       return this.describeArc(this.center, this.center, this.radius, start, end)
     },
 
     darkPath () {
-      if (this.value >= 100) return null
-      if (this.value <= 0) {
-        return this.describeArc(this.center, this.center, this.radius, this.startAngleEff + 0.001, this.startAngleEff + this.arcSpanDeg - 0.001)
-      }
+      // só desenha arco entre 0 e 100
+      if (this.isZero || this.isFull) return null
       if (this.drawDarkDot) return null
+
       const start = this.startAngleEff + this.valueAngle + (this.gapAngle / 2)
       const end   = this.startAngleEff + this.arcSpanDeg - (this.gapAngle / 2)
       return this.describeArc(this.center, this.center, this.radius, start, end)
+    },
+
+    zeroPath () {
+      if (!this.semicircle || !this.isZero) return null
+      return this.describeArc(
+        this.center,
+        this.center,
+        this.radius,
+        this.startAngleEff,
+        this.startAngleEff + this.arcSpanDeg
+      )
+    },
+
+    fullPath () {
+      if (!this.semicircle || !this.isFull) return null
+      return this.describeArc(
+        this.center,
+        this.center,
+        this.radius,
+        this.startAngleEff,
+        this.startAngleEff + this.arcSpanDeg
+      )
     },
 
     dotPos () {

@@ -438,7 +438,7 @@
           <template #content>
             <div class="col-12 row items-center justify-between" style="padding: 40px 30px;">
               <div class="fancy-scroll" style="width: 70%; padding: 50px 20px 0px 0px;">
-                <ProgressBarsComponent />
+                <ProgressBarsComponent :chart-data="faturamento.desempenhoDiario.dias" />
               </div>
   
               <div class="row" style="width: 25%;">
@@ -470,7 +470,7 @@
 
                 <div class="col-12 row justify-center" style="margin: 40px 0;">
                   <DonutRadial
-                    :value="69"
+                    :value="faturamento.desempenhoDiario.totalPerc"
                     :size="110"
                     :start-angle="175"
                     progress-color="#0047A1"
@@ -483,7 +483,7 @@
                     <!-- Top label -->
                     <template #top-label>
                       <div class="label-top">
-                        <div class="weight-600 text-blue"><span class="text-12 q-pr-xs">R$</span><span class="text-16">288.000,00</span></div>
+                        <div class="weight-600 text-blue text-center"><span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(faturamento.desempenhoDiario.totalVendido) }}</span></div>
                         <div class="text-grey-1 text-center">Total Vendido</div>
                       </div>
                     </template>
@@ -491,14 +491,14 @@
                     <!-- Center label -->
                     <template #center-label>
                       <div class="label-center">
-                        <span class="text-18 weight-600 text-blue">69%</span>
+                        <span class="text-18 weight-600 text-blue">{{ faturamento.desempenhoDiario.totalPerc }}%</span>
                       </div>
                     </template>
 
                     <!-- Bottom label -->
                     <template #bottom-label>
                       <div class="label-bottom">
-                        <div class="weight-600 text-grey-1"><span class="text-12 q-pr-xs">R$</span><span class="text-16">288.000,00</span></div>
+                        <div class="weight-600 text-grey-1 text-center"><span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ formatCurrency(faturamento.desempenhoDiario.totalFalta) }}</span></div>
                         <div class="text-grey-1 text-center">Falta</div>
                       </div>
                     </template>
@@ -519,30 +519,25 @@
             <div class="col-12 row items-start justify-center" style="padding: 60px 20px;">
               <div class="col-2 row justify-center" style="height: 100%;">
                 <PieChartComponent
-                  :data="[
-                    { label: 'Pontual', percentage: 38, color: '#7ED321' },
-                    { label: 'Recorrente', percentage: 24, color: '#417505' },
-                    { label: 'Serviço', percentage: 19, color: '#FF8A00' },
-                    { label: 'Revende', percentage: 19, color: '#9013FE' }
-                  ]"
+                  :data="faturamento.modalidadeVenda.pieArray"
                 >
                   <template #bottom-label>
                     <div class="bottom-label row items-center justify-center">
-                      <span class="text-12 q-pr-xs weight-600 text-center">R$</span><span class="text-16 weight-600">{{ (420000).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-                      <span class="text-center text-grey-1">Total em Vendas</span>
+                      <span class="text-12 q-pr-xs weight-600 text-center">R$</span><span class="text-16 weight-600">{{ formatCurrency(faturamento.modalidadeVenda.totalVendas) }}</span>
+                      <span class="col-12 text-center text-grey-1">Total em Vendas</span>
                     </div>
                   </template>
                 </PieChartComponent>
               </div>
 
               <div
-                v-for="(item, index) in arrayFaturamentoVenda"
+                v-for="(item, index) in faturamento.modalidadeVenda.resumos"
                 :key="index"
                 class="col"
                 :class="$q.screen.lt.lg ? 'q-mx-sm' : 'q-mx-md'"
               >
                 <CardComponent
-                  :title="item.title"
+                  :title="item.label"
                   title-position="center"
                   :theme-color="item.color"
                   :title-color="item.color"
@@ -561,7 +556,7 @@
 
                       <div class="col-12 row justify-center q-px-md q-pt-md">
                         <DonutRadial
-                          :value="item.percent"
+                          :value="item.percentage"
                           :size="130"
                           :stroke-width="16"
                           semicircle
@@ -575,7 +570,7 @@
                           <!-- Center label -->
                           <template #center-label>
                             <div class="label-center q-pt-lg">
-                              <span class="text-18 weight-600" :style="{ color: item.color }">{{ item.percent }}%</span>
+                              <span class="text-18 weight-600" :style="{ color: item.color }">{{ item.percentage }}%</span>
                             </div>
                           </template>
                         </DonutRadial>
@@ -761,185 +756,18 @@ export default {
         desempenhoDiario: {
           projetado: 0,
           faturamento: 0,
-          pontoEquilibrio: 0
+          pontoEquilibrio: 0,
+          totalVendido: 0,
+          totalFalta: 0,
+          totalPerc: 0,
+          dias: []
+        },
+        modalidadeVenda: {
+          pieArray: [],
+          totalVendas: 0,
+          resumos: []
         }
       },
-      arrayFaturamentoVenda: [
-        {
-          title: 'Pontual',
-          percent: 38,
-          color: '#91DA71',
-          cards: [
-            {
-              qtde: 320,
-              value: 160000,
-              border: false,
-              background: false
-            },
-            {
-              qtde: 40,
-              value: 20000,
-              border: true,
-              background: false,
-              title: 'Serviço'
-            },
-            {
-              qtde: 280,
-              value: 140000,
-              border: true,
-              background: false,
-              title: 'Produto'
-            }
-          ]
-        },
-        {
-          title: 'Recorrente',
-          percent: 24,
-          color: '#4F7D6B',
-          cards: [
-            {
-              qtde: 100,
-              value: 100000,
-              border: true,
-              background: false
-            },
-            {
-              qtde: null,
-              value: 1000,
-              border: true,
-              background: true
-            }
-          ]
-        },
-        {
-          title: 'Serviço',
-          percent: 19,
-          color: '#F2814B',
-          cards: [
-            {
-              qtde: 40,
-              value: 80000,
-              border: true,
-              background: false
-            },
-            {
-              qtde: null,
-              value: 2000,
-              border: true,
-              background: true
-            }
-          ]
-        },
-        {
-          title: 'Revenda',
-          percent: 19,
-          color: '#9643B7',
-          cards: [
-            {
-              qtde: 20,
-              value: 80000,
-              border: true,
-              background: false
-            },
-            {
-              qtde: null,
-              value: 4000,
-              border: true,
-              background: true
-            }
-          ]
-        }
-      ],
-      arrayInadimplenciaVenda: [
-        {
-          title: 'Pontual',
-          percent: 24,
-          color: '#91DA71',
-          cards: [
-            {
-              qtde: 8,
-              value: 200000,
-              color: '#B0F2C2'
-            },
-            {
-              qtde: 8,
-              value: 200000,
-              color: '#F2F298'
-            },
-            {
-              qtde: 4,
-              value: 100000,
-              color: '#FFB6AF'
-            }
-          ]
-        },
-        {
-          title: 'Recorrente',
-          percent: 38.5,
-          color: '#4F7D6B',
-          cards: [
-            {
-              qtde: 15,
-              value: 480000,
-              color: '#B0F2C2'
-            },
-            {
-              qtde: 7,
-              value: 224000,
-              color: '#F2F298'
-            },
-            {
-              qtde: 3,
-              value: 96000,
-              color: '#FFB6AF'
-            }
-          ]
-        },
-        {
-          title: 'Serviço',
-          percent: 21.6,
-          color: '#F2814B',
-          cards: [
-            {
-              qtde: 4,
-              value: 120000,
-              color: '#B0F2C2'
-            },
-            {
-              qtde: 6,
-              value: 180000,
-              color: '#F2F298'
-            },
-            {
-              qtde: 5,
-              value: 150000,
-              color: '#FFB6AF'
-            }
-          ]
-        },
-        {
-          title: 'Revenda',
-          percent: 15.9,
-          color: '#9643B7',
-          cards: [
-            {
-              qtde: 2,
-              value: 66000,
-              color: '#B0F2C2'
-            },
-            {
-              qtde: 3,
-              value: 99000,
-              color: '#F2F298'
-            },
-            {
-              qtde: 5,
-              value: 165000,
-              color: '#FFB6AF'
-            }
-          ]
-        }
-      ]
     }
   },
   mounted () {
@@ -1174,7 +1002,7 @@ export default {
       
       return getFaturamento()
         .then(data => {
-          const mountArray = (faturamento) => {
+          const mountArrayMeses = (faturamento) => {
             const monthLabelsPt = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
 
             const meses = faturamento?.Meses ?? []
@@ -1193,6 +1021,275 @@ export default {
                 equilibrio: mesItem.PontoEquilibrio
               }
             })
+          }
+
+          const calcDiarioPercent = () => {
+            const result = (data.desempenho_diario.total_realizado / data.desempenho_diario.total_projetado) * 100
+            return Number.isFinite(result) ? result : 0
+          }
+
+          const mountArrayDias = (desempenhoDiario) => {
+            const dias = desempenhoDiario?.dias ?? []
+
+            return dias.map((diaItem) => {
+              const dia = diaItem.data.substring(8, 10)
+              const label = `${this.formatCurrency(diaItem.realizado)}`
+
+              return {
+                day: dia,
+                value: diaItem.realizado,
+                label: label,
+                projetado: diaItem.projetado
+              }
+            })
+          }
+
+          const mountArrayModalidade = (modalidade, type) => {
+            const resumos = modalidade?.resumos
+
+            if (type === 'pie') {
+              if (resumos === null) {
+                return [
+                  {
+                    label: 'Pontual',
+                    percentage: 25,
+                    color: '#7ED321'
+                  },
+                  {
+                    label: 'Recorrente',
+                    percentage: 25,
+                    color: '#417505'
+                  },
+                  {
+                    label: 'Serviço',
+                    percentage: 25,
+                    color: '#FF8A00'
+                  },
+                  {
+                    label: 'Revenda',
+                    percentage: 25,
+                    color: '#9013FE'
+                  }
+                ]
+              }
+  
+              return resumos.map((resumo) => {
+                switch (resumo.modalidade) {
+                  case 'pontual':
+                    return {
+                      label: 'Pontual',
+                      percentage: resumo.perc_sobre_total ?? 0,
+                      color: '#7ED321'
+                    }
+                  
+                  case 'recorrente':
+                    return {
+                      label: 'Recorrente',
+                      percentage: resumo.perc_sobre_total ?? 0,
+                      color: '#417505'
+                    }
+  
+                  case 'servico':
+                    return {
+                      label: 'Serviço',
+                      percentage: resumo.perc_sobre_total ?? 0,
+                      color: '#FF8A00'
+                    }
+                  
+                  case 'revenda':
+                    return {
+                      label: 'Revenda',
+                      percentage: resumo.perc_sobre_total ?? 0,
+                      color: '#9013FE'
+                    }
+                }
+              })
+            } else if (type === 'card') {
+              if (resumos === null) {
+                return [
+                  {
+                    label: 'Pontual',
+                    percentage: 0,
+                    color: '#91DA71',
+                    cards: [
+                      {
+                        qtde: 0,
+                        value: 0,
+                        border: false,
+                        background: false
+                      },
+                      {
+                        qtde: 0,
+                        value: 0,
+                        border: true,
+                        background: false,
+                        title: 'Produto'
+                      },
+                      {
+                        qtde: 0,
+                        value: 0,
+                        border: true,
+                        background: false,
+                        title: 'Serviço'
+                      }
+                    ]
+                  },
+                  {
+                    label: 'Recorrente',
+                    percentage: 0,
+                    color: '#4F7D6B',
+                    cards: [
+                      {
+                        qtde: 0,
+                        value: 0,
+                        border: true,
+                        background: false
+                      },
+                      {
+                        qtde: null,
+                        value: 0,
+                        border: true,
+                        background: true
+                      }
+                    ]
+                  },
+                  {
+                    label: 'Serviço',
+                    percentage: 0,
+                    color: '#F2814B',
+                    cards: [
+                      {
+                        qtde: 0,
+                        value: 0,
+                        border: true,
+                        background: false
+                      },
+                      {
+                        qtde: null,
+                        value: 0,
+                        border: true,
+                        background: true
+                      }
+                    ]
+                  },
+                  {
+                    label: 'Revenda',
+                    percentage: 0,
+                    color: '#9643B7',
+                    cards: [
+                      {
+                        qtde: 0,
+                        value: 0,
+                        border: true,
+                        background: false
+                      },
+                      {
+                        qtde: null,
+                        value: 0,
+                        border: true,
+                        background: true
+                      }
+                    ]
+                  }
+                ]
+              }
+
+              return resumos.map((resumo) => {
+                switch (resumo.modalidade) {
+                  case 'pontual':
+                    return {
+                      label: 'Pontual',
+                      percentage: resumo.perc_sobre_total ?? 0,
+                      color: '#91DA71',
+                      cards: [
+                        {
+                          qtde: resumo.qtde_docs ?? 0,
+                          value: resumo.valor ?? 0,
+                          border: false,
+                          background: false
+                        },
+                        {
+                          qtde: resumo.qtde_produtos ?? 0,
+                          value: resumo.valor_produto ?? 0,
+                          border: true,
+                          background: false,
+                          title: 'Produto'
+                        },
+                        {
+                          qtde: resumo.qtde_servicos ?? 0,
+                          value: resumo.valor_servico ?? 0,
+                          border: true,
+                          background: false,
+                          title: 'Serviço'
+                        }
+                      ]
+                    }
+                  
+                  case 'recorrente':
+                    return {
+                      label: 'Recorrente',
+                      percentage: resumo.perc_sobre_total ?? 0,
+                      color: '#4F7D6B',
+                      cards: [
+                        {
+                          qtde: resumo.qtde_docs ?? 0,
+                          value: resumo.valor ?? 0,
+                          border: true,
+                          background: false
+                        },
+                        {
+                          qtde: null,
+                          value: resumo.ticket_medio ?? 0,
+                          border: true,
+                          background: true
+                        }
+                      ]
+                    }
+  
+                  case 'servico':
+                    return {
+                      label: 'Serviço',
+                      percentage: resumo.perc_sobre_total ?? 0,
+                      color: '#F2814B',
+                      cards: [
+                        {
+                          qtde: resumo.qtde_docs ?? 0,
+                          value: resumo.valor ?? 0,
+                          border: true,
+                          background: false
+                        },
+                        {
+                          qtde: null,
+                          value: resumo.ticket_medio ?? 0,
+                          border: true,
+                          background: true
+                        }
+                      ]
+                    }
+                  
+                  case 'revenda':
+                    return {
+                      label: 'Revenda',
+                      percentage: resumo.perc_sobre_total ?? 0,
+                      color: '#9643B7',
+                      cards: [
+                        {
+                          qtde: resumo.qtde_docs ?? 0,
+                          value: resumo.valor ?? 0,
+                          border: true,
+                          background: false
+                        },
+                        {
+                          qtde: null,
+                          value: resumo.ticket_medio ?? 0,
+                          border: true,
+                          background: true
+                        }
+                      ]
+                    }
+                }
+              })
+            }
           }
 
           this.faturamento = {
@@ -1215,11 +1312,20 @@ export default {
               }
             ],
             performance: data.faturamento.performancePerc,
-            meses: mountArray(data.faturamento),
+            meses: mountArrayMeses(data.faturamento),
             desempenhoDiario: {
               projetado: data.faturamento.TotalPeriodo,
               faturamento: data.faturamento.TotalProjetadoPeriodo,
-              pontoEquilibrio: data.faturamento.PontoEquilibrio
+              pontoEquilibrio: data.faturamento.PontoEquilibrio,
+              totalVendido: data.desempenho_diario.total_realizado,
+              totalFalta: data.desempenho_diario.total_projetado,
+              totalPerc: calcDiarioPercent(),
+              dias: mountArrayDias(data.desempenho_diario)
+            },
+            modalidadeVenda: {
+              pieArray: mountArrayModalidade(data.faturamento_por_modalidade, 'pie'),
+              totalVendas: data.faturamento_por_modalidade.total_vendas,
+              resumos: mountArrayModalidade(data.faturamento_por_modalidade, 'card')
             }
           }
         })

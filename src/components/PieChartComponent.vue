@@ -30,7 +30,7 @@
           viewBox="0 0 200 200"
           class="donut-chart"
         >
-          <g transform="translate(100, 100) rotate(-90)">
+          <g transform="translate(100, 100) rotate(-82)">
             <path
               v-for="(seg, index) in segments"
               :key="index"
