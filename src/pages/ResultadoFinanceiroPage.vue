@@ -621,7 +621,7 @@
           <q-spinner-dots color="blue" size="56px" />
         </div>
       </template>
-      <Card3 />
+      <Card3 :inadimplencia-data="inadimplencia" />
     </div>
 
     <!-- Card 4 - Perda de Receita Recorrente -->
@@ -684,7 +684,7 @@ import Card4 from 'src/components/CardsResultadoFinanceiro.vue/Card4.vue'
 import Card5 from 'src/components/CardsResultadoFinanceiro.vue/Card5.vue'
 import Card6 from 'src/components/CardsResultadoFinanceiro.vue/Card6.vue'
 import Card7 from 'src/components/CardsResultadoFinanceiro.vue/Card7.vue'
-import { getFaturamento, getResultadoFinanceiro } from 'src/boot/axios'
+import { getFaturamento, getInadimplencia, getResultadoFinanceiro } from 'src/boot/axios'
 import { notify } from 'src/helpers/notify'
 
 // formatter: pt-BR number with 2 fraction digits, no currency symbol
@@ -768,6 +768,29 @@ export default {
           resumos: []
         }
       },
+      inadimplencia: {
+        valorTotal: 0,
+        qtdeTotal: 0,
+        percTotal: 0,
+        riscoPorTempo: {
+          ate7Dias: {
+            valor: 0,
+            perc: 0,
+            qtde: 0
+          },
+          ate30Dias: {
+            valor: 0,
+            perc: 0,
+            qtde: 0
+          },
+          acima31Dias: {
+            valor: 0,
+            perc: 0,
+            qtde: 0
+          }
+        },
+        porModalidade: []
+      }
     }
   },
   mounted () {
@@ -1336,13 +1359,238 @@ export default {
           this.loadingFaturamento = false
         })
     },
-
     returnInadimplencia () {
       this.loadingInadimplencia = true
-      // Simula loading de 2 segundos
-      setTimeout(() => {
-        this.loadingInadimplencia = false
-      }, 2000000)
+      
+      return getInadimplencia()
+        .then(data => {
+          const mountArrayModalidade = (props) => {
+            const modalidades = props ?? []
+
+            if (modalidades.length === 0) {
+              return [
+                {
+                  label: 'Pontual',
+                  color: '#7ED321',
+                  perc: 25,
+                  buckets: {
+                    ate7:{
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    },
+                    ate30: {
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    },
+                    acima31:{
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    }
+                  }
+                },
+                {
+                  label: 'Recorrente',
+                  color: '#417505',
+                  perc: 25,
+                  buckets: {
+                    ate7:{
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    },
+                    ate30: {
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    },
+                    acima31:{
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    }
+                  }
+                },
+                {
+                  label: 'Serviço',
+                  color: '#FF8A00',
+                  perc: 25,
+                  buckets: {
+                    ate7:{
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    },
+                    ate30: {
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    },
+                    acima31:{
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    }
+                  }
+                },
+                {
+                  label: 'Revenda',
+                  color: '#9013FE',
+                  perc: 25,
+                  buckets: {
+                    ate7:{
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    },
+                    ate30: {
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    },
+                    acima31:{
+                      valor: 0,
+                      qtde: 0,
+                      perc: 0
+                    }
+                  }
+                }
+              ]
+            }
+
+            return modalidades.map((modalidade) => {
+              switch (modalidade.modalidade) {
+                case 'pontual':
+                  return {
+                    label: 'Pontual',
+                    color: '#7ED321',
+                    perc: modalidade.perc,
+                    buckets: {
+                      ate7:{
+                        valor: modalidade.buckets.ate7.valor,
+                        qtde: modalidade.buckets.ate7.qtde,
+                        perc: modalidade.buckets.ate7.perc
+                      },
+                      ate30: {
+                        valor: modalidade.buckets.ate30.valor,
+                        qtde: modalidade.buckets.ate30.qtde,
+                        perc: modalidade.buckets.ate30.perc
+                      },
+                      acima31:{
+                        valor: modalidade.buckets.acima31.valor,
+                        qtde: modalidade.buckets.acima31.qtde,
+                        perc: modalidade.buckets.acima31.perc
+                      }
+                    }
+                  }
+                
+                case 'recorrente':
+                  return {
+                    label: 'Recorrente',
+                    color: '#417505',
+                    perc: modalidade.perc,
+                    buckets: {
+                      ate7:{
+                        valor: modalidade.buckets.ate7.valor,
+                        qtde: modalidade.buckets.ate7.qtde,
+                        perc: modalidade.buckets.ate7.perc
+                      },
+                      ate30: {
+                        valor: modalidade.buckets.ate30.valor,
+                        qtde: modalidade.buckets.ate30.qtde,
+                        perc: modalidade.buckets.ate30.perc
+                      },
+                      acima31:{
+                        valor: modalidade.buckets.acima31.valor,
+                        qtde: modalidade.buckets.acima31.qtde,
+                        perc: modalidade.buckets.acima31.perc
+                      }
+                    }
+                  }
+
+                case 'servico':
+                  return {
+                    label: 'Serviço',
+                    color: '#FF8A00',
+                    perc: modalidade.perc,
+                    buckets: {
+                      ate7:{
+                        valor: modalidade.buckets.ate7.valor,
+                        qtde: modalidade.buckets.ate7.qtde,
+                        perc: modalidade.buckets.ate7.perc
+                      },
+                      ate30: {
+                        valor: modalidade.buckets.ate30.valor,
+                        qtde: modalidade.buckets.ate30.qtde,
+                        perc: modalidade.buckets.ate30.perc
+                      },
+                      acima31:{
+                        valor: modalidade.buckets.acima31.valor,
+                        qtde: modalidade.buckets.acima31.qtde,
+                        perc: modalidade.buckets.acima31.perc
+                      }
+                    }
+                  }
+                
+                case 'revenda':
+                  return {
+                    label: 'Revenda',
+                    color: '#9013FE',
+                    perc: modalidade.perc,
+                    buckets: {
+                      ate7:{
+                        valor: modalidade.buckets.ate7.valor,
+                        qtde: modalidade.buckets.ate7.qtde,
+                        perc: modalidade.buckets.ate7.perc
+                      },
+                      ate30: {
+                        valor: modalidade.buckets.ate30.valor,
+                        qtde: modalidade.buckets.ate30.qtde,
+                        perc: modalidade.buckets.ate30.perc
+                      },
+                      acima31:{
+                        valor: modalidade.buckets.acima31.valor,
+                        qtde: modalidade.buckets.acima31.qtde,
+                        perc: modalidade.buckets.acima31.perc
+                      }
+                    }
+                  }
+              }
+            })
+          }
+
+          this.inadimplencia = {
+            valorTotal: data.valorTotal,
+            qtdeTotal: data.clientesInadimplentes,
+            percTotal: data.sobreFaturamentoPerc,
+            riscoPorTempo: {
+              ate7Dias: {
+                valor: data.porTempo.ate7.valor,
+                perc: data.porTempo.ate7.perc,
+                qtde: data.porTempo.ate7.qtde
+              },
+              ate30Dias: {
+                valor: data.porTempo.ate30.valor,
+                perc: data.porTempo.ate30.perc,
+                qtde: data.porTempo.ate30.qtde
+              },
+              acima31Dias: {
+                valor: data.porTempo.acima31.valor,
+                perc: data.porTempo.acima31.perc,
+                qtde: data.porTempo.acima31.qtde
+              }
+            },
+            porModalidade: mountArrayModalidade(data.porModalidade)
+          }
+        })
+        .catch(error => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingInadimplencia = false
+        })
     },
     returnPerdaRecorrencia () {
       this.loadingPerdaRecorrencia = true

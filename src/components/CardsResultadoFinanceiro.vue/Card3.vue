@@ -11,7 +11,7 @@
       <div class="row items-center q-gutter-md" :class="$q.screen.width > 1350 ? 'offset-md-1' : 'q-pl-md'">
         <span class="text-16 text-grey-7">Quantidade:</span>
         <q-input
-          :model-value="50"
+          :model-value="inadimplenciaData.totalQtde ?? 0"
           outlined
           dense
           input-class="text-center"
@@ -19,7 +19,7 @@
         />
         <span class="text-16 text-grey-7">Valor Total:</span>
         <q-input
-          model-value="R$ 102.000,00"
+          :model-value="`R$ ${inadimplenciaData.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`"
           outlined
           dense
           input-class="text-center"
@@ -27,7 +27,7 @@
         />
         <span class="text-16 text-grey-7">Sobre o Faturamento:</span>
         <DonutRadial
-          :value="3"
+          :value="inadimplenciaData.percTotal"
           :size="110"
           :stroke-width="16"
           semicircle
@@ -40,7 +40,7 @@
         >
           <template #center-label>
             <div class="label-center q-pt-lg">
-              <span class="text-18 weight-600" :style="{ color: '#0047A1' }">3%</span>
+              <span class="text-18 weight-600" :style="{ color: '#0047A1' }">{{ inadimplenciaData.percTotal }}%</span>
             </div>
           </template>
         </DonutRadial>
@@ -74,8 +74,8 @@
                     :onlyBar="true"
                     :sideTitle="null"
                     :chartData="[
-                      { value: r.max, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
-                      { value: r.current, label: 'Faturamento', color: '#0047A1', bgColor: r.fill }
+                      { value: 100, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
+                      { value: r.percent, label: 'Faturamento', color: '#0047A1', bgColor: r.fill }
                     ]"
                   />
                 </div>
@@ -84,7 +84,7 @@
                 <div class="percent-wrap">
                   <span class="chevron">&lt;</span>
                   <div class="percent-badge" :style="{ borderColor: r.fill }">
-                    <span class="badge-text">{{ r.percentLabel }}</span>
+                    <span class="badge-text">{{ formatPercentLabel(r.percent) }}</span>
                   </div>
                 </div>
 
@@ -116,12 +116,7 @@
           <div class="col-12 row items-start justify-center" style="padding: 60px 20px; overflow-x: auto; flex-wrap: nowrap;">
             <div class="col-2 row justify-center" style="height: 100%;">
               <PieChartComponent
-                :data="[
-                  { label: 'Pontual', percentage: 24, color: '#7ED321' },
-                  { label: 'Recorrente', percentage: 38.5, color: '#417505' },
-                  { label: 'Serviço', percentage: 21.6, color: '#FF8A00' },
-                  { label: 'Revende', percentage: 15.9, color: '#9013FE' }
-                ]"
+                :data="arrayPieInadimplencia"
               />
             </div>
             <div
@@ -163,8 +158,8 @@
                           :onlyBar="true"
                           :sideTitle="null"
                           :chartData="[
-                            { value: 500000, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
-                            { value: card.value, label: 'Faturamento', color: 'blue', bgColor: card.color }
+                            { value: 100, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
+                            { value: card.perc, label: 'Faturamento', color: 'blue', bgColor: card.color }
                           ]"
                         />
                       </div>
@@ -197,94 +192,115 @@ import DonutRadial from '../DonutRadial.vue'
 import PieChartComponent from '../PieChartComponent.vue'
 
 export default {
+  props: {
+    inadimplenciaData: {
+      type: Object,
+      required: true
+    }
+  },
   components: {
     CardComponent,
     CustomBarChart,
     DonutRadial,
     PieChartComponent
   },
-  data () {
-    return {
-      // === Dados do bloco "Risco por Tempo de Atraso" (imagem) ===
-      riscoTempo: [
+  computed: {
+    riscoTempo () {
+      return [
         {
           title: 'Até 7 Dias',
           level: 'Baixo Risco',
           levelClass: 'level-low',
           fill: '#7ED9AE',
-          percentLabel: '0,7%',
-          current: 12000,
-          max: 25000,
-          tick: 15,
-          amount: 25000
+          percent: this.inadimplenciaData.riscoPorTempo.ate7Dias.perc ?? 0,
+          current: this.inadimplenciaData.riscoPorTempo.ate7Dias.valor ?? 0,
+          tick: this.inadimplenciaData.riscoPorTempo.ate7Dias.qtde ?? 0,
+          amount: this.inadimplenciaData.riscoPorTempo.ate7Dias.valor ?? 0
         },
         {
           title: 'Até 30 Dias',
           level: 'Médio Risco',
           levelClass: 'level-mid',
           fill: '#EFE27A',
-          percentLabel: '1%',
-          current: 23000, // apenas um exemplo proporcional
-          max: 36000,
-          tick: 20,
-          amount: 36000
+          percent: this.inadimplenciaData.riscoPorTempo.ate30Dias.perc ?? 0,
+          current: this.inadimplenciaData.riscoPorTempo.ate30Dias.valor ?? 0,
+          tick: this.inadimplenciaData.riscoPorTempo.ate30Dias.qtde ?? 0,
+          amount: this.inadimplenciaData.riscoPorTempo.ate30Dias.valor ?? 0
         },
         {
           title: '+ 31 Dias',
           level: 'Alto Risco',
           levelClass: 'level-high',
           fill: '#FF9F9F',
-          percentLabel: '1,3%',
-          current: 19000, // exemplo proporcional
-          max: 41000,
-          tick: 15,
-          amount: 41000
-        }
-      ],
-
-      // === Bloco "Faturamento por Modalidade de Venda" (mantido) ===
-      arrayInadimplenciaVenda: [
-        {
-          title: 'Pontual',
-          percent: 24,
-          color: '#91DA71',
-          cards: [
-            { qtde: 8, value: 200000, color: '#B0F2C2' },
-            { qtde: 8, value: 200000, color: '#F2F298' },
-            { qtde: 4, value: 100000, color: '#FFB6AF' }
-          ]
-        },
-        {
-          title: 'Recorrente',
-          percent: 38.5,
-          color: '#4F7D6B',
-          cards: [
-            { qtde: 15, value: 480000, color: '#B0F2C2' },
-            { qtde: 7, value: 224000, color: '#F2F298' },
-            { qtde: 3, value: 96000, color: '#FFB6AF' }
-          ]
-        },
-        {
-          title: 'Serviço',
-          percent: 21.6,
-          color: '#F2814B',
-          cards: [
-            { qtde: 4, value: 120000, color: '#B0F2C2' },
-            { qtde: 6, value: 180000, color: '#F2F298' },
-            { qtde: 5, value: 150000, color: '#FFB6AF' }
-          ]
-        },
-        {
-          title: 'Revenda',
-          percent: 15.9,
-          color: '#9643B7',
-          cards: [
-            { qtde: 2, value: 66000, color: '#B0F2C2' },
-            { qtde: 3, value: 99000, color: '#F2F298' },
-            { qtde: 5, value: 165000, color: '#FFB6AF' }
-          ]
+          percent: this.inadimplenciaData.riscoPorTempo.acima31Dias.perc ?? 0,
+          current: this.inadimplenciaData.riscoPorTempo.acima31Dias.valor ?? 0, // exemplo proporcional
+          tick: this.inadimplenciaData.riscoPorTempo.acima31Dias.qtde ?? 0,
+          amount: this.inadimplenciaData.riscoPorTempo.acima31Dias.valor ?? 0
         }
       ]
+    },
+
+    arrayPieInadimplencia () {
+      const array = []
+      const modalidades = this.inadimplenciaData.porModalidade ?? []
+
+      modalidades.forEach(modalidade => {
+        array.push({
+          label: modalidade.label,
+          percentage: modalidade.perc,
+          color: modalidade.color
+        })
+      })
+
+      return array
+    },
+
+    arrayInadimplenciaVenda () {
+      const array = []
+      const modalidades = this.inadimplenciaData.porModalidade ?? []
+      
+      modalidades.forEach(modalidade => {
+        array.push({
+          title: modalidade.label,
+          percent: modalidade.perc,
+          color: modalidade.color,
+          cards: [
+            {
+              qtde: modalidade.buckets.ate7.qtde,
+              value: modalidade.buckets.ate7.valor,
+              color: '#B0F2C2'
+            },
+            {
+              qtde: modalidade.buckets.ate30.qtde,
+              value: modalidade.buckets.ate30.valor,
+              color: '#F2F298'
+            },
+            {
+              qtde: modalidade.buckets.acima31.qtde,
+              value: modalidade.buckets.acima31.valor,
+              color: '#FFB6AF'
+            }
+          ]
+        })
+      })
+
+      return array
+    } 
+  },
+  methods: {
+    formatPercentLabel (value) {
+      const num = Number(value)
+
+      // Tratamento de valores inválidos
+      if (!Number.isFinite(num)) return '0%'
+
+      // Formata com duas casas
+      const formatted = num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      })
+    
+      return `${formatted}%`
     }
   }
 }
