@@ -41,12 +41,16 @@ export default {
   computed: {
     percent () {
       const clamped = Math.min(this.max, Math.max(this.min, this.value))
-      // distribuir igualmente 1..12 ao longo da faixa
-      const steps = this.max - this.min
-      return steps > 0 ? ((clamped - this.min) / steps) * 100 : 0
+      const count = this.max - this.min + 1 // 1..12 => 12 posições
+      if (count <= 0) return 0
+
+      const idx = clamped - this.min // 0 para min, 11 para max
+      const center = (idx + 0.5) / count
+
+      return center * 100
     },
     thumbStyle () {
-      return { left: `calc(${this.percent}% - 17px)` } // 17px = metade do diâmetro (34px)
+      return { left: `${this.percent}%` }
     }
   }
 }
@@ -80,7 +84,7 @@ export default {
   left: 0;                 /* deslocamento vem via :style (thumbStyle) */
   width: 70px;
   height: 70px;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   border-radius: 50%;
 
   /* transparência + blur para deixar o gradiente aparecer */

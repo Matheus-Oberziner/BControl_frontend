@@ -60,7 +60,7 @@
                       :onlyBar="true"
                       :sideTitle="null"
                       :chartData="[
-                        { value: 50000, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
+                        { value: 100, label: 'Projetado', color: 'gray', bgColor: '#f0f0f0' },
                         { value: c.value, label: 'Faturamento', color: 'blue', bgColor: c.color }
                       ]"
                     />
@@ -87,7 +87,7 @@
 
     <div class="col-12 row justify-between items-center" style="padding: 40px 70px;">
       <div class="col-9">
-        <TreeComponent />
+        <TreeComponent :data="perdaData.receitasRecorrentes" />
       </div>
 
       <div class="q-pl-md" style="width: 25%;">
@@ -108,17 +108,17 @@
   
               <div class="col-12 row justify-center q-px-md q-pt-lg">
                 <DonutRadial
-                  :value="25"
+                  :value="percPerdaVenda"
                   :size="120"
                   :stroke-width="14"
                   semicircle
-                  progress-color="#50D577"
-                  rest-color="#B74345"
+                  progress-color="#B74345"
+                  rest-color="#50D577"
                 >
                   <!-- Center label -->
                   <template #center-label>
                     <div class="label-center q-pt-lg">
-                      <span class="text-18 weight-600 text-blue">{{ 25 }}%</span>
+                      <span class="text-18 weight-600 text-blue">{{ formatPercentLabel(percPerdaVenda) }}</span>
                     </div>
                   </template>
                 </DonutRadial>
@@ -154,7 +154,7 @@
           <div class="col-12 row justify-center" style="padding: 40px 10px;">
             <div class="q-pb-lg" style="width: 85%;">
               <GradientScaleComponent
-                :value="3.2"
+                :value="perdaData.riscoEsforco.mesCritico"
               />
             </div>
 
@@ -182,7 +182,7 @@
                 </div>
 
                 <div class="col-12 row justify-center items-center weight-600">
-                  <span class="text-12 q-pr-xs">R$</span><span class="text-16">4.000,00</span>
+                  <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ perdaData.riscoEsforco.cacMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
                 </div>
               </div>
               <div
@@ -208,7 +208,7 @@
                 </div>
 
                 <div class="col-12 row justify-center items-center weight-600">
-                  <span class="text-16 q-pr-md">02</span><span class="text-12 q-pr-xs">R$</span><span class="text-16">20.000,00</span>
+                  <span class="text-16 q-pr-md">{{ perdaData.riscoEsforco.mesCritico }}</span><span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ perdaData.riscoEsforco.periodoCritico.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
                 </div>
               </div>
               <div
@@ -234,7 +234,7 @@
                 </div>
 
                 <div class="col-12 row justify-center items-center weight-600">
-                  <span class="text-12 q-pr-xs">R$</span><span class="text-16">10.000,00</span>
+                  <span class="text-12 q-pr-xs">R$</span><span class="text-16">{{ perdaData.riscoEsforco.esforcoVenda.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
                 </div>
               </div>
             </div>
@@ -334,8 +334,8 @@
                       :onlyBar="true"
                       :sideTitle="null"
                       :chartData="[
-                        { value: r.valueMax - r.valueMin, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
-                        { value: r.currentValue - r.valueMin, label: 'Faturamento', color: '#0047A1', bgColor: '#50D577' }
+                        { value: 100, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
+                        { value: r.currentPerc, label: 'Faturamento', color: '#0047A1', bgColor: '#50D577' }
                       ]"
                     />
                   </div>
@@ -379,34 +379,48 @@ export default {
     TreeComponent,
     GradientScaleComponent
   },
-  data () {
-    return {
-      array: [
+  props: {
+    perdaData: {
+      type: Object,
+      required: true
+    }
+  },
+  watch: {
+    perdaData: {
+      handler (newVal) {
+        console.log('perdaData updated:', newVal)
+      },
+      deep: true
+    }
+  },
+  computed: {
+    array () {
+      return [
         {
           title: 'Entrada Clientes',
-          percent: 50,
+          percent: this.perdaData.entradaClientes[0]?.perc ?? 0,
           color1: '#50D577',
           color2:'#3EB461',
           cards: [
             {
-              label: '97 Retidos',
-              value: 670000
+              label: `${this.perdaData.entradaClientes[0]?.qtde ?? 0} Retidos`,
+              value: this.perdaData.entradaClientes[0]?.valor ?? 0
             },
             {
-              label: '10 Novos',
-              value: 200000
+              label: `${this.perdaData.entradaClientes[1]?.qtde ?? 0} Novos`,
+              value: this.perdaData.entradaClientes[1]?.valor ?? 0
             }
           ]
         },
         {
           title: 'Saída Clientes',
-          percent: 30,
+          percent: this.perdaData.saidaClientes[0]?.perc ?? 0,
           color1: '#B74345',
           color2: '#3EB461',
           cards: [
             {
-              label: '03 Perdidos',
-              value: 30000
+              label: `${this.perdaData.saidaClientes[0]?.qtde ?? 0} Perdidos`,
+              value: this.perdaData.saidaClientes[0]?.valor ?? 0
             }
           ]
         },
@@ -414,146 +428,179 @@ export default {
           title: 'Saldo Final Clientes',
           cards: [
             {
-              label: '104 Saldo',
-              value: 840000
+              label: `${this.perdaData.saldoFinalClientes?.qtde ?? 0} Saldo`,
+              value: this.perdaData.saldoFinalClientes?.valor ?? 0
             }
           ],
           charts: [
             {
-              value: 35000,
+              value: this.perdaData.entradaClientes[0]?.perc ?? 0,
               color: '#50D577'
             },
             {
-              value: 20000,
+              value: this.perdaData.saidaClientes[0]?.perc ?? 0,
               color: '#B74345'
             },
             {
-              value: 25000,
+              value: this.perdaData.saldoFinalClientes?.perc ?? 0,
               color: '#0E6FEB'
             }
           ]
         }
-      ],
-      arrayPerdaVenda: [
+      ]
+    },
+    arrayPerdaVenda () {
+      return [
         {
-          value: 200000,
+          value: this.perdaData.perdaSobVenda.novasVendas?.valor ?? 0,
           label: 'Novas Vendas',
-          qtde: 10,
+          qtde: this.perdaData.perdaSobVenda.novasVendas?.qtde ?? 0,
           color: '#B0F2C2'
         },
         {
-          value: 30000,
+          value: this.perdaData.perdaSobVenda.perdaClientes?.valor ?? 0,
           label: 'Perda de Clientes',
-          qtde: 3,
+          qtde: this.perdaData.perdaSobVenda.perdaClientes?.qtde ?? 0,
           color: '#FFB6AF'
         },
         {
-          value: 70000,
+          value: this.perdaData.perdaSobVenda.saldoFinal?.valor ?? 0,
           label: 'Saldo\n Entrada X Perda',
-          qtde: 7,
+          qtde: this.perdaData.perdaSobVenda.saldoFinal?.qtde ?? 0,
           color: '#0E6FEB'
         }
-      ],
-      arrayRiscoCharts: [
+      ]
+    },
+    percPerdaVenda () {
+      const perda = this.perdaData.perdaSobVenda.perdaClientes?.valor ?? 0
+      const novas = this.perdaData.perdaSobVenda.novasVendas?.valor ?? 0
+      const total = perda + novas
+      if (total === 0) return 0
+      return Math.round((perda / total) * 100)
+    },
+
+    arrayRiscoCharts () {
+      return [
         {
           type: 'Alto',
-          qtde: 1,
-          value: 12000,
+          qtde: 0, // Não preparado ainda (API)
+          value: this.perdaData.riscoEsforco.perdaTicketAlto ?? 0,
           charts: [
             {
-              val: 6000,
+              val: 6000, // Não preparado ainda (API)
               color: '#FFB6AF'
             },
             {
-              val: 9000,
+              val: 9000, // Não preparado ainda (API)
               color: '#F2F298'
             },
             {
-              val: 4000,
+              val: 4000, // Não preparado ainda (API)
               color: '#B0F2C2'
             },
             {
-              val: 6000,
+              val: 6000, // Não preparado ainda (API)
               color: '#83AAFD'
             }
           ]
         },
         {
           type: 'Médio',
-          qtde: 1,
-          value: 10000,
+          qtde: 0, // Não preparado ainda (API)
+          value: this.perdaData.riscoEsforco.perdaTicketMedio ?? 0,
           charts: [
             {
-              val: 6000,
+              val: 6000, // Não preparado ainda (API)
               color: '#FFB6AF'
             },
             {
-              val: 9000,
+              val: 9000, // Não preparado ainda (API)
               color: '#F2F298'
             },
             {
-              val: 4000,
+              val: 4000, // Não preparado ainda (API)
               color: '#B0F2C2'
             },
             {
-              val: 6000,
+              val: 6000, // Não preparado ainda (API)
               color: '#83AAFD'
             }
           ]
         },
         {
           type: 'Baixo',
-          qtde: 1,
-          value: 8000,
+          qtde: 0, // Não preparado ainda (API)
+          value: this.perdaData.riscoEsforco.perdaTicketBaixo ?? 0,
           charts: [
             {
-              val: 6000,
+              val: 6000, // Não preparado ainda (API)
               color: '#FFB6AF'
             },
             {
-              val: 9000,
+              val: 9000, // Não preparado ainda (API)
               color: '#F2F298'
             },
             {
-              val: 4000,
+              val: 4000, // Não preparado ainda (API)
               color: '#B0F2C2'
             },
             {
-              val: 6000,
+              val: 6000, // Não preparado ainda (API)
               color: '#83AAFD'
             }
           ]
-        }
-      ],
-      arrayCharts: [
-        {
-          type: 'Alto',
-          percentMax: 100,
-          percentMin: 68,
-          valueMax: 12000,
-          valueMin: 8160,
-          currentValue: 11000,
-          qtde: 18
-        },
-        {
-          type: 'Médio',
-          percentMax: 67,
-          percentMin: 32,
-          valueMax: 7040,
-          valueMin: 4080,
-          currentValue: 6500,
-          qtde: 32
-        },
-        {
-          type: 'Baixo',
-          percentMax: 31,
-          percentMin: 0,
-          valueMax: 3040,
-          valueMin: 0,
-          currentValue: 3000,
-          qtde: 20
         }
       ]
+    },
+    arrayCharts () {
+      return [
+        {
+          type: 'Alto',
+          percentMax: 100, // Não preparado ainda (API)
+          percentMin: 68, // Não preparado ainda (API)
+          currentPerc: this.perdaData.tickets.alto.perc ?? 0,
+          valueMax: 12000, // Não preparado ainda (API)
+          valueMin: 8160, // Não preparado ainda (API)
+          currentValue: this.perdaData.tickets.alto.valor ?? 0,
+          qtde: this.perdaData.tickets.alto.qtde ?? 0
+        },
+        {
+          type: 'Médio',
+          percentMax: 67, // Não preparado ainda (API)
+          percentMin: 32, // Não preparado ainda (API)
+          currentPerc: this.perdaData.tickets.medio.perc ?? 0,
+          valueMax: 7040, // Não preparado ainda (API)
+          valueMin: 4080, // Não preparado ainda (API)
+          currentValue: this.perdaData.tickets.medio.valor ?? 0,
+          qtde: this.perdaData.tickets.medio.qtde ?? 0
+        },
+        {
+          type: 'Baixo',
+          percentMax: 31, // Não preparado ainda (API)
+          percentMin: 0, // Não preparado ainda (API)
+          currentPerc: this.perdaData.tickets.baixo.perc ?? 0,
+          valueMax: 3040, // Não preparado ainda (API)
+          valueMin: 0, // Não preparado ainda (API)
+          currentValue: this.perdaData.tickets.baixo.valor ?? 0,
+          qtde: this.perdaData.tickets.baixo.qtde ?? 0
+        }
+      ]
+    }
+  },
+  methods: {
+    formatPercentLabel (value) {
+      const num = Number(value)
+
+      // Tratamento de valores inválidos
+      if (!Number.isFinite(num)) return '0%'
+
+      // Formata com duas casas
+      const formatted = num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      })
+    
+      return `${formatted}%`
     }
   }
 }

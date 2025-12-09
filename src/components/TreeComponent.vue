@@ -19,21 +19,21 @@
         <div class="col-title text-16 weight-700 text-blue">Antes da Perda</div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 870.000,00
+          <span class="money-prefix">R$</span> {{ data.antesPerda.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
 
-        <div class="pill light">107</div>
+        <div class="pill light">{{ data.antesPerda.qtdeClientes }}</div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 12.000,00
-        </div>
-
-        <div class="pill light">
-          <span class="money-prefix">R$</span> 20.000,00
+          <span class="money-prefix">R$</span> {{ data.antesPerda.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 5.000,00
+          <span class="money-prefix">R$</span> {{ data.antesPerda.maiorTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+
+        <div class="pill light">
+          <span class="money-prefix">R$</span> {{ data.antesPerda.menorTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
       </div>
 
@@ -75,23 +75,23 @@
         <div class="col-title text-16 weight-700 text-blue">Após a Perda</div>
 
         <div class="pill light">
-          <span><span class="money-prefix">R$</span> 840.000,00</span>
+          <span><span class="money-prefix">R$</span> {{ data.aposPerda.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
         </div>
 
         <div class="pill light">
-          <span>104</span>
+          <span>{{ data.aposPerda.qtdeClientes }}</span>
         </div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 8.200,00
+          <span class="money-prefix">R$</span> {{ data.aposPerda.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 15.000,00
+          <span class="money-prefix">R$</span> {{ data.aposPerda.maiorTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
 
         <div class="pill light">
-          <span class="money-prefix">R$</span> 4.000,00
+          <span class="money-prefix">R$</span> {{ data.aposPerda.menorTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
       </div>
     </div>
@@ -99,7 +99,13 @@
 </template>
 <script>
 export default {
-  name: 'ReceitasRecorrentes'
+  name: 'ReceitasRecorrentes',
+  props: {
+    data: {
+      type: Object,
+      required: true
+    }
+  }
 }
 </script>
 <style scoped>

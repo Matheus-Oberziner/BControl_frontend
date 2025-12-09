@@ -632,7 +632,7 @@
           <q-spinner-dots color="blue" size="56px" />
         </div>
       </template>
-      <Card4 />
+      <Card4 :perda-data="perdaRecorrente" />
     </div>
 
     <!-- Card 5 - Despesas por Centro de Custo -->
@@ -684,7 +684,7 @@ import Card4 from 'src/components/CardsResultadoFinanceiro.vue/Card4.vue'
 import Card5 from 'src/components/CardsResultadoFinanceiro.vue/Card5.vue'
 import Card6 from 'src/components/CardsResultadoFinanceiro.vue/Card6.vue'
 import Card7 from 'src/components/CardsResultadoFinanceiro.vue/Card7.vue'
-import { getFaturamento, getInadimplencia, getResultadoFinanceiro } from 'src/boot/axios'
+import { getFaturamento, getInadimplencia, getPerdaReceitaRecorrente, getResultadoFinanceiro } from 'src/boot/axios'
 import { notify } from 'src/helpers/notify'
 
 // formatter: pt-BR number with 2 fraction digits, no currency symbol
@@ -790,6 +790,72 @@ export default {
           }
         },
         porModalidade: []
+      },
+      perdaRecorrente: {
+        entradaClientes: [],
+        saidaClientes: [],
+        saldoFinalClientes: {
+          rotulo: '',
+          valor: 0,
+          perc: 0,
+          qtde: 0
+        },
+        receitasRecorrentes: {
+          antesPerda: {
+            faturamento: 0,
+            maiorTicket: 0,
+            menorTicket: 0,
+            ticketMedio: 0,
+            qtdeClientes: 0
+          },
+          aposPerda: {
+            faturamento: 0,
+            maiorTicket: 0,
+            menorTicket: 0,
+            ticketMedio: 0,
+            qtdeClientes: 0
+          }
+        },
+        perdaSobVenda: {
+          novasVendas: {
+            qtde: 0,
+            valor: 0
+          },
+          perdaClientes: {
+            qtde: 0,
+            valor: 0
+          },
+          saldoFinal: {
+            qtde: 0,
+            valor: 0
+          }
+        },
+        riscoEsforco: {
+          cacMedio: 0,
+          mesCritico: 0,
+          perdaTicketAlto: 0,
+          perdaTicketMedio: 0,
+          perdaTicketBaixo: 0,
+          periodoCritico: 0,
+          esforcoVenda: 0
+        },
+        tickets: {
+          alto: {
+            perc: 0,
+            qtde: 0,
+            valor: 0
+          },
+          medio: {
+            perc: 0,
+            qtde: 0,
+            valor: 0
+          },
+          baixo: {
+            perc: 0,
+            qtde: 0,
+            valor: 0
+          }
+        }
       }
     }
   },
@@ -1594,10 +1660,126 @@ export default {
     },
     returnPerdaRecorrencia () {
       this.loadingPerdaRecorrencia = true
-      // Simula loading de 2 segundos
-      setTimeout(() => {
-        this.loadingPerdaRecorrencia = false
-      }, 2000000)
+
+      const mountArray = (props, type) => {
+        const array = []
+        const entradas = props ?? []
+
+        if (entradas.length === 0) {
+          if (type === 'entrada') {
+            return [
+              {
+                rotulo: "Retidos",
+                qtde: 0,
+                valor: 0,
+                perc: 0
+              },
+              {
+                rotulo: "Novos",
+                qtde: 0,
+                valor: 0,
+                perc: 0
+              }
+            ]
+          } else {
+            return [
+              {
+                rotulo: "Perdidos",
+                qtde: 0,
+                valor: 0,
+                perc: 0
+              }
+            ]
+          }
+        }
+
+        entradas.forEach((entrada) => {
+          array.push({
+            rotulo: entrada.rotulo,
+            qtde: entrada.qtde,
+            valor: entrada.valor,
+            perc: entrada.perc
+          })
+        })
+
+        return array
+      }
+      
+      return getPerdaReceitaRecorrente()
+        .then(data => {
+          this.perdaRecorrente = {
+            entradaClientes: mountArray(data.entrada_clientes),
+            saidaClientes: mountArray(data.saida_clientes),
+            saldoFinalClientes: {
+              rotulo: data.saldo_final_clientes.rotulo,
+              valor: data.saldo_final_clientes.valor,
+              perc: data.saldo_final_clientes.perc,
+              qtde: data.saldo_final_clientes.qtde
+            },
+            receitasRecorrentes: {
+              antesPerda: {
+                faturamento: data.antes_da_perda.faturamento,
+                maiorTicket: data.antes_da_perda.maior_ticket,
+                menorTicket: data.antes_da_perda.menor_ticket,
+                ticketMedio: data.antes_da_perda.ticket_medio,
+                qtdeClientes: data.antes_da_perda.qtde_clientes
+              },
+              aposPerda: {
+                faturamento: data.apos_a_perda.faturamento,
+                maiorTicket: data.apos_a_perda.maior_ticket,
+                menorTicket: data.apos_a_perda.menor_ticket,
+                ticketMedio: data.apos_a_perda.ticket_medio,
+                qtdeClientes: data.apos_a_perda.qtde_clientes
+              }
+            },
+            perdaSobVenda: {
+              novasVendas: {
+                valor: data.perda_sob_venda.novas_vendas,
+                qtde: 0 // Não preparado ainda (API)
+              },
+              perdaClientes: {
+                valor: data.perda_sob_venda.perda_clientes,
+                qtde: 0 // Não preparado ainda (API)
+              },
+              saldoFinal: {
+                valor: data.perda_sob_venda.saldo,
+                qtde: 0 // Não preparado ainda (API)
+              }
+            },
+            riscoEsforco: {
+              cacMedio: data.risco_esforco.cac_medio,
+              mesCritico: data.risco_esforco.mes_critico,
+              perdaTicketAlto: data.risco_esforco.perda_ticket_alto,
+              perdaTicketBaixo: data.risco_esforco.perda_ticket_baixo,
+              perdaTicketMedio: data.risco_esforco.perda_ticket_medio,
+              esforcoVenda: data.risco_esforco.total_perdido_esforco_venda,
+              periodoCritico: data.risco_esforco.total_perdido_periodo_critico
+            },
+            tickets: {
+              alto: {
+                valor: data.tickets.valor_alto,
+                perc: data.tickets.perc_valor_alto,
+                qtde: data.tickets.qtde_alto
+              },
+              medio: {
+                valor: data.tickets.valor_medio,
+                perc: data.tickets.perc_valor_medio,
+                qtde: data.tickets.qtde_medio
+              },
+              baixo: {
+                valor: data.tickets.valor_baixo,
+                perc: data.tickets.perc_valor_baixo,
+                qtde: data.tickets.qtde_baixo
+              }
+            }
+          }
+        })
+        .catch(error => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingPerdaRecorrencia = false
+        })
     },
     returnDespesas () {
       this.loadingDespesas = true
@@ -1623,13 +1805,12 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style>
 .topic-style {
   background: #FDFAFA;
   border-radius: 30px;
   box-shadow: inset 0 1px 10px rgba(74, 74, 74, 0.3);
 }
-
 .border-gradient {
   position: relative;
   border-radius: 20px;
