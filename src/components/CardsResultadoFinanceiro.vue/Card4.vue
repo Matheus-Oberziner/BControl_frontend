@@ -385,14 +385,6 @@ export default {
       required: true
     }
   },
-  watch: {
-    perdaData: {
-      handler (newVal) {
-        console.log('perdaData updated:', newVal)
-      },
-      deep: true
-    }
-  },
   computed: {
     array () {
       return [

@@ -12,7 +12,7 @@
       <div class="row items-center q-gutter-md" :class="$q.screen.width > 1350 ? 'offset-md-1' : 'q-pl-md'">
         <span class="text-16 text-grey-7">Total:</span>
         <q-input
-          model-value="R$ 520.000,00"
+          :model-value="`R$ ${data.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`"
           outlined
           dense
           input-class="text-center"
@@ -20,7 +20,7 @@
         />
         <span class="text-16 text-grey-7">Sobre o Faturamento:</span>
         <DonutRadial
-          :value="25"
+          :value="data.percDespesasSobreFaturamento"
           :size="110"
           :stroke-width="16"
           semicircle
@@ -33,7 +33,7 @@
         >
           <template #center-label>
             <div class="label-center q-pt-lg">
-              <span class="text-18 weight-600" :style="{ color: '#0047A1' }">25%</span>
+              <span class="text-18 weight-600" :style="{ color: '#0047A1' }">{{ formatPercentLabel(data.percDespesasSobreFaturamento) }}</span>
             </div>
           </template>
         </DonutRadial>
@@ -66,7 +66,7 @@
             </div>
 
             <DonutRadial
-              :value="25"
+              :value="a.percent"
               :size="110"
               :stroke-width="16"
               semicircle
@@ -79,7 +79,7 @@
             >
               <template #center-label>
                 <div class="label-center q-pt-lg">
-                  <span class="text-18 weight-600" :style="{ color: '#0047A1' }">25%</span>
+                  <span class="text-18 weight-600" :style="{ color: '#0047A1' }">{{ formatPercentLabel(a.percent) }}</span>
                 </div>
               </template>
             </DonutRadial>
@@ -140,112 +140,145 @@ export default {
     CustomBarChart
   },
 
+  props: {
+    data: {
+      type: Object,
+      required: true
+    }
+  },
+
   setup () {
     return {
       mdiChevronDownCircle
     }
   },
 
-  data () {
-    return {
-      array: [
-        { 
-          label: 'Administrativo',
-          percent: 15,
-          color: '#4090F2',
-          value: 78000,
-          charts: [
-            { value: 40 },
-            { value: 30 },
-            { value: 20 },
-            { value: 10 }
-          ]
-        },
-        { 
-          label: 'Operacional',
-          percent: 20,
-          color: '#FFA167', 
-          value: 104000,
-          charts: [
-            { value: 40 },
-            { value: 30 },
-            { value: 20 },
-            { value: 10 }
-          ]
-        },
-        {
-          label: 'Comercial',
-          percent: 15,
-          color: '#58C377',
-          value: 78000,
-          charts: [
-            { value: 40 },
-            { value: 30 },
-            { value: 20 },
-            { value: 10 }
-          ]
-        },
-        {
-          label: 'Marketing',
-          percent: 15,
-          color: '#95F0A9',
-          value: 78000,
-          charts: [
-            { value: 40 },
-            { value: 30 },
-            { value: 20 },
-            { value: 10 }
-          ]
-        },
-        { 
-          label: 'CS Suporte',
-          percent: 10,
-          color: '#CCA9DD',
-          value: 52000,
-          charts: [
-            { value: 40 },
-            { value: 30 },
-            { value: 20 },
-            { value: 10 }
-          ]
-        },
-        {
-          label: 'Tecnologia',
-          percent: 10,
-          color: '#E7DDFF',
-          value: 52000,
-          charts: [
-            { value: 40 },
-            { value: 30 },
-            { value: 20 },
-            { value: 10 }
-          ]
-        },
-        {
-          label: 'Logística',
-          percent: 10,
-          color: '#FFA8DC',
-          value: 52000,
-          charts: [
-            { value: 40 },
-            { value: 30 },
-            { value: 20 },
-            { value: 10 }
-          ]
-        },
-        {
-          label: 'Sem Categoria', 
-          percent: 5, 
-          color: '#0047A1', 
-          value: 26000,
-          charts: [
-            { value: 40 },
-            { value: 30 },
-            { value: 20 },
-            { value: 10 }
-          ]
-        }
-      ]
+  computed: {
+    array () {
+      const centros = this.data && Array.isArray(this.data.centros)
+        ? this.data.centros
+        : null
+
+      // Se não vier nada ou vier [], usa o default do card
+      if (!centros || centros.length === 0) {
+        return [
+          {
+            label: 'Administrativo',
+            percent: 12.5,
+            color: '#4090F2',
+            value: 0,
+            charts: [
+              { value: 0 },
+              { value: 0 },
+              { value: 0 },
+              { value: 0 }
+            ]
+          },
+          { 
+            label: 'Operacional',
+            percent: 12.5,
+            color: '#FFA167', 
+            value: 0,
+            charts: [
+              { value: 0 },
+              { value: 0 },
+              { value: 0 },
+              { value: 0 }
+            ]
+          },
+          {
+            label: 'Comercial',
+            percent: 12.5,
+            color: '#58C377',
+            value: 0,
+            charts: [
+              { value: 0 },
+              { value: 0 },
+              { value: 0 },
+              { value: 0 }
+            ]
+          },
+          {
+            label: 'Marketing',
+            percent: 12.5,
+            color: '#95F0A9',
+            value: 0,
+            charts: [
+              { value: 0 },
+              { value: 0 },
+              { value: 0 },
+              { value: 0 }
+            ]
+          },
+          { 
+            label: 'CS Suporte',
+            percent: 12.5,
+            color: '#CCA9DD',
+            value: 0,
+            charts: [
+              { value: 0 },
+              { value: 0 },
+              { value: 0 },
+              { value: 0 }
+            ]
+          },
+          {
+            label: 'Tecnologia',
+            percent: 12.5,
+            color: '#E7DDFF',
+            value: 0,
+            charts: [
+              { value: 0 },
+              { value: 0 },
+              { value: 0 },
+              { value: 0 }
+            ]
+          },
+          {
+            label: 'Logística',
+            percent: 12.5,
+            color: '#FFA8DC',
+            value: 0,
+            charts: [
+              { value: 0 },
+              { value: 0 },
+              { value: 0 },
+              { value: 0 }
+            ]
+          },
+          {
+            label: 'Sem Categoria', 
+            percent: 12.5, 
+            color: '#0047A1', 
+            value: 0,
+            charts: [
+              { value: 0 },
+              { value: 0 },
+              { value: 0 },
+              { value: 0 }
+            ]
+          }
+        ]
+      }
+
+      return centros
+    }
+  },
+
+  methods: {
+    formatPercentLabel (value) {
+      const num = Number(value)
+
+      // Tratamento de valores inválidos
+      if (!Number.isFinite(num)) return '0%'
+
+      // Formata com duas casas
+      const formatted = num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      })
+    
+      return `${formatted}%`
     }
   }
 }

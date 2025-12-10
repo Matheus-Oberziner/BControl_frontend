@@ -643,7 +643,7 @@
           <q-spinner-dots color="blue" size="56px" />
         </div>
       </template>
-      <Card5 />
+      <Card5 :data="despesasCentroCusto" />
     </div>
 
     <!-- Card 6 - Margem de Contribuição -->
@@ -684,7 +684,7 @@ import Card4 from 'src/components/CardsResultadoFinanceiro.vue/Card4.vue'
 import Card5 from 'src/components/CardsResultadoFinanceiro.vue/Card5.vue'
 import Card6 from 'src/components/CardsResultadoFinanceiro.vue/Card6.vue'
 import Card7 from 'src/components/CardsResultadoFinanceiro.vue/Card7.vue'
-import { getFaturamento, getInadimplencia, getPerdaReceitaRecorrente, getResultadoFinanceiro } from 'src/boot/axios'
+import { getDespesasCentroCusto, getFaturamento, getInadimplencia, getPerdaReceitaRecorrente, getResultadoFinanceiro } from 'src/boot/axios'
 import { notify } from 'src/helpers/notify'
 
 // formatter: pt-BR number with 2 fraction digits, no currency symbol
@@ -856,6 +856,11 @@ export default {
             valor: 0
           }
         }
+      },
+      despesasCentroCusto: {
+        valorTotal: 0,
+        percDespesasSobreFaturamento: 0,
+        centros: []
       }
     }
   },
@@ -1783,10 +1788,242 @@ export default {
     },
     returnDespesas () {
       this.loadingDespesas = true
-      // Simula loading de 2 segundos
-      setTimeout(() => {
-        this.loadingDespesas = false
-      }, 2000000)
+      
+      return getDespesasCentroCusto()
+        .then(data => {
+          const mountArrayCentroCusto = (props) => {
+            const centros = props ?? []
+
+            if (centros.length === 0) {
+              return [
+                { 
+                  label: 'Administrativo',
+                  percent: 12.5,
+                  color: '#4090F2',
+                  value: 0,
+                  charts: [
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 }
+                  ]
+                },
+                { 
+                  label: 'Operacional',
+                  percent: 12.5,
+                  color: '#FFA167', 
+                  value: 0,
+                  charts: [
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 }
+                  ]
+                },
+                {
+                  label: 'Comercial',
+                  percent: 12.5,
+                  color: '#58C377',
+                  value: 0,
+                  charts: [
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 }
+                  ]
+                },
+                {
+                  label: 'Marketing',
+                  percent: 12.5,
+                  color: '#95F0A9',
+                  value: 0,
+                  charts: [
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 }
+                  ]
+                },
+                { 
+                  label: 'CS Suporte',
+                  percent: 12.5,
+                  color: '#CCA9DD',
+                  value: 0,
+                  charts: [
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 }
+                  ]
+                },
+                {
+                  label: 'Tecnologia',
+                  percent: 12.5,
+                  color: '#E7DDFF',
+                  value: 0,
+                  charts: [
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 }
+                  ]
+                },
+                {
+                  label: 'Logística',
+                  percent: 12.5,
+                  color: '#FFA8DC',
+                  value: 0,
+                  charts: [
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 }
+                  ]
+                },
+                {
+                  label: 'Sem Categoria', 
+                  percent: 12.5, 
+                  color: '#0047A1', 
+                  value: 0,
+                  charts: [
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 },
+                    { value: 0 }
+                  ]
+                }
+              ]
+            }
+
+            return centros.map((centro) => {
+              switch(centro.nome.toLowerCase()) {
+                case 'administrativo':
+                  return {
+                    label: 'Administrativo',
+                    percent: (centro.despesaTotal / data.valorTotalDespesas) * 100,
+                    color: '#4090F2',
+                    value: centro.despesaTotal,
+                    charts: [ // Não preparado ainda (API)
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 }
+                    ]
+                  }
+                
+                case 'operacional':
+                  return {
+                    label: 'Operacional',
+                    percent: (centro.despesaTotal / data.valorTotalDespesas) * 100,
+                    color: '#FFA167', 
+                    value: centro.despesaTotal,
+                    charts: [ // Não preparado ainda (API)
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 }
+                    ]
+                  }
+
+                case 'comercial':
+                  return {
+                    label: 'Comercial',
+                    percent: (centro.despesaTotal / data.valorTotalDespesas) * 100,
+                    color: '#58C377',
+                    value: centro.despesaTotal,
+                    charts: [ // Não preparado ainda (API)
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 }
+                    ]
+                  }
+
+                case 'marketing':
+                  return {
+                    label: 'Marketing',
+                    percent: (centro.despesaTotal / data.valorTotalDespesas) * 100,
+                    color: '#95F0A9',
+                    value: centro.despesaTotal,
+                    charts: [ // Não preparado ainda (API)
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 }
+                    ]
+                  }
+                
+                case 'cs suporte':
+                  return {
+                    label: 'CS Suporte',
+                    percent: (centro.despesaTotal / data.valorTotalDespesas) * 100,
+                    color: '#CCA9DD',
+                    value: centro.despesaTotal,
+                    charts: [ // Não preparado ainda (API)
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 }
+                    ]
+                  }
+
+                case 'tecnologia':
+                  return {
+                    label: 'Tecnologia',
+                    percent: (centro.despesaTotal / data.valorTotalDespesas) * 100,
+                    color: '#E7DDFF',
+                    value: centro.despesaTotal,
+                    charts: [ // Não preparado ainda (API)
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 }
+                    ]
+                  }
+
+                case 'logistica':
+                  return {
+                    label: 'Logística',
+                    percent: (centro.despesaTotal / data.valorTotalDespesas) * 100,
+                    color: '#FFA8DC',
+                    value: centro.despesaTotal,
+                    charts: [ // Não preparado ainda (API)
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 }
+                    ]
+                  }
+
+                case 'sem categoria':
+                  return {
+                    label: 'Sem Categoria', 
+                    percent: (centro.despesaTotal / data.valorTotalDespesas) * 100,
+                    color: '#0047A1', 
+                    value: centro.despesaTotal,
+                    charts: [ // Não preparado ainda (API)
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 },
+                      { value: 0 }
+                    ]
+                  }
+              }
+            })
+          }
+
+          this.despesasCentroCusto = {
+            valorTotal: data.valorTotalDespesas,
+            percDespesasSobreFaturamento: data.percDespesasSobreFaturamento,
+            centros: mountArrayCentroCusto(data.centros)
+          }
+        })
+        .catch(error => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingDespesas = false
+        })
     },
     returnMargemContribuicao () {
       this.loadingMargemContribuicao = true

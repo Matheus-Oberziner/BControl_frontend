@@ -60,7 +60,7 @@
           text-anchor="middle"
           dominant-baseline="middle"
         >
-          {{ seg.percent.toFixed(0) }}%
+          {{ formatPercentLabel(seg.percent) }}%
         </text>
 
         <!-- Furo central -->
@@ -195,6 +195,15 @@ export default {
       // anima só quando: animate=true E play=true (entrou no viewport)
       if (this.animate && this.play) base.animation = `spinIn 900ms ease-out ${i * 100}ms both`
       return base
+    },
+
+    formatPercentLabel (value) {
+      const num = Number(value) || 0
+
+      return num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 1
+      })
     }
   }
 }
