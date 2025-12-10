@@ -203,7 +203,7 @@ const getDespesasCentroCusto = async () => {
   return res.data
 }
 
-const getDreMensal = async params => {
+const getMargemContribuicaoDRE = async params => {
   let company = JSON.parse(localStorage.getItem('company'))
   const res = await axios.get(`/resultado-financeiro/${company?.cnpj}/dre`, {params})
   return res.data
@@ -241,7 +241,7 @@ export {
   forgotPassword,
   getResultadoFinanceiro,
   getDespesasCentroCusto,
-  getDreMensal,
+  getMargemContribuicaoDRE,
   getFaturamento,
   getInadimplencia,
   getPerdaReceitaRecorrente,

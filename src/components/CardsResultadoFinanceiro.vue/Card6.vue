@@ -13,7 +13,7 @@
     <div class="row justify-center items-center col" style="padding: 40px 10px;">
       <div class="row justify-center q-gutter-sm">
         <div class="text-grey-2">
-          <span class="text-12 q-pr-xs weight-500 text-center">R$</span><span class="text-16 weight-500">{{ (416000).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+          <span class="text-12 q-pr-xs weight-500 text-center">R$</span><span class="text-16 weight-500">{{ (data.receitaBruta ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
         </div>
 
         <CustomBarChart
@@ -22,8 +22,8 @@
           :onlyBar="true"
           :sideTitle="null"
           :chartData="[
-            { value: 500000, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
-            { value: 416000, label: 'Faturamento', color: '#0047A1', bgColor: '#7C0187' }
+            { value: 500000, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' }, // Não preparado ainda (API)
+            { value: data.receitaBruta ?? 0, label: 'Faturamento', color: '#0047A1', bgColor: '#7C0187' }
           ]"
         />
 
@@ -34,7 +34,7 @@
 
       <div class="row justify-center q-gutter-sm">
         <div class="text-grey-2">
-          <span class="text-12 q-pr-xs weight-500 text-center">R$</span><span class="text-16 weight-500">{{ (62400).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+          <span class="text-12 q-pr-xs weight-500 text-center">R$</span><span class="text-16 weight-500">{{ (data.impostosDevolucoes ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
         </div>
 
         <CustomBarChart
@@ -43,8 +43,8 @@
           :onlyBar="true"
           :sideTitle="null"
           :chartData="[
-            { value: 200000, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
-            { value: 62400, label: 'Faturamento', color: '#0047A1', bgColor: '#CF00E2' }
+            { value: 200000, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' }, // Não preparado ainda (API)
+            { value: data.impostosDevolucoes ?? 0, label: 'Faturamento', color: '#0047A1', bgColor: '#CF00E2' }
           ]"
         />
 
@@ -55,7 +55,7 @@
 
       <div class="row justify-center q-gutter-sm">
         <div class="text-grey-2">
-          <span class="text-12 q-pr-xs weight-500 text-center">R$</span><span class="text-16 weight-500">{{ (166400).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+          <span class="text-12 q-pr-xs weight-500 text-center">R$</span><span class="text-16 weight-500">{{ (data.custosVariaveis ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
         </div>
 
         <CustomBarChart
@@ -64,8 +64,8 @@
           :onlyBar="true"
           :sideTitle="null"
           :chartData="[
-            { value: 250000, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' },
-            { value: 166400, label: 'Faturamento', color: '#0047A1', bgColor: '#CF00E2' }
+            { value: 250000, label: 'Projetado', color: '#e7e7e7', bgColor: '#f6f6f6' }, // Não preparado ainda (API)
+            { value: data.custosVariaveis ?? 0, label: 'Faturamento', color: '#0047A1', bgColor: '#CF00E2' }
           ]"
         />
 
@@ -79,17 +79,17 @@
       </svg>
 
       <DonutRadial
-        :value="45"
+        :value="percMargemContribuicao"
         :size="235"
         :stroke-width="30"
         semicircle
-        progress-color="#7C0187"
-        rest-color="#CF00E2"
+        progress-color="#CF00E2"
+        rest-color="#7C0187"
       >
         <!-- Center label -->
         <template #center-label>
           <div class="label-center q-pt-lg">
-            <span class="text-32 weight-600 text-blue">{{ 45 }}%</span>
+            <span class="text-32 weight-600 text-blue">{{ formatPercentLabel(percMargemContribuicao) }}</span>
           </div>
         </template>
       </DonutRadial>
@@ -103,6 +103,36 @@ export default {
   components: {
     CustomBarChart,
     DonutRadial
+  },
+
+  props: {
+    data: {
+      type: Object,
+      required: true
+    }
+  },
+
+  computed: {
+    percMargemContribuicao () {
+      return this.data.receitaBruta > 0 ? (this.data.valorTotal / this.data.receitaBruta) * 100 : 0
+    }
+  },
+
+  methods: {
+    formatPercentLabel (value) {
+      const num = Number(value)
+
+      // Tratamento de valores inválidos
+      if (!Number.isFinite(num)) return '0%'
+
+      // Formata com duas casas
+      const formatted = num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      })
+    
+      return `${formatted}%`
+    }
   }
 }
 </script>

@@ -654,7 +654,7 @@
           <q-spinner-dots color="blue" size="56px" />
         </div>
       </template>
-      <Card6 />
+      <Card6 :data="margemContribuicao" />
     </div>
 
     <!-- Card 7 - DRE -->
@@ -684,7 +684,7 @@ import Card4 from 'src/components/CardsResultadoFinanceiro.vue/Card4.vue'
 import Card5 from 'src/components/CardsResultadoFinanceiro.vue/Card5.vue'
 import Card6 from 'src/components/CardsResultadoFinanceiro.vue/Card6.vue'
 import Card7 from 'src/components/CardsResultadoFinanceiro.vue/Card7.vue'
-import { getDespesasCentroCusto, getFaturamento, getInadimplencia, getPerdaReceitaRecorrente, getResultadoFinanceiro } from 'src/boot/axios'
+import { getDespesasCentroCusto, getFaturamento, getInadimplencia, getMargemContribuicaoDRE, getPerdaReceitaRecorrente, getResultadoFinanceiro } from 'src/boot/axios'
 import { notify } from 'src/helpers/notify'
 
 // formatter: pt-BR number with 2 fraction digits, no currency symbol
@@ -861,6 +861,13 @@ export default {
         valorTotal: 0,
         percDespesasSobreFaturamento: 0,
         centros: []
+      },
+      margemContribuicao: {
+        lucroLiquido: 0,
+        receitaBruta: 0,
+        custosVariaveis: 0,
+        impostosDevolucoes: 0,
+        valorTotal: 0
       }
     }
   },
@@ -2027,10 +2034,23 @@ export default {
     },
     returnMargemContribuicao () {
       this.loadingMargemContribuicao = true
-      // Simula loading de 2 segundos
-      setTimeout(() => {
-        this.loadingMargemContribuicao = false
-      }, 2000000)
+      
+      return getMargemContribuicaoDRE()
+        .then(data => {
+          this.margemContribuicao = {
+            custosVariaveis: data.resumo.custos_variaveis_total,
+            impostosDevolucoes: data.resumo.impostos_devolucoes_total,
+            lucroLiquido: data.resumo.lucro_liquido,
+            receitaBruta: data.resumo.receita_bruta_total,
+            valorTotal: data.resumo.margem_contribuicao_total
+          }
+        })
+        .catch(error => {
+          notify.showFromHttp(error)
+        })
+        .finally(() => {
+          this.loadingMargemContribuicao = false
+        })
     },
     returnDRE () {
       this.loadingDRE = true
