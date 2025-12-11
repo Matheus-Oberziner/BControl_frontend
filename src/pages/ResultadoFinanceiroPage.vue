@@ -665,7 +665,7 @@
           <q-spinner-dots color="blue" size="56px" />
         </div>
       </template>
-      <Card7 />
+      <Card7 :months="dre" />
     </div>
   </div>
 </template>
@@ -735,6 +735,8 @@ export default {
       loadedDespesas: false,
       loadedMargemContribuicao: false,
       loadedDRE: false,
+      loadedMargemDre: false,
+      drePromise: null,
       resultado: {
         faturamento: 0,
         receita: 0,
@@ -868,7 +870,8 @@ export default {
         custosVariaveis: 0,
         impostosDevolucoes: 0,
         valorTotal: 0
-      }
+      },
+      dre: []
     }
   },
   mounted () {
@@ -2032,10 +2035,20 @@ export default {
           this.loadingDespesas = false
         })
     },
-    returnMargemContribuicao () {
+
+    fetchMargemEDRE () {
+      if (this.loadedMargemDre && !this.drePromise) {
+        return Promise.resolve()
+      }
+
+      if (this.drePromise) {
+        return this.drePromise
+      }
+
       this.loadingMargemContribuicao = true
-      
-      return getMargemContribuicaoDRE()
+      this.loadingDRE = true
+
+      this.drePromise = getMargemContribuicaoDRE()
         .then(data => {
           this.margemContribuicao = {
             custosVariaveis: data.resumo.custos_variaveis_total,
@@ -2044,20 +2057,28 @@ export default {
             receitaBruta: data.resumo.receita_bruta_total,
             valorTotal: data.resumo.margem_contribuicao_total
           }
+
+          this.dre = data.meses
+
+          this.loadedMargemDre = true
         })
         .catch(error => {
           notify.showFromHttp(error)
         })
         .finally(() => {
           this.loadingMargemContribuicao = false
+          this.loadingDRE = false
+
+          this.drePromise = null
         })
+
+      return this.drePromise
+    },
+    returnMargemContribuicao () {
+      return this.fetchMargemEDRE()
     },
     returnDRE () {
-      this.loadingDRE = true
-      // Simula loading de 2 segundos
-      setTimeout(() => {
-        this.loadingDRE = false
-      }, 2000000)
+      return this.fetchMargemEDRE()
     }
   }
 }

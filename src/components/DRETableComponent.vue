@@ -53,7 +53,10 @@
 export default {
   name: 'DRETableComponent',
   props: {
-    months: { type: Array, default: () => [] }
+    months: {
+      type: Array,
+      required: true
+    }
   },
   data () {
     return {
@@ -73,18 +76,31 @@ export default {
         { key: 'margemContrib', label: 'Margem de Contribuição' },
         { key: 'ebitda',        label: 'Resultado Operacional (EBITDA)' },
         { key: 'lucroLiquido',  label: 'Lucro Líquido' }
-      ],
-      // dados exemplo (some quando você passar "months")
-      sampleMonths: [
-        { label: 'Janeiro / 2025',  receitaBruta: 420000, impostos: 63000,  receitaLiquida: 357000, custosVariaveis: 168000, margemContrib: 189000, despesasFixas: 104000, ebitda: 85000,  jurosIR: 2000, lucroLiquido: 83000 },
-        { label: 'Fevereiro / 2025',receitaBruta: 415000, impostos: 62250,  receitaLiquida: 352750, custosVariaveis: 166000, margemContrib: 186750, despesasFixas: 104000, ebitda: 82750,  jurosIR: 2000, lucroLiquido: 80000 },
-        { label: 'Março / 2025',    receitaBruta: 400000, impostos: 60000,  receitaLiquida: 340000, custosVariaveis: 160000, margemContrib: 180000, despesasFixas: 104000, ebitda: 76000,  jurosIR: 2000, lucroLiquido: 74000 }
       ]
     }
   },
   computed: {
     monthsToUse () {
-      return this.months && this.months.length ? this.months : this.sampleMonths
+      const src = this.months && this.months.length
+        ? this.months
+        : []
+
+      return src.map(m => {
+        return {
+          label: this.formatReferencia(m.referencia),
+          receitaBruta:   m.receita_bruta           ?? 0,
+          impostos:       m.impostos_devolucoes     ?? 0,
+          receitaLiquida: m.receita_liquida         ?? 0,
+          custosVariaveis:m.custos_variaveis        ?? 0,
+          margemContrib:  m.margem_contribuicao     ?? 0,
+          despesasFixas:  m.despesas_fixas          ?? 0,
+          ebitda:         m.ebitda_resultado_oper   ?? 0,
+
+          // API ainda não manda isso – mantemos 0 para não quebrar o componente
+          jurosIR:        m.juros_ir        ?? 0,
+          lucroLiquido:   m.lucro_liquido   ?? 0
+        }
+      })
     }
   },
   methods: {
@@ -94,6 +110,23 @@ export default {
         maximumFractionDigits: 2
       })
     },
+
+    formatReferencia (ref) {
+      // espera algo tipo "2025-01", "0001-01", etc.
+      if (!ref || typeof ref !== 'string' || ref.length < 7) {
+        return ref || '-'
+      }
+
+      const ano = ref.substring(0, 4)
+      const mes = ref.substring(5, 7)
+
+      const monthLabelsPt = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+      const idx = Number(mes) - 1
+
+      const mesLabel = monthLabelsPt[idx] || mes
+      return `${mesLabel} / ${ano}`
+    },
+
     // sincroniza a rolagem horizontal dos dois blocos
     syncScroll (who) {
       if (this.syncing) return

@@ -6,12 +6,20 @@
 
     <!-- ocupa 100% -->
     <div class="col-12">
-      <DRETableComponent class="col-12" />
+      <DRETableComponent :months="months" class="col-12" />
     </div>
   </div>
 </template>
 
 <script>
 import DRETableComponent from '../DRETableComponent.vue'
-export default { components: { DRETableComponent } }
+export default {
+  components: { DRETableComponent },
+  props: {
+    months: {
+      type: Array,
+      required: true
+    }
+  }
+}
 </script>
